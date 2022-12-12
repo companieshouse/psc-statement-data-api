@@ -1,0 +1,5 @@
+app_name: psc-statement-data-api
+group: api
+weight: 991
+routes:
+   1: ^/psc-statement-data-api/healthcheck
