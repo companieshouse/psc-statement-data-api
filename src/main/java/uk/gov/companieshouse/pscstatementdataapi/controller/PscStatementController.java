@@ -23,7 +23,7 @@ public class PscStatementController {
         System.out.println("Retrieving psc statement data for company number" + company_number +
                         "and statementId "+statement_id);
 
-        PscStatementDao pscStatementDao = retrievePscStatementService.retrievePscStatementFromDb(company_number, statement_id);
-        return new ResponseEntity<>(pscStatementDao.getData(), HttpStatus.OK);
+        Statement statement = retrievePscStatementService.retrievePscStatementFromDb(company_number, statement_id);
+        return new ResponseEntity<>(statement, HttpStatus.OK);
     }
 }

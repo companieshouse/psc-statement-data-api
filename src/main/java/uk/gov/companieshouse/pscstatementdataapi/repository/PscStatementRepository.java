@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface PscStatementRepository extends MongoRepository<PscStatementDao, String> {
 
     @Query("{'company_number' : ?0, '_id' : ?1}")
-    Optional<Document> getPscStatementByCompanyNumberAndStatementId(String companyNumber, String statementId);
+    Optional<PscStatementDao> getPscStatementByCompanyNumberAndStatementId(String companyNumber, String statementId);
     }
 
