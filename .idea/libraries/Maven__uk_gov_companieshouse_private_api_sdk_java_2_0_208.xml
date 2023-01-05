@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: uk.gov.companieshouse:private-api-sdk-java:2.0.208">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/uk/gov/companieshouse/private-api-sdk-java/2.0.208/private-api-sdk-java-2.0.208.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/uk/gov/companieshouse/private-api-sdk-java/2.0.208/private-api-sdk-java-2.0.208-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/uk/gov/companieshouse/private-api-sdk-java/2.0.208/private-api-sdk-java-2.0.208-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
