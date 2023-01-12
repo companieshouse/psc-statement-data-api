@@ -8,9 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.psc.Statement;
-import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDao;
 import uk.gov.companieshouse.pscstatementdataapi.services.RetrievePscStatementService;
-import uk.gov.companieshouse.logging.Logger;
+
 @RestController
 public class PscStatementController {
 

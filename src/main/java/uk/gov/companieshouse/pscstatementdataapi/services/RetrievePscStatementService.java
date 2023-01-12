@@ -1,13 +1,11 @@
 package uk.gov.companieshouse.pscstatementdataapi.services;
 
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDao;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 @Service
 public class RetrievePscStatementService {

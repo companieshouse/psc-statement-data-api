@@ -1,8 +1,5 @@
 package uk.gov.companieshouse.pscstatementdataapi.model;
 
-import java.util.Collection;
-import java.util.Date;
-
 import org.springframework.data.mongodb.core.mapping.Document;
 import uk.gov.companieshouse.api.psc.Statement;
 
