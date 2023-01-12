@@ -1,7 +1,7 @@
 management:
   endpoints:
     web:
-      base-path: /psc-statements
+      base-path: /company
       path-mapping:
         health: /healthcheck
 

@@ -59,12 +59,8 @@ public class LocalDateDeserializerTest {
         String jsonTestString = null;
 
         assertThrows(NullPointerException.class, ()->{
-
             deserialize(jsonTestString);
-
         });
-
-
     }
 
     private LocalDate deserialize(String jsonString) throws JsonParseException, IOException {

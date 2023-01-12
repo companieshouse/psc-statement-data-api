@@ -1,22 +1,20 @@
-package uk.gov.companieshouse.pscstatementdataapi.config;
-
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+package uk.gov.companieshouse.pscstatementdataapi.auth;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.servlet.FilterChain;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import static org.mockito.Mockito.*;
+
 @SpringBootTest
-public class SimpleAuthenticationInterceptorTest {
+public class EricAuthFilterTest {
     
-    private SimpleAuthenticationInterceptor interceptor;
+    private EricAuthFilter interceptor;
 
     @Mock
     HttpServletRequest request;
@@ -27,7 +25,7 @@ public class SimpleAuthenticationInterceptorTest {
 
     @BeforeEach
     public void setUp(){
-        interceptor = new SimpleAuthenticationInterceptor();
+        interceptor = new EricAuthFilter();
     }
 
     @Test
