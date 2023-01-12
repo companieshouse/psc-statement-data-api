@@ -8,9 +8,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.companieshouse.api.psc.Statement;
-import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDao;
+import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
-import uk.gov.companieshouse.pscstatementdataapi.services.RetrievePscStatementService;
+import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 
 import java.util.Optional;
 
@@ -19,21 +19,21 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-public class RetrievePscStatementServiceTest {
+public class PscStatementServiceTest {
 
     @Mock
     PscStatementRepository repository;
 
     @Spy
     @InjectMocks
-    RetrievePscStatementService pscStatementService;
+    PscStatementService pscStatementService;
 
     @Test
     public void statementReturnedByCompanyNumberAndStatementIdFromRepository() throws JsonProcessingException {
         Statement expectedStatement = new Statement();
-        PscStatementDao pscStatementDao = new PscStatementDao();
-        pscStatementDao.setData(expectedStatement);
-        Optional<PscStatementDao> pscStatementOptional = Optional.of(pscStatementDao);
+        PscStatementDocument pscStatementDocument = new PscStatementDocument();
+        pscStatementDocument.setData(expectedStatement);
+        Optional<PscStatementDocument> pscStatementOptional = Optional.of(pscStatementDocument);
         when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(),anyString())).thenReturn(pscStatementOptional);
 
         Statement statement = pscStatementService.retrievePscStatementFromDb("123","testId");

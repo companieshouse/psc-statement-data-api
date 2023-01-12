@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.pscstatementdataapi.controller;
+package uk.gov.companieshouse.pscstatementdataapi.serialization;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;

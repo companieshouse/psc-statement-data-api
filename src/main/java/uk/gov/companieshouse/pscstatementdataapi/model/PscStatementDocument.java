@@ -4,7 +4,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import uk.gov.companieshouse.api.psc.Statement;
 
 @Document(collection="#{@environment.getProperty('mongodb.pscStatements.collection.name')}")
-public class PscStatementDao {
+public class PscStatementDocument {
 
     private Statement data;
 

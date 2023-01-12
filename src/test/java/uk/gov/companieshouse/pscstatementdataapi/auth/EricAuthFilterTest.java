@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import uk.gov.companieshouse.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,8 @@ public class EricAuthFilterTest {
     private EricAuthFilter interceptor;
 
     @Mock
+    Logger logger;
+    @Mock
     HttpServletRequest request;
     @Mock
     HttpServletResponse response;
@@ -25,7 +28,7 @@ public class EricAuthFilterTest {
 
     @BeforeEach
     public void setUp(){
-        interceptor = new EricAuthFilter();
+        interceptor = new EricAuthFilter(logger);
     }
 
     @Test

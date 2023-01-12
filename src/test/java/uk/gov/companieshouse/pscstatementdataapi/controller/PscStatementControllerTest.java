@@ -9,8 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.companieshouse.api.psc.Statement;
-import uk.gov.companieshouse.pscstatementdataapi.model.Links;
-import uk.gov.companieshouse.pscstatementdataapi.services.RetrievePscStatementService;
+import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 
 import java.time.LocalDate;
 
@@ -23,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PscStatementControllerTest {
 
     @MockBean
-    private RetrievePscStatementService pscStatementService;
+    private PscStatementService pscStatementService;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -40,7 +39,7 @@ public class PscStatementControllerTest {
         when(pscStatementService.retrievePscStatementFromDb("123","xyz")).thenReturn(getStatementObject());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/psc-statements/123/xyz")
+                        .get("/company/123/persons-with-significant-control-statement/xyz")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("ERIC-IDENTITY", "Test-Identity")
                         .header("ERIC-IDENTITY-TYPE", "Key"))
@@ -53,9 +52,6 @@ public class PscStatementControllerTest {
         Statement statement = new Statement();
         statement.setEtag("xyz");
         statement.setNotifiedOn(LocalDate.now());
-        Links links = new Links();
-        links.setSelf("abc");
-        statement.setLinks(links);
         return statement;
     }
 
