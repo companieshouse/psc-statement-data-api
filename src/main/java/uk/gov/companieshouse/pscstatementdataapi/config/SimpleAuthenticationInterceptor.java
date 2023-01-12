@@ -21,6 +21,7 @@ public class SimpleAuthenticationInterceptor extends OncePerRequestFilter {
         String identityType = request.getHeader("ERIC-Identity-Type");
 
         if (StringUtils.isEmpty(identity)) {
+            logger.error("Unauthorised request received without eric identity");
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
 
             System.out.println("first if statement");
@@ -30,6 +31,7 @@ public class SimpleAuthenticationInterceptor extends OncePerRequestFilter {
 
         if (StringUtils.isEmpty(identityType) ||
                 !(identityType.equalsIgnoreCase("Key") || identityType.equalsIgnoreCase("oauth2"))) {
+            logger.error("Unauthorised request received without eric identity type");
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             System.out.println("second if statement");
             return;
