@@ -1,0 +1,29 @@
+management:
+  endpoints:
+    web:
+      base-path: /company
+      path-mapping:
+        health: /healthcheck
+
+chs:
+  kafka:
+    api:
+      endpoint: ${CHS_KAFKA_API_URL:localhost}
+      key: ${CHS_API_KEY:chsApiKey}
+      enabled: ${DSQ_STREAM_HOOK_ENABLED:true}
+
+logger:
+  namespace: psc-statement-data-api
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URL:mongodb://mongo:27017}/company_psc_statements?retryWrites=false
+      name: company_psc_statements
+  jackson:
+    default-property-inclusion: NON_NULL
+
+mongodb:
+  pscStatements:
+    collection:
+      name: company_psc_statements
