@@ -17,7 +17,7 @@ public class PscStatementService {
     Optional<PscStatementDocument> statementOptional = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
     PscStatementDocument pscStatementDocument = statementOptional.orElseThrow(() ->
       new IllegalArgumentException(String.format(
-                "Resource not found for statement ID: %s, and company number: %f", statementId, companyNumber)));
+                "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber)));
     return pscStatementDocument.getData();
   }
 
