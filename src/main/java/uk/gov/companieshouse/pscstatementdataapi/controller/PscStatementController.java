@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 
 @RestController
@@ -20,7 +21,7 @@ public class PscStatementController {
     private PscStatementService pscStatementService;
 
     @GetMapping("/company/{company_number}/persons-with-significant-control-statement/{statement_id}")
-    public ResponseEntity<Statement> searchPscStatements(@PathVariable String company_number, @PathVariable String statement_id) throws JsonProcessingException {
+    public ResponseEntity<Statement> searchPscStatements(@PathVariable String company_number, @PathVariable String statement_id) throws JsonProcessingException, ResourceNotFoundException {
         logger.info(String.format("Retrieving psc statement data for company number %s and statement_id %s", company_number, statement_id));
         Statement statement = pscStatementService.retrievePscStatementFromDb(company_number, statement_id);
         return new ResponseEntity<>(statement, HttpStatus.OK);
