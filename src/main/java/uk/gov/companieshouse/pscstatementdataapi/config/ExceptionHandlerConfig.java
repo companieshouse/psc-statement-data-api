@@ -16,7 +16,7 @@ public class ExceptionHandlerConfig {
 
     @ExceptionHandler(value= ResourceNotFoundException.class)
     public ResponseEntity<String> handleException(ResourceNotFoundException exception){
-        logger.error(exception.getMsg());
+        logger.error(exception.getMessage());
         return new ResponseEntity<String>("Resource not found", HttpStatus.NOT_FOUND);
     }
 
