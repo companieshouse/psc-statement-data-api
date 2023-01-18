@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
@@ -29,7 +30,7 @@ public class PscStatementServiceTest {
     PscStatementService pscStatementService;
 
     @Test
-    public void statementReturnedByCompanyNumberAndStatementIdFromRepository() throws JsonProcessingException {
+    public void statementReturnedByCompanyNumberAndStatementIdFromRepository() throws JsonProcessingException, ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         PscStatementDocument pscStatementDocument = new PscStatementDocument();
         pscStatementDocument.setData(expectedStatement);
