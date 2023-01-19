@@ -44,9 +44,8 @@ public class PscStatementServiceTest {
     @Test
     public void statementReturnedByCompanyNumberAndStatementIdFromRepository() throws JsonProcessingException, ResourceNotFoundException {
         Statement expectedStatement = new Statement();
-        PscStatementDocument pscStatementDocument = new PscStatementDocument();
-        pscStatementDocument.setData(expectedStatement);
-        Optional<PscStatementDocument> pscStatementOptional = Optional.of(pscStatementDocument);
+        document.setData(expectedStatement);
+        Optional<PscStatementDocument> pscStatementOptional = Optional.of(document);
         when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(),anyString())).thenReturn(pscStatementOptional);
 
         Statement statement = pscStatementService.retrievePscStatementFromDb(COMPANY_NUMBER,STATEMENT_ID);

@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
@@ -30,7 +33,7 @@ public class PscStatementController {
      * @param  statementId  the statement id to be deleted
      * @return return 200 status with empty body
      */
-    @DeleteMapping("/company/{company_number}/persons-with-significant-control-statement/{statement_id}/Internal")
+    @DeleteMapping("/company/{company_number}/persons-with-significant-control-statement/{statement_id}/internal")
     public ResponseEntity<Void> deletePscStatement(
             @PathVariable("company_number") String companyNumber,
             @PathVariable("statement_id") String statementId) {
