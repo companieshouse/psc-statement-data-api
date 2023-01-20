@@ -16,11 +16,19 @@ public class PscStatementService {
   PscStatementRepository pscStatementRepository;
 
   public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {
-    Optional<PscStatementDocument> statementOptional = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
-    PscStatementDocument pscStatementDocument = statementOptional.orElseThrow(() ->
-      new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
-                "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber)));
+    PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
     return pscStatementDocument.getData();
   }
 
+  public void deletePscStatement(String companyNumber, String statementId) throws ResourceNotFoundException{
+    PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
+    pscStatementRepository.delete(pscStatementDocument);
+  }
+
+  private PscStatementDocument getPscStatementDocument(String companyNumber, String statementId) throws ResourceNotFoundException{
+    Optional<PscStatementDocument> statementOptional = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
+    return statementOptional.orElseThrow(() ->
+            new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
+                    "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber)));
+  }
 }
