@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -41,4 +42,19 @@ public class PscStatementController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    /**
+     * Delete psc-statement information for a statement id.
+     *
+     * @param  statementId  the statement id to be deleted
+     * @return return 200 status with empty body
+     */
+    @DeleteMapping("/company/{company_number}/persons-with-significant-control-statement/delete/{statement_id}/internal")
+    public ResponseEntity<Void> deletePscStatement(
+            @PathVariable("company_number") String companyNumber,
+            @PathVariable("statement_id") String statementId) {
+        logger.info(String.format(
+                "Deleting Psc statement information for statement id %s", statementId));
+        pscStatementService.deletePscStatement(companyNumber, statementId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
