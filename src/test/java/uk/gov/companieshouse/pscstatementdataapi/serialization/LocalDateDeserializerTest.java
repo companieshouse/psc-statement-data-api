@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateDeserializer;
 
 @SpringBootTest
@@ -59,6 +60,16 @@ public class LocalDateDeserializerTest {
         String jsonTestString = null;
 
         assertThrows(NullPointerException.class, ()->{
+            deserialize(jsonTestString);
+        });
+    }
+
+    @Test
+    public void invalidStringReturnsError() throws JsonParseException, IOException{
+
+        String jsonTestString = "{\"date\":{\"$date\": \"NotADate\"}}}";
+
+        assertThrows(BadRequestException.class, ()->{
             deserialize(jsonTestString);
         });
     }
