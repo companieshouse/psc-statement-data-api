@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
+import uk.gov.companieshouse.pscstatementdataapi.converter.EnumConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
 import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateDeserializer;
 
@@ -20,9 +21,10 @@ public class ApplicationConfig {
     @Bean
     public MongoCustomConversions mongoCustomConversions(){
         ObjectMapper objectMapper = mongoDbObjectMapper();
-        return new MongoCustomConversions(Arrays.asList(new PscStatementReadConverter(objectMapper)));
+        return new MongoCustomConversions(Arrays.asList(
+                new PscStatementReadConverter(objectMapper),
+                new EnumConverter.EnumToString()));
     }
-
 
     private ObjectMapper mongoDbObjectMapper(){
         ObjectMapper objectMapper = new ObjectMapper();

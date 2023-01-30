@@ -12,6 +12,7 @@ import uk.gov.companieshouse.pscstatementdataapi.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import uk.gov.companieshouse.pscstatementdataapi.transform.DateTransformer;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
 
 import java.util.List;
@@ -25,6 +26,8 @@ public class PscStatementService {
   PscStatementRepository pscStatementRepository;
   @Autowired
   PscStatementTransformer pscStatementTransformer;
+  @Autowired
+  DateTransformer dateTransformer;
 
   public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
@@ -59,7 +62,7 @@ public class PscStatementService {
   }
 
   private boolean isLatestRecord(String companyNumber, String statementId, String deltaAt) {
-    List<PscStatementDocument> statements = pscStatementRepository.findUpdatedPscStatement(companyNumber, statementId, deltaAt);
+    List<PscStatementDocument> statements = pscStatementRepository.findUpdatedPscStatement(companyNumber, statementId, dateTransformer.transformDate(deltaAt));
     return statements.isEmpty();
   }
 

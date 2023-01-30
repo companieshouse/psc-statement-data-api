@@ -36,9 +36,9 @@ public class PscStatementController {
     public ResponseEntity<Void> processPcsStatement(@RequestHeader("x-request-id") String contextId,
                                                     @PathVariable String company_number,
                                                     @PathVariable String statement_id,
-                                                    @RequestBody CompanyPscStatement statement) throws JsonProcessingException{
+                                                    @RequestBody CompanyPscStatement companyPscStatement) throws JsonProcessingException{
         logger.info(String.format("Processing psc statement data for company number %s and statement_id %s", company_number, statement_id));
-        pscStatementService.processPscStatement(contextId, company_number, statement_id, statement);
+        pscStatementService.processPscStatement(contextId, company_number, statement_id, companyPscStatement);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -48,7 +48,7 @@ public class PscStatementController {
      * @param  statementId  the statement id to be deleted
      * @return return 200 status with empty body
      */
-    @DeleteMapping("/company/{company_number}/persons-with-significant-control-statement/delete/{statement_id}/internal")
+    @DeleteMapping("/company/{company_number}/persons-with-significant-control-statement/{statement_id}/internal")
     public ResponseEntity<Void> deletePscStatement(
             @PathVariable("company_number") String companyNumber,
             @PathVariable("statement_id") String statementId) {
