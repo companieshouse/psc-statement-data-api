@@ -1,0 +1,14 @@
+{
+  "company_number" : "12388814",
+  "psc_statement_id" : "xyzZGWm42-hTgP-LBAQTjWQnVzM",
+  "statement" : {
+    "notified_on" : "2017-01-14",
+    "kind" : "persons-with-significant-control-statement",
+    "links" : {
+      "self" : "/company/12388814/persons-with-significant-control-statements/xyzZGWm42-hTgP-LBAQTjWQnVzM"
+    },
+    "statement" : "no-individual-or-entity-with-signficant-control",
+    "etag" : "1234e95014c699cebf7494546a5b0d47de8105e5"
+  },
+  "delta_at" : "20200101093435661593"
+}

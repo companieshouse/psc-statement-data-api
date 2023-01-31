@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
-import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateDeserializer;
 
 @SpringBootTest
 
