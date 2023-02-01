@@ -8,9 +8,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
-import uk.gov.companieshouse.pscstatementdataapi.converter.EnumConverter;
+import uk.gov.companieshouse.pscstatementdataapi.converter.EnumWriteConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
 import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateDeserializer;
+import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateSerializer;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -23,7 +24,7 @@ public class ApplicationConfig {
         ObjectMapper objectMapper = mongoDbObjectMapper();
         return new MongoCustomConversions(Arrays.asList(
                 new PscStatementReadConverter(objectMapper),
-                new EnumConverter.EnumToString()));
+                new EnumWriteConverter()));
     }
 
     private ObjectMapper mongoDbObjectMapper(){
@@ -33,6 +34,7 @@ public class ApplicationConfig {
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         SimpleModule module = new SimpleModule();
         module.addDeserializer(LocalDate.class, new LocalDateDeserializer());
+        module.addSerializer(LocalDate.class, new LocalDateSerializer());
         objectMapper.registerModule(module);
         return objectMapper;
     }

@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateDeserializer extends JsonDeserializer {
+public class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
     @Override
     public LocalDate deserialize(JsonParser jsonParser, DeserializationContext
             deserializationContext) {
