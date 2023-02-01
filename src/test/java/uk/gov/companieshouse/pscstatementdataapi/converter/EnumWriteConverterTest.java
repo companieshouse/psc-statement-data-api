@@ -27,7 +27,7 @@ public class EnumWriteConverterTest {
 
     @Test
     void testConvert() {
-        String convertedEnum = converter.convert(StatementEnum.ALL_BENEFICIAL_OWNERS_IDENTIFIED);
+        String convertedEnum = converter.convert(StatementEnum.OE_ALL_BO_IDENTIFIED);
         assertEquals("all-beneficial-owners-identified", convertedEnum);
     }
 

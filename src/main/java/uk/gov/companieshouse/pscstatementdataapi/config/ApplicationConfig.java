@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import uk.gov.companieshouse.pscstatementdataapi.converter.EnumWriteConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
+import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementWriteConverter;
 import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateDeserializer;
 import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateSerializer;
 
@@ -24,6 +25,7 @@ public class ApplicationConfig {
         ObjectMapper objectMapper = mongoDbObjectMapper();
         return new MongoCustomConversions(Arrays.asList(
                 new PscStatementReadConverter(objectMapper),
+                new PscStatementWriteConverter(objectMapper),
                 new EnumWriteConverter()));
     }
 
