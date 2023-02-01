@@ -31,9 +31,11 @@ public class PscStatementControllerTest {
     private static final String PUT_URL = String.format("/company/%s/persons-with-significant-control-statement/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
     private static final String DELETE_URL = String.format("/company/%s/persons-with-significant-control-statement/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
 
-    public  static  final String ERIC_IDENTITY = "Test-Identity";
-    public  static  final String ERIC_IDENTITY_TYPE = "Key";
-    public  static  final String X_REQUEST_ID = "654321";
+    public static final String ERIC_IDENTITY = "Test-Identity";
+    public static final String ERIC_IDENTITY_TYPE = "Key";
+    public static final String ERIC_PRIVILEGES = "internal-app";
+    public static final String X_REQUEST_ID = "654321";
+
 
     @MockBean
     private PscStatementService pscStatementService;
@@ -79,6 +81,7 @@ public class PscStatementControllerTest {
                         .header("x-request-id", X_REQUEST_ID)
                         .header("ERIC-Identity", ERIC_IDENTITY)
                         .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
+                        .header("ERIC-Authorised-Key-Privileges", ERIC_PRIVILEGES)
                         .content(testHelper.createJsonCompanyPscStatementPayload()))
                 .andExpect(status().isOk());
     }
@@ -94,7 +97,8 @@ public class PscStatementControllerTest {
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", X_REQUEST_ID)
                         .header("ERIC-Identity", ERIC_IDENTITY)
-                        .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE))
+                        .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
+                        .header("ERIC-Authorised-Key-Privileges", ERIC_PRIVILEGES))
                 .andExpect(status().isOk());
     }
 
