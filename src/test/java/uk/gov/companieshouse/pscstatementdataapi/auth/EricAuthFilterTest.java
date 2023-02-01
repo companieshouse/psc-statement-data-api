@@ -79,7 +79,7 @@ public class EricAuthFilterTest {
     void ericTokenFilterBlocksPutWithMissingPrivilege() throws Exception {
         when(request.getMethod()).thenReturn("PUT");
         when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
-        when(request.getHeader("ERIC-Identity-Type")).thenReturn("INVALID");
+        when(request.getHeader("ERIC-Identity-Type")).thenReturn("key");
 
         interceptor.doFilterInternal(request, response, filterChain);
 
@@ -91,12 +91,11 @@ public class EricAuthFilterTest {
     void ericTokenFilterAllowsPutWithKeyPrivilege() throws Exception {
         when(request.getMethod()).thenReturn("PUT");
         when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
-        when(request.getHeader("ERIC-Identity-Type")).thenReturn("INVALID");
+        when(request.getHeader("ERIC-Identity-Type")).thenReturn("key");
         when(request.getHeader("ERIC-Authorised-Key-Privileges")).thenReturn("internal-app");
 
         interceptor.doFilterInternal(request, response, filterChain);
 
-        verify(filterChain, times(0)).doFilter(request, response);
-        verify(response, times(1)).sendError(403);
+        verify(filterChain, times(1)).doFilter(request, response);
     }
 }

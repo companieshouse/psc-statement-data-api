@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.Statement.KindEnum;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class PscStatementWriteConverterTest {
@@ -30,5 +31,10 @@ public class PscStatementWriteConverterTest {
         String json = object.toJson();
 
         assertTrue(json.contains(KIND));
+    }
+
+    @Test
+    public void assertThrowsJsonException() {
+        assertThrows(RuntimeException.class, () -> converter.convert(null));
     }
 }
