@@ -15,11 +15,11 @@ public class PscStatementReadConverterTest {
     private PscStatementReadConverter pscStatementReadConverter;
 
     @BeforeEach
-    public void setUp(){
+    void setUp(){
         pscStatementReadConverter = new PscStatementReadConverter(new ObjectMapper());
     }
     @Test
-    public void correctlyConvertsDocumentToStatementObject(){
+    void correctlyConvertsDocumentToStatementObject(){
         Document source = Document.parse("{\"etag\" : \"test123\"}");
         Statement actualStatement = pscStatementReadConverter.convert(source);
         assertEquals(actualStatement.getEtag(),etag);
