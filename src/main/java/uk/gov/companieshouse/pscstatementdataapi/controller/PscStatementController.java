@@ -13,9 +13,17 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
+import org.springframework.web.bind.annotation.*;
+import uk.gov.companieshouse.api.handler.statements.request.StatementsList;
+import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.api.psc.StatementList;
+
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class PscStatementController {
@@ -41,6 +49,20 @@ public class PscStatementController {
         logger.info(String.format("Processing psc statement data for company number %s and statement_id %s", companyNumber, statementId));
         pscStatementService.processPscStatement(contextId, companyNumber, statementId, companyPscStatement);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/company/{company_number}/persons-with-significant-control-statement/internal")
+    public ResponseEntity<List<Statement>> searchPscStatementsList(
+            @PathVariable String company_number,
+            @RequestParam(value = "items_per_page", required = false) final Integer itemsPerPage,
+            @RequestParam(value = "start_index", required = false) final Integer startIndex) throws JsonProcessingException, ResourceNotFoundException {
+        logger.info(String.format("Retrieving psc statement list data for company number %s, start index %d, items %d", company_number,
+                Optional.ofNullable(startIndex).orElse(0),
+                Optional.ofNullable(itemsPerPage).orElse(25)));
+        List<Statement> statement = pscStatementService.retrievePscStatementListFromDb(company_number,
+                Optional.ofNullable(startIndex).orElse(0),
+                Optional.ofNullable(itemsPerPage).orElse(25));
+        return new ResponseEntity<>(statement, HttpStatus.OK);
     }
 
     /**

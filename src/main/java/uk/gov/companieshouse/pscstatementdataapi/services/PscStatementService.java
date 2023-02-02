@@ -12,11 +12,14 @@ import uk.gov.companieshouse.pscstatementdataapi.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import uk.gov.companieshouse.pscstatementdataapi.transform.DateTransformer;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class PscStatementService {
 
@@ -33,6 +36,17 @@ public class PscStatementService {
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
     return pscStatementDocument.getData();
   }
+
+  public List<Statement> retrievePscStatementListFromDb(String companyNumber, int startIndex, int itemsPerPage) throws JsonProcessingException, ResourceNotFoundException {
+    Optional<List<PscStatementDocument>> statementListOptional =
+            pscStatementRepository.getStatementList(companyNumber, startIndex, itemsPerPage);
+
+    List<PscStatementDocument> pscStatementListDocument = statementListOptional.orElseThrow(() ->
+            new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
+                    "Resource not found for company number: %s", companyNumber)));
+    return pscStatementListDocument.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
+  }
+
 
   public void deletePscStatement(String companyNumber, String statementId) throws ResourceNotFoundException{
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
