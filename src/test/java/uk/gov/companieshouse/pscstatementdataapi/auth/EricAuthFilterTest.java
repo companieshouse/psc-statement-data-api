@@ -27,13 +27,13 @@ public class EricAuthFilterTest {
     FilterChain filterChain;
 
     @BeforeEach
-    public void setUp(){
+    void setUp(){
         interceptor = new EricAuthFilter(logger);
         when(request.getMethod()).thenReturn("GET");
     }
 
     @Test
-    public void ericTokenFilterAllowsCallWithKeyCredentials() throws Exception {
+    void ericTokenFilterAllowsCallWithKeyCredentials() throws Exception {
         when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
         when(request.getHeader("ERIC-Identity-Type")).thenReturn("KEY");
 

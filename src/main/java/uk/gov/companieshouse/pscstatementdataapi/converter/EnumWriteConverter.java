@@ -6,9 +6,6 @@ import org.springframework.data.convert.WritingConverter;
 @WritingConverter
 public class EnumWriteConverter implements Converter<Enum<?>, String> {
 
-    public EnumWriteConverter() {
-    }
-
     @Override
     public String convert(Enum<?> source) {
         try {

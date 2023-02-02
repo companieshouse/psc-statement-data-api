@@ -26,7 +26,7 @@ public class PscStatementWriteConverter implements Converter<Statement, BasicDBO
         try {
           return BasicDBObject.parse(objectMapper.writeValueAsString(source));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 }

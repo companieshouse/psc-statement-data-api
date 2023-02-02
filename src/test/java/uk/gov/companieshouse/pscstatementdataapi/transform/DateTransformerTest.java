@@ -18,7 +18,7 @@ public class DateTransformerTest {
     }
 
     @Test
-    public void transformDate(){
+    void transformDate(){
         String transformedDate = dateTransformer.transformDate(DELTA_AT);
         assertEquals(transformedDate, TRANSFORMED_DELTA_AT);
     }

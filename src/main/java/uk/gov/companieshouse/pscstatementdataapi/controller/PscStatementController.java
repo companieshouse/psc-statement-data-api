@@ -26,19 +26,20 @@ public class PscStatementController {
     private PscStatementService pscStatementService;
 
     @GetMapping("/company/{company_number}/persons-with-significant-control-statement/{statement_id}")
-    public ResponseEntity<Statement> searchPscStatements(@PathVariable String company_number, @PathVariable String statement_id) throws JsonProcessingException, ResourceNotFoundException {
-        logger.info(String.format("Retrieving psc statement data for company number %s and statement_id %s", company_number, statement_id));
-        Statement statement = pscStatementService.retrievePscStatementFromDb(company_number, statement_id);
+    public ResponseEntity<Statement> searchPscStatements (@PathVariable("company_number") String companyNumber,
+                                                          @PathVariable("statement_id") String statementId) throws JsonProcessingException, ResourceNotFoundException {
+        logger.info(String.format("Retrieving psc statement data for company number %s and statement_id %s", companyNumber, statementId));
+        Statement statement = pscStatementService.retrievePscStatementFromDb(companyNumber, statementId);
         return new ResponseEntity<>(statement, HttpStatus.OK);
     }
 
     @PutMapping("/company/{company_number}/persons-with-significant-control-statement/{statement_id}/internal")
     public ResponseEntity<Void> processPcsStatement(@RequestHeader("x-request-id") String contextId,
-                                                    @PathVariable String company_number,
-                                                    @PathVariable String statement_id,
-                                                    @RequestBody CompanyPscStatement companyPscStatement) throws JsonProcessingException{
-        logger.info(String.format("Processing psc statement data for company number %s and statement_id %s", company_number, statement_id));
-        pscStatementService.processPscStatement(contextId, company_number, statement_id, companyPscStatement);
+                                                    @PathVariable("company_number") String companyNumber,
+                                                    @PathVariable("statement_id") String statementId,
+                                                    @RequestBody CompanyPscStatement companyPscStatement) {
+        logger.info(String.format("Processing psc statement data for company number %s and statement_id %s", companyNumber, statementId));
+        pscStatementService.processPscStatement(contextId, companyNumber, statementId, companyPscStatement);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

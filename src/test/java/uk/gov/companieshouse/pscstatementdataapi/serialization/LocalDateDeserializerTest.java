@@ -27,14 +27,14 @@ public class LocalDateDeserializerTest {
     private ObjectMapper mapper;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         deserializer = new LocalDateDeserializer();
 
         mapper = new ObjectMapper();
     }
 
     @Test
-    public void dateShouldDeserialize() throws JsonParseException, IOException{
+    void dateShouldDeserialize() throws JsonParseException, IOException{
 
         String jsonTestString = "{\"date\":{\"$date\": \"2023-01-09T00:00:00Z\"}}";
 
@@ -44,7 +44,7 @@ public class LocalDateDeserializerTest {
     }
 
     @Test
-    public void longStringReturnsLong() throws JsonParseException, IOException{
+    void longStringReturnsLong() throws JsonParseException, IOException{
 
         String jsonTestString = "{\"date\":{\"$date\": {\"$numberLong\":\"-1431388800000\"}}}";
 
@@ -54,7 +54,7 @@ public class LocalDateDeserializerTest {
     }
 
     @Test
-    public void nullStringReturnsError() throws JsonParseException, IOException{
+    void nullStringReturnsError() throws JsonParseException, IOException{
 
         String jsonTestString = null;
 
@@ -64,7 +64,7 @@ public class LocalDateDeserializerTest {
     }
 
     @Test
-    public void invalidStringReturnsError() throws JsonParseException, IOException{
+    void invalidStringReturnsError() throws JsonParseException, IOException{
 
         String jsonTestString = "{\"date\":{\"$date\": \"NotADate\"}}}";
 
@@ -75,7 +75,6 @@ public class LocalDateDeserializerTest {
 
     private LocalDate deserialize(String jsonString) throws JsonParseException, IOException {
         JsonParser parser = mapper.getFactory().createParser(jsonString);
-
         DeserializationContext deserializationContext = mapper.getDeserializationContext();
 
         parser.nextToken();
@@ -83,7 +82,6 @@ public class LocalDateDeserializerTest {
         parser.nextToken();
 
         return deserializer.deserialize(parser, deserializationContext);
-
     }
     
 }

@@ -55,7 +55,7 @@ public class EricAuthFilter extends OncePerRequestFilter {
     private boolean isKeyAuthenticated(HttpServletRequest request) {
         String[] privileges = getApiKeyPrivileges(request);
 
-        return request.getMethod().equals("GET") ? true : 
+        return request.getMethod().equals("GET") ||
                 ArrayUtils.contains(privileges, "internal-app");
     }
 

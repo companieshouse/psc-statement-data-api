@@ -18,12 +18,12 @@ public class PscStatementWriteConverterTest {
     private PscStatementWriteConverter converter;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         converter = new PscStatementWriteConverter(new ObjectMapper());
     }
 
     @Test
-    public void canConvertDocument() {
+    void canConvertDocument() {
         Statement statement = new Statement();
         statement.setKind(KindEnum.PERSONS_WITH_SIGNIFICANT_CONTROL_STATEMENT);
 
@@ -34,7 +34,7 @@ public class PscStatementWriteConverterTest {
     }
 
     @Test
-    public void assertThrowsJsonException() {
+    void assertThrowsJsonException() {
         assertThrows(RuntimeException.class, () -> converter.convert(null));
     }
 }

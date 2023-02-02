@@ -1,7 +1,8 @@
 package uk.gov.companieshouse.pscstatementdataapi.transform;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
@@ -19,14 +20,14 @@ public class PscStatementTransformTest {
 
     private TestHelper testHelper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         transformer = new PscStatementTransformer();
         testHelper = new TestHelper();
     }
 
     @Test
-    public void shouldTransformCompanyPscStatement() {
+    void shouldTransformCompanyPscStatement() {
         CompanyPscStatement request =  testHelper.createCompanyPscStatement();
 
         PscStatementDocument document = transformer.transformPscStatement(TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID, request);

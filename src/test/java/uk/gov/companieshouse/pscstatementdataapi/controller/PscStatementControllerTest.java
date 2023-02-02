@@ -31,10 +31,10 @@ public class PscStatementControllerTest {
     private static final String PUT_URL = String.format("/company/%s/persons-with-significant-control-statement/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
     private static final String DELETE_URL = String.format("/company/%s/persons-with-significant-control-statement/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
 
-    public static final String ERIC_IDENTITY = "Test-Identity";
-    public static final String ERIC_IDENTITY_TYPE = "Key";
-    public static final String ERIC_PRIVILEGES = "internal-app";
-    public static final String X_REQUEST_ID = "654321";
+    private static final String ERIC_IDENTITY = "Test-Identity";
+    private static final String ERIC_IDENTITY_TYPE = "Key";
+    private static final String ERIC_PRIVILEGES = "internal-app";
+    private static final String X_REQUEST_ID = "654321";
 
 
     @MockBean
@@ -47,17 +47,17 @@ public class PscStatementControllerTest {
     private TestHelper testHelper;
 
     @BeforeEach
-    public void setUp(){
+    void setUp(){
         testHelper = new TestHelper();
     }
 
     @Test
-    public void contextLoads(){
+    void contextLoads(){
         assertThat(pscStatementController).isNotNull();
     }
 
     @Test
-    public void statementResponseReturnedWhenGetRequestInvoked() throws Exception {
+    void statementResponseReturnedWhenGetRequestInvoked() throws Exception {
         when(pscStatementService.retrievePscStatementFromDb(TestHelper.COMPANY_NUMBER,TestHelper.PSC_STATEMENT_ID))
                 .thenReturn(testHelper.createStatement());
 
@@ -71,7 +71,7 @@ public class PscStatementControllerTest {
     }
 
     @Test
-    public void callPscStatementPutRequest() throws Exception {
+    void callPscStatementPutRequest() throws Exception {
         doNothing()
                 .when(pscStatementService).processPscStatement(anyString(), anyString(), anyString(),
                 isA(CompanyPscStatement.class));
@@ -88,7 +88,7 @@ public class PscStatementControllerTest {
 
     @Test
     @DisplayName("PSC-STATEMENT DELETE request")
-    public void callPscStatementDeleteRequest() throws Exception {
+    void callPscStatementDeleteRequest() throws Exception {
 
         doNothing()
                 .when(pscStatementService).deletePscStatement(anyString(), anyString());

@@ -10,14 +10,14 @@ import java.time.LocalDateTime;
 @Component
 public class PscStatementTransformer {
 
-    public PscStatementDocument transformPscStatement(String company_number, String statement_id, CompanyPscStatement companyPscStatement) {
+    public PscStatementDocument transformPscStatement(String companyNumber, String statementId, CompanyPscStatement companyPscStatement) {
 
         PscStatementDocument document = new PscStatementDocument();
 
-        document.setId(statement_id);
-        document.setCompanyNumber(company_number);
+        document.setId(statementId);
+        document.setCompanyNumber(companyNumber);
         document.setUpdated(new Updated().setAt(LocalDateTime.now()));
-        document.setPscStatementId(statement_id);
+        document.setPscStatementId(statementId);
         document.setData(companyPscStatement.getStatement());
         document.setDeltaAt(companyPscStatement.getDeltaAt());
 

@@ -57,13 +57,13 @@ public class PscStatementServiceTest {
     private PscStatementDocument document;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         testHelper = new TestHelper();
         document = testHelper.createEmptyPscStatementDocument();
         companyPscStatement = testHelper.createCompanyPscStatement();
     }
     @Test
-    public void statementReturnedByCompanyNumberAndStatementIdFromRepository() throws JsonProcessingException, ResourceNotFoundException {
+    void statementReturnedByCompanyNumberAndStatementIdFromRepository() throws JsonProcessingException, ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         Optional<PscStatementDocument> pscStatementOptional = Optional.of(document);
@@ -77,27 +77,27 @@ public class PscStatementServiceTest {
     }
 
     @Test
-    public void deletePscStatementDeletesStatement() {
+    void deletePscStatementDeletesStatement() {
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
         pscStatementService.deletePscStatement(COMPANY_NUMBER, STATEMENT_ID);
         verify(repository).delete(document);
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
     }
     @Test
-    public void deleteThrowsExceptionWhenInvalidIdGiven() {
+    void deleteThrowsExceptionWhenInvalidIdGiven() {
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
         assertThrows(ResourceNotFoundException.class, () -> pscStatementService.deletePscStatement(COMPANY_NUMBER, "invalid_id"));
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, "invalid_id");
     }
     @Test
-    public void deleteThrowsExceptionWhenInvalidCompanyNumberGiven() {
+    void deleteThrowsExceptionWhenInvalidCompanyNumberGiven() {
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
         assertThrows(ResourceNotFoundException.class, () -> pscStatementService.deletePscStatement("invalid_company_no", STATEMENT_ID));
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId("invalid_company_no", STATEMENT_ID);
     }
 
     @Test
-    public void processPscStatementSavesStatement() {
+    void processPscStatementSavesStatement() {
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
@@ -109,7 +109,7 @@ public class PscStatementServiceTest {
     }
 
     @Test
-    public void processPscStatementUpdatesStatement() {
+    void processPscStatementUpdatesStatement() {
         LocalDateTime dateTime = LocalDateTime.now();
         Created created = new Created();
         created.setAt(dateTime);
@@ -126,7 +126,7 @@ public class PscStatementServiceTest {
     }
 
     @Test
-    public void processPscStatementDoesntUpdateStatementWhenDeltaAtInPast() {
+    void processPscStatementDoesntUpdateStatementWhenDeltaAtInPast() {
         LocalDateTime dateTime = LocalDateTime.now();
         Updated updated = new Updated();
         updated.setAt(dateTime);
