@@ -27,12 +27,13 @@ public class EricAuthFilterTest {
     FilterChain filterChain;
 
     @BeforeEach
-    public void setUp(){
+    void setUp(){
         interceptor = new EricAuthFilter(logger);
+        when(request.getMethod()).thenReturn("GET");
     }
 
     @Test
-    public void ericTokenFilterAllowsCallWithKeyCredentials() throws Exception {
+    void ericTokenFilterAllowsCallWithKeyCredentials() throws Exception {
         when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
         when(request.getHeader("ERIC-Identity-Type")).thenReturn("KEY");
 
@@ -72,5 +73,29 @@ public class EricAuthFilterTest {
 
         verify(filterChain, times(0)).doFilter(request, response);
         verify(response, times(1)).sendError(403);
+    }
+
+    @Test
+    void ericTokenFilterBlocksPutWithMissingPrivilege() throws Exception {
+        when(request.getMethod()).thenReturn("PUT");
+        when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
+        when(request.getHeader("ERIC-Identity-Type")).thenReturn("key");
+
+        interceptor.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain, times(0)).doFilter(request, response);
+        verify(response, times(1)).sendError(403);
+    }
+
+    @Test
+    void ericTokenFilterAllowsPutWithKeyPrivilege() throws Exception {
+        when(request.getMethod()).thenReturn("PUT");
+        when(request.getHeader("ERIC-Identity")).thenReturn("TEST");
+        when(request.getHeader("ERIC-Identity-Type")).thenReturn("key");
+        when(request.getHeader("ERIC-Authorised-Key-Privileges")).thenReturn("internal-app");
+
+        interceptor.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain, times(1)).doFilter(request, response);
     }
 }

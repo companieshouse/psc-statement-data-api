@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 public class TestHelper {
 
-    public  static  final String PSC_STATEMENT_ID = "statementId";
+    public static final String PSC_STATEMENT_ID = "statementId";
     public static final String COMPANY_NUMBER = "companyNumber";
     public static final String DELTA_AT = "20180101093435661593";
     public static final String ETAG = "etag";

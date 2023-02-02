@@ -17,13 +17,13 @@ public class ExceptionHandlerConfig {
     @ExceptionHandler(value= ResourceNotFoundException.class)
     public ResponseEntity<String> handleNotFoundException(ResourceNotFoundException exception){
         logger.error(exception.getMessage());
-        return new ResponseEntity<String>("Resource not found", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Resource not found", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = {IllegalArgumentException.class})
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException exception) {
         logger.error(exception.getMessage());
-        return new ResponseEntity<String>("Illegal argument", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Illegal argument", HttpStatus.BAD_REQUEST);
     }
 
 }
