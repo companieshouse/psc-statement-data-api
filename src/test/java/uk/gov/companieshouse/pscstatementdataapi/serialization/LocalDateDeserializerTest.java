@@ -39,7 +39,7 @@ public class LocalDateDeserializerTest {
         String jsonTestString = "{\"date\":{\"$date\": \"2023-01-09T00:00:00Z\"}}";
 
         LocalDate returnedDate = deserialize(jsonTestString);
-        assertEquals(returnedDate, LocalDate.of(2023, 1, 9));
+        assertEquals(LocalDate.of(2023, 1, 9), returnedDate);
 
     }
 
@@ -49,7 +49,7 @@ public class LocalDateDeserializerTest {
         String jsonTestString = "{\"date\":{\"$date\": {\"$numberLong\":\"-1431388800000\"}}}";
 
         LocalDate returnedDate = deserialize(jsonTestString);
-        assertEquals(returnedDate, LocalDate.of(1924, 8, 23));
+        assertEquals(LocalDate.of(1924, 8, 23), returnedDate);
 
     }
 
