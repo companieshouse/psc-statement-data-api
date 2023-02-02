@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
@@ -37,14 +38,15 @@ public class PscStatementService {
     return pscStatementDocument.getData();
   }
 
-  public List<Statement> retrievePscStatementListFromDb(String companyNumber, int startIndex, int itemsPerPage) throws JsonProcessingException, ResourceNotFoundException {
+  public StatementList retrievePscStatementListFromDb(String companyNumber, int startIndex, int itemsPerPage) throws JsonProcessingException, ResourceNotFoundException {
     Optional<List<PscStatementDocument>> statementListOptional =
             pscStatementRepository.getStatementList(companyNumber, startIndex, itemsPerPage);
 
-    List<PscStatementDocument> pscStatementListDocument = statementListOptional.orElseThrow(() ->
+    List<PscStatementDocument> pscStatementDocuments = statementListOptional.orElseThrow(() ->
             new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
                     "Resource not found for company number: %s", companyNumber)));
-    return pscStatementListDocument.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
+
+    return createStatementList(pscStatementDocuments, startIndex, itemsPerPage);
   }
 
 
@@ -102,6 +104,18 @@ public class PscStatementService {
   private Created getCreatedFromCurrentRecord(String companyNumber,String statementId) {
     Optional<PscStatementDocument> document = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
     return document.isPresent() ? document.get().getCreated(): null;
+  }
+
+  private StatementList createStatementList(List<PscStatementDocument> statementDocuments, int startIndex, int itemsPerPage) {
+    StatementList statementList = new StatementList();
+    List<Statement> statements = statementDocuments.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
+    statementList.setItemsPerPage(itemsPerPage);
+    statementList.setStartIndex(startIndex);
+    statementList.setActiveCount(0);
+    statementList.setCeasedCount(0);
+    statementList.setTotalResults(0);
+    statementList.setItems(statements);
+    return statementList;
   }
 
 }

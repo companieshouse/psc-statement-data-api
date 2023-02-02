@@ -25,5 +25,5 @@ public interface PscStatementRepository extends MongoRepository<PscStatementDocu
             "{'$skip': ?1}",
             "{'$limit': ?2}",
         })
-    Optional<List<PscStatementDocument>> getStatementList(String companyNumber, int startIndex, int pageSize);
+    Optional<List<PscStatementDocument>> getStatementList(String companyNumber, int startIndex, int itemsPerPage);
 }

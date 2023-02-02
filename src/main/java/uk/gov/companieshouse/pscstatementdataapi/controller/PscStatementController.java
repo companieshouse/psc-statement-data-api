@@ -52,17 +52,17 @@ public class PscStatementController {
     }
 
     @GetMapping("/company/{company_number}/persons-with-significant-control-statement/internal")
-    public ResponseEntity<List<Statement>> searchPscStatementsList(
+    public ResponseEntity<StatementList> searchPscStatementsList(
             @PathVariable String company_number,
             @RequestParam(value = "items_per_page", required = false) final Integer itemsPerPage,
             @RequestParam(value = "start_index", required = false) final Integer startIndex) throws JsonProcessingException, ResourceNotFoundException {
         logger.info(String.format("Retrieving psc statement list data for company number %s, start index %d, items %d", company_number,
                 Optional.ofNullable(startIndex).orElse(0),
                 Optional.ofNullable(itemsPerPage).orElse(25)));
-        List<Statement> statement = pscStatementService.retrievePscStatementListFromDb(company_number,
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(company_number,
                 Optional.ofNullable(startIndex).orElse(0),
                 Optional.ofNullable(itemsPerPage).orElse(25));
-        return new ResponseEntity<>(statement, HttpStatus.OK);
+        return new ResponseEntity<>(statementList, HttpStatus.OK);
     }
 
     /**
