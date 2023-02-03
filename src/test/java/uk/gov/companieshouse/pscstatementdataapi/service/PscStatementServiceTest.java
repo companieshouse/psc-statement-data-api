@@ -10,6 +10,7 @@ import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
@@ -23,6 +24,8 @@ import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -74,6 +77,27 @@ public class PscStatementServiceTest {
         assertEquals(expectedStatement, statement);
         verify(pscStatementService, times(1)).retrievePscStatementFromDb(COMPANY_NUMBER, STATEMENT_ID);
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+    }
+
+    @Test
+    void statementListReturnedByCompanyNumberFromRepository() throws JsonProcessingException, ResourceNotFoundException {
+        Statement expectedStatement = new Statement();
+        StatementList expectedStatementList = new StatementList();
+        expectedStatementList.setItems(Collections.singletonList(expectedStatement));
+        expectedStatementList.setActiveCount(0);
+        expectedStatementList.setCeasedCount(0);
+        expectedStatementList.setTotalResults(0);
+        expectedStatementList.setStartIndex(0);
+        expectedStatementList.setItemsPerPage(25);
+        document.setData(expectedStatement);
+        Optional<List<PscStatementDocument>> pscStatementsOptional = Optional.of(Collections.singletonList(document));
+        when(repository.getStatementList(anyString(),anyInt(), anyInt())).thenReturn(pscStatementsOptional);
+
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+
+        assertEquals(expectedStatementList, statementList);
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
     }
 
     @Test

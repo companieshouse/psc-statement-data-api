@@ -11,12 +11,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
+import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -30,7 +30,7 @@ public class PscStatementControllerTest {
     private static final String GET_URL = String.format("/company/%s/persons-with-significant-control-statement/%s", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
     private static final String PUT_URL = String.format("/company/%s/persons-with-significant-control-statement/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
     private static final String DELETE_URL = String.format("/company/%s/persons-with-significant-control-statement/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
-
+    private static final String GET_STATEMENT_LIST_URL = String.format("/company/%s/persons-with-significant-control-statement/internal", TestHelper.COMPANY_NUMBER);
     private static final String ERIC_IDENTITY = "Test-Identity";
     private static final String ERIC_IDENTITY_TYPE = "Key";
     private static final String ERIC_PRIVILEGES = "internal-app";
@@ -83,6 +83,19 @@ public class PscStatementControllerTest {
                         .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
                         .header("ERIC-Authorised-Key-Privileges", ERIC_PRIVILEGES)
                         .content(testHelper.createJsonCompanyPscStatementPayload()))
+                .andExpect(status().isOk());
+    }
+    @Test
+    void callPscStatementListGetRequest() throws Exception {
+        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 0, 5))
+                .thenReturn(testHelper.createStatementList());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get(GET_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("ERIC-IDENTITY", ERIC_IDENTITY)
+                        .header("ERIC-IDENTITY-TYPE", ERIC_IDENTITY_TYPE)
+                        .header("items_per_page", 5))
                 .andExpect(status().isOk());
     }
 

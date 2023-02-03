@@ -3,6 +3,7 @@ package uk.gov.companieshouse.pscstatementdataapi.utils;
 import org.springframework.util.FileCopyUtils;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
 
@@ -10,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class TestHelper {
 
@@ -64,6 +67,12 @@ public class TestHelper {
                 ClassLoader.getSystemClassLoader().getResourceAsStream("psc-statement-example.json"));
 
         return FileCopyUtils.copyToString(exampleJsonPayload);
+    }
+
+    public StatementList createStatementList() {
+        StatementList statementList = new StatementList();
+        statementList.setItems(Collections.singletonList(createStatement()));
+        return statementList;
     }
 
 }
