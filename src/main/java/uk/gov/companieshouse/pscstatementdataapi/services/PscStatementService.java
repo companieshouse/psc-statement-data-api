@@ -3,10 +3,13 @@ package uk.gov.companieshouse.pscstatementdataapi.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.Created;
@@ -16,7 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import uk.gov.companieshouse.pscstatementdataapi.transform.DateTransformer;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +34,11 @@ public class PscStatementService {
   PscStatementTransformer pscStatementTransformer;
   @Autowired
   DateTransformer dateTransformer;
+  @Autowired
+  CompanyMetricsApiService companyMetricsApiService;
+
+  @Autowired
+  InternalApiClient internalApiClient;
 
   public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
@@ -46,7 +53,9 @@ public class PscStatementService {
             new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
                     "Resource not found for company number: %s", companyNumber)));
 
-    return createStatementList(pscStatementDocuments, startIndex, itemsPerPage);
+    Optional<MetricsApi> companyMetrics = companyMetricsApiService.getCompanyMetrics(companyNumber);
+
+    return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, companyNumber);
   }
 
 
@@ -106,14 +115,20 @@ public class PscStatementService {
     return document.isPresent() ? document.get().getCreated(): null;
   }
 
-  private StatementList createStatementList(List<PscStatementDocument> statementDocuments, int startIndex, int itemsPerPage) {
+  private StatementList createStatementList(List < PscStatementDocument > statementDocuments,
+                                            int startIndex, int itemsPerPage, Optional < MetricsApi > metrics, String companyNumber) {
     StatementList statementList = new StatementList();
-    List<Statement> statements = statementDocuments.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
+    List < Statement > statements = statementDocuments.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
     statementList.setItemsPerPage(itemsPerPage);
     statementList.setStartIndex(startIndex);
-    statementList.setActiveCount(0);
-    statementList.setCeasedCount(0);
-    statementList.setTotalResults(0);
+    metrics.ifPresentOrElse(metricsApi -> {
+              statementList.setActiveCount(metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
+              statementList.setCeasedCount(metricsApi.getCounts().getPersonsWithSignificantControl().getWithdrawnStatementsCount());
+              statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getTotalCount());
+            },
+            () -> {
+              logger.info(String.format("No company metrics data found for company number: %s", companyNumber));
+            });
     statementList.setItems(statements);
     return statementList;
   }

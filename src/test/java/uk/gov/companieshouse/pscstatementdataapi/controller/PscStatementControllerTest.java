@@ -86,8 +86,8 @@ public class PscStatementControllerTest {
                 .andExpect(status().isOk());
     }
     @Test
-    void callPscStatementListGetRequest() throws Exception {
-        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 0, 5))
+    void callPscStatementListGetRequestWithParams() throws Exception {
+        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 2, 5))
                 .thenReturn(testHelper.createStatementList());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -95,12 +95,25 @@ public class PscStatementControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("ERIC-IDENTITY", ERIC_IDENTITY)
                         .header("ERIC-IDENTITY-TYPE", ERIC_IDENTITY_TYPE)
-                        .header("items_per_page", 5))
+                        .header("items_per_page", 5)
+                        .header("start_index", 2))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("PSC-STATEMENT DELETE request")
+    void callPscStatementListGetRequestNoParams() throws Exception {
+        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 0, 25))
+                .thenReturn(testHelper.createStatementList());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get(GET_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("ERIC-IDENTITY", ERIC_IDENTITY)
+                        .header("ERIC-IDENTITY-TYPE", ERIC_IDENTITY_TYPE))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void callPscStatementDeleteRequest() throws Exception {
 
         doNothing()

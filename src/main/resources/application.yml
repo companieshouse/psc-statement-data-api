@@ -27,3 +27,13 @@ mongodb:
   pscStatements:
     collection:
       name: company_psc_statements
+
+company-metrics:
+  api:
+    url: ${COMPANY_METRICS_API_URL}
+
+api:
+  psc-statements-data-api-key: ${PSC_STATEMENTS_DATA_API_KEY:localhost}
+  company-metrics-data-api-key: ${PSC_STATEMENTS_DATA_API_KEY:g9yZIA81Zo9J46Kzp3JPbfld6kOqxR47EAYqXbRV}
+  api-url: ${API_URL:http://localhost:8888}
+  internal-api-url: ${INTERNAL_API_URL:http://api.chs.local:4001}

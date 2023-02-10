@@ -62,6 +62,13 @@ public class TestHelper {
         return pscStatementDocument;
     }
 
+    public PscStatementDocument createPscStatementDocument() {
+        pscStatementDocument = new PscStatementDocument();
+        pscStatementDocument.setData(createStatement());
+        pscStatementDocument.setId(PSC_STATEMENT_ID);
+        pscStatementDocument.setUpdated(new Updated().setAt(LocalDateTime.now()));
+        return pscStatementDocument;
+    }
     public String createJsonCompanyPscStatementPayload() throws IOException{
         InputStreamReader exampleJsonPayload = new InputStreamReader(
                 ClassLoader.getSystemClassLoader().getResourceAsStream("psc-statement-example.json"));

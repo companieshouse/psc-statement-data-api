@@ -2,15 +2,23 @@ package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import uk.gov.companieshouse.api.metrics.CountsApi;
+import uk.gov.companieshouse.api.metrics.MetricsApi;
+import uk.gov.companieshouse.api.metrics.PscApi;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
@@ -22,6 +30,7 @@ import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransform
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,6 +57,8 @@ public class PscStatementServiceTest {
     PscStatementRepository repository;
     @Mock
     PscStatementTransformer statementTransformer;
+    @Mock
+    CompanyMetricsApiService companyMetricsApiService;
     @Spy
     DateTransformer dateTransformer;
 
@@ -80,24 +91,50 @@ public class PscStatementServiceTest {
     }
 
     @Test
-    void statementListReturnedByCompanyNumberFromRepository() throws JsonProcessingException, ResourceNotFoundException {
+    void statementListReturnedByCompanyNumberFromRepository() throws ResourceNotFoundException, IOException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = new StatementList();
         expectedStatementList.setItems(Collections.singletonList(expectedStatement));
-        expectedStatementList.setActiveCount(0);
-        expectedStatementList.setCeasedCount(0);
-        expectedStatementList.setTotalResults(0);
+        expectedStatementList.setActiveCount(1);
+        expectedStatementList.setCeasedCount(1);
+        expectedStatementList.setTotalResults(2);
         expectedStatementList.setStartIndex(0);
         expectedStatementList.setItemsPerPage(25);
         document.setData(expectedStatement);
-        Optional<List<PscStatementDocument>> pscStatementsOptional = Optional.of(Collections.singletonList(document));
-        when(repository.getStatementList(anyString(),anyInt(), anyInt())).thenReturn(pscStatementsOptional);
+
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.ofNullable(createMetrics()));
 
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
 
         assertEquals(expectedStatementList, statementList);
         verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
         verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+    }
+
+    @Test
+    void whenNoStatementsExistGetStatementListShouldThrow() throws JsonProcessingException{
+
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.empty());
+            try {
+               pscStatementService.retrievePscStatementListFromDb( COMPANY_NUMBER, 0, 25);
+            }
+            catch (ResponseStatusException statusException)  {
+                Assertions.assertEquals(HttpStatus.NOT_FOUND, statusException.getStatus());
+        }
+    }
+
+    private MetricsApi createMetrics() {
+        MetricsApi metrics = new MetricsApi();
+        CountsApi counts = new CountsApi();
+        PscApi pscs = new PscApi();
+        pscs.setActiveStatementsCount(1);
+        pscs.setWithdrawnStatementsCount(1);
+        pscs.setTotalCount(2);
+        counts.setPersonsWithSignificantControl(pscs);
+        metrics.setCounts(counts);
+        return metrics;
     }
 
     @Test
