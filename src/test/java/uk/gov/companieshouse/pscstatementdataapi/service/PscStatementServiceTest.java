@@ -93,18 +93,12 @@ public class PscStatementServiceTest {
     @Test
     void statementListReturnedByCompanyNumberFromRepository() throws ResourceNotFoundException, IOException {
         Statement expectedStatement = new Statement();
-        StatementList expectedStatementList = new StatementList();
-        expectedStatementList.setItems(Collections.singletonList(expectedStatement));
-        expectedStatementList.setActiveCount(1);
-        expectedStatementList.setCeasedCount(1);
-        expectedStatementList.setTotalResults(2);
-        expectedStatementList.setStartIndex(0);
-        expectedStatementList.setItemsPerPage(25);
+        StatementList expectedStatementList = testHelper.createStatementList();
         document.setData(expectedStatement);
 
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
-                .thenReturn(Optional.ofNullable(createMetrics()));
+                .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
 
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
 
@@ -123,18 +117,6 @@ public class PscStatementServiceTest {
             catch (ResponseStatusException statusException)  {
                 Assertions.assertEquals(HttpStatus.NOT_FOUND, statusException.getStatus());
         }
-    }
-
-    private MetricsApi createMetrics() {
-        MetricsApi metrics = new MetricsApi();
-        CountsApi counts = new CountsApi();
-        PscApi pscs = new PscApi();
-        pscs.setActiveStatementsCount(1);
-        pscs.setWithdrawnStatementsCount(1);
-        pscs.setTotalCount(2);
-        counts.setPersonsWithSignificantControl(pscs);
-        metrics.setCounts(counts);
-        return metrics;
     }
 
     @Test

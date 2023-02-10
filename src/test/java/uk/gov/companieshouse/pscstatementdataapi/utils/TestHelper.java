@@ -1,6 +1,9 @@
 package uk.gov.companieshouse.pscstatementdataapi.utils;
 
 import org.springframework.util.FileCopyUtils;
+import uk.gov.companieshouse.api.metrics.CountsApi;
+import uk.gov.companieshouse.api.metrics.MetricsApi;
+import uk.gov.companieshouse.api.metrics.PscApi;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
@@ -62,13 +65,6 @@ public class TestHelper {
         return pscStatementDocument;
     }
 
-    public PscStatementDocument createPscStatementDocument() {
-        pscStatementDocument = new PscStatementDocument();
-        pscStatementDocument.setData(createStatement());
-        pscStatementDocument.setId(PSC_STATEMENT_ID);
-        pscStatementDocument.setUpdated(new Updated().setAt(LocalDateTime.now()));
-        return pscStatementDocument;
-    }
     public String createJsonCompanyPscStatementPayload() throws IOException{
         InputStreamReader exampleJsonPayload = new InputStreamReader(
                 ClassLoader.getSystemClassLoader().getResourceAsStream("psc-statement-example.json"));
@@ -77,9 +73,27 @@ public class TestHelper {
     }
 
     public StatementList createStatementList() {
+        Statement statement = new Statement();
         StatementList statementList = new StatementList();
-        statementList.setItems(Collections.singletonList(createStatement()));
+        statementList.setItems(Collections.singletonList(statement));
+        statementList.setActiveCount(1);
+        statementList.setCeasedCount(1);
+        statementList.setTotalResults(2);
+        statementList.setStartIndex(0);
+        statementList.setItemsPerPage(25);
         return statementList;
+    }
+
+    public MetricsApi createMetrics() {
+        MetricsApi metrics = new MetricsApi();
+        CountsApi counts = new CountsApi();
+        PscApi pscs = new PscApi();
+        pscs.setActiveStatementsCount(1);
+        pscs.setWithdrawnStatementsCount(1);
+        pscs.setTotalCount(2);
+        counts.setPersonsWithSignificantControl(pscs);
+        metrics.setCounts(counts);
+        return metrics;
     }
 
 }

@@ -27,10 +27,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class PscStatementControllerTest {
-    private static final String GET_URL = String.format("/company/%s/persons-with-significant-control-statement/%s", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
-    private static final String PUT_URL = String.format("/company/%s/persons-with-significant-control-statement/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
-    private static final String DELETE_URL = String.format("/company/%s/persons-with-significant-control-statement/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
-    private static final String GET_STATEMENT_LIST_URL = String.format("/company/%s/persons-with-significant-control-statement/internal", TestHelper.COMPANY_NUMBER);
+    private static final String GET_URL = String.format("/company/%s/persons-with-significant-control-statements/%s", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
+    private static final String PUT_URL = String.format("/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
+    private static final String DELETE_URL = String.format("/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
+    private static final String GET_STATEMENT_LIST_URL = String.format("/company/%s/persons-with-significant-control-statements", TestHelper.COMPANY_NUMBER);
     private static final String ERIC_IDENTITY = "Test-Identity";
     private static final String ERIC_IDENTITY_TYPE = "Key";
     private static final String ERIC_PRIVILEGES = "internal-app";
@@ -106,7 +106,7 @@ public class PscStatementControllerTest {
                 .thenReturn(testHelper.createStatementList());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get(GET_URL)
+                        .get(GET_STATEMENT_LIST_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("ERIC-IDENTITY", ERIC_IDENTITY)
                         .header("ERIC-IDENTITY-TYPE", ERIC_IDENTITY_TYPE))
