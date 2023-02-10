@@ -84,6 +84,15 @@ public class TestHelper {
         return statementList;
     }
 
+    public StatementList createStatementListNoMetrics() {
+        Statement statement = new Statement();
+        StatementList statementList = new StatementList();
+        statementList.setItems(Collections.singletonList(statement));
+        statementList.setStartIndex(0);
+        statementList.setItemsPerPage(25);
+        return statementList;
+    }
+
     public MetricsApi createMetrics() {
         MetricsApi metrics = new MetricsApi();
         CountsApi counts = new CountsApi();

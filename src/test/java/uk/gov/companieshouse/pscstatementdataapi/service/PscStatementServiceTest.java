@@ -120,6 +120,23 @@ public class PscStatementServiceTest {
     }
 
     @Test
+    void statementListReturnedForCompanyNumberButNoMetricsFound_ShouldReturnList() throws ResourceNotFoundException, IOException {
+        Statement expectedStatement = new Statement();
+        StatementList expectedStatementList = testHelper.createStatementListNoMetrics();
+        document.setData(expectedStatement);
+
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.empty());
+
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+
+        assertEquals(expectedStatementList, statementList);
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+    }
+
+    @Test
     void deletePscStatementDeletesStatement() {
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
         pscStatementService.deletePscStatement(COMPANY_NUMBER, STATEMENT_ID);
