@@ -28,8 +28,8 @@ public class ExceptionHandlerConfig {
 
     @ExceptionHandler(value = {Exception.class})
     public ResponseEntity<String> handleException(Exception exception) {
-        logger.error(exception.toString());
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        logger.error(exception.getMessage());
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
