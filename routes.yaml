@@ -3,5 +3,5 @@ group: api
 weight: 991
 routes:
    1: ^/psc-statement-data-api/healthcheck
-   2: ^/company/(.){8-10}/persons-with-significant-control-statements
-   3: ^/company/(.){8-10}/persons-with-significant-control-statements/(.*)
+   2: ^/company/(.){0,10}/persons-with-significant-control-statements
+   3: ^/company/(.){0,10}/persons-with-significant-control-statements/(.*)
