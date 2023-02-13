@@ -20,7 +20,6 @@ import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/company/{company_number}/persons-with-significant-control-statements")
@@ -52,14 +51,14 @@ public class PscStatementController {
     @GetMapping("")
     public ResponseEntity<StatementList> searchPscStatementsList(
             @PathVariable String company_number,
-            @RequestParam(value = "items_per_page", required = false) final Integer itemsPerPage,
-            @RequestParam(value = "start_index", required = false) final Integer startIndex) throws JsonProcessingException, ResourceNotFoundException {
-        logger.info(String.format("Retrieving psc statement list data for company number %s, start index %d, items %d", company_number,
-                Optional.ofNullable(startIndex).orElse(0),
-                Optional.ofNullable(itemsPerPage).orElse(25)));
+            @RequestParam(value = "items_per_page", required = false, defaultValue = "25") final Integer itemsPerPage,
+            @RequestParam(value = "start_index", required = false, defaultValue = "0") final Integer startIndex) throws JsonProcessingException, ResourceNotFoundException {
+        logger.info(String.format("Retrieving psc statement list data for company number %s, start index %d, items per page %d", company_number,
+                startIndex,
+                itemsPerPage));
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(company_number,
-                Optional.ofNullable(startIndex).orElse(0),
-                Optional.ofNullable(itemsPerPage).orElse(25));
+                startIndex,
+                itemsPerPage);
         return new ResponseEntity<>(statementList, HttpStatus.OK);
     }
 
