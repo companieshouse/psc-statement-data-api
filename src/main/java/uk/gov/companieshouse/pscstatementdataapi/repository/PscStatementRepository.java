@@ -21,7 +21,7 @@ public interface PscStatementRepository extends MongoRepository<PscStatementDocu
 
     @Aggregation(pipeline = {
             "{'$match': { 'company_number': ?0} } }",
-            "{'$sort': {'data.notified_on': -1 } }",
+            "{'$sort': {'data.notified_on': -1, 'data.ceased_on': -1 } }",
             "{'$skip': ?1}",
             "{'$limit': ?2}",
         })
