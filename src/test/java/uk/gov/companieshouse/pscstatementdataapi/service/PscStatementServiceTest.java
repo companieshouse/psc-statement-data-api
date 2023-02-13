@@ -2,14 +2,23 @@ package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import uk.gov.companieshouse.api.metrics.CountsApi;
+import uk.gov.companieshouse.api.metrics.MetricsApi;
+import uk.gov.companieshouse.api.metrics.PscApi;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.api.psc.StatementList;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
@@ -21,8 +30,11 @@ import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransform
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -45,6 +57,8 @@ public class PscStatementServiceTest {
     PscStatementRepository repository;
     @Mock
     PscStatementTransformer statementTransformer;
+    @Mock
+    CompanyMetricsApiService companyMetricsApiService;
     @Spy
     DateTransformer dateTransformer;
 
@@ -74,6 +88,52 @@ public class PscStatementServiceTest {
         assertEquals(expectedStatement, statement);
         verify(pscStatementService, times(1)).retrievePscStatementFromDb(COMPANY_NUMBER, STATEMENT_ID);
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+    }
+
+    @Test
+    void statementListReturnedByCompanyNumberFromRepository() throws ResourceNotFoundException, IOException {
+        Statement expectedStatement = new Statement();
+        StatementList expectedStatementList = testHelper.createStatementList();
+        document.setData(expectedStatement);
+
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
+
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+
+        assertEquals(expectedStatementList, statementList);
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+    }
+
+    @Test
+    void whenNoStatementsExistGetStatementListShouldThrow() throws JsonProcessingException{
+
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.empty());
+            try {
+               pscStatementService.retrievePscStatementListFromDb( COMPANY_NUMBER, 0, 25);
+            }
+            catch (ResponseStatusException statusException)  {
+                Assertions.assertEquals(HttpStatus.NOT_FOUND, statusException.getStatus());
+        }
+    }
+
+    @Test
+    void statementListReturnedForCompanyNumberButNoMetricsFound_ShouldReturnList() throws ResourceNotFoundException, IOException {
+        Statement expectedStatement = new Statement();
+        StatementList expectedStatementList = testHelper.createStatementListNoMetrics();
+        document.setData(expectedStatement);
+
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.empty());
+
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+
+        assertEquals(expectedStatementList, statementList);
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
     }
 
     @Test

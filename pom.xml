@@ -205,6 +205,11 @@
                         <exclude>**/*ITest.java</exclude>
                     </excludes>
                     <skipTests>${skip.unit.tests}</skipTests>
+                    <environmentVariables>
+                        <CHS_API_KEY>key</CHS_API_KEY>
+                        <API_URL>key</API_URL>
+                        <PAYMENTS_API_URL>key</PAYMENTS_API_URL>
+                    </environmentVariables>
                 </configuration>
             </plugin>
             <plugin>
