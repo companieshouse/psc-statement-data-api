@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.psc.Statement;
@@ -22,6 +23,7 @@ import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/company/{company_number}/persons-with-significant-control-statements")
 public class PscStatementController {
 
     @Autowired
@@ -29,7 +31,7 @@ public class PscStatementController {
     @Autowired
     private PscStatementService pscStatementService;
 
-    @GetMapping("/company/{company_number}/persons-with-significant-control-statements/{statement_id}")
+    @GetMapping("/{statement_id}")
     public ResponseEntity<Statement> searchPscStatements (@PathVariable("company_number") String companyNumber,
                                                           @PathVariable("statement_id") String statementId) throws JsonProcessingException, ResourceNotFoundException {
         logger.info(String.format("Retrieving psc statement data for company number %s and statement_id %s", companyNumber, statementId));
@@ -37,7 +39,7 @@ public class PscStatementController {
         return new ResponseEntity<>(statement, HttpStatus.OK);
     }
 
-    @PutMapping("/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal")
+    @PutMapping("/{statement_id}/internal")
     public ResponseEntity<Void> processPcsStatement(@RequestHeader("x-request-id") String contextId,
                                                     @PathVariable("company_number") String companyNumber,
                                                     @PathVariable("statement_id") String statementId,
@@ -47,7 +49,7 @@ public class PscStatementController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/company/{company_number}/persons-with-significant-control-statements")
+    @GetMapping("")
     public ResponseEntity<StatementList> searchPscStatementsList(
             @PathVariable String company_number,
             @RequestParam(value = "items_per_page", required = false) final Integer itemsPerPage,
@@ -67,7 +69,7 @@ public class PscStatementController {
      * @param  statementId  the statement id to be deleted
      * @return return 200 status with empty body
      */
-    @DeleteMapping("/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal")
+    @DeleteMapping("/{statement_id}/internal")
     public ResponseEntity<Void> deletePscStatement(
             @PathVariable("company_number") String companyNumber,
             @PathVariable("statement_id") String statementId) {
