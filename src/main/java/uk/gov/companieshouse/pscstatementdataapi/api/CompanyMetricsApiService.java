@@ -60,6 +60,9 @@ public class CompanyMetricsApiService {
                 throw new ResponseStatusException(exp.getStatusCode(),
                         exp.getStatusMessage(), null);
             }
+        } catch (Exception exp) {
+            logger.error(String.format("Error calling getCompanyMetrics endpoint. "
+                            + " message [%s]", exp.getMessage()));
         }
         return Optional.empty();
     }
