@@ -32,10 +32,7 @@ import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -110,13 +107,8 @@ public class PscStatementServiceTest {
     @Test
     void whenNoStatementsExistGetStatementListShouldThrow() throws JsonProcessingException{
 
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.empty());
-            try {
-               pscStatementService.retrievePscStatementListFromDb( COMPANY_NUMBER, 0, 25);
-            }
-            catch (ResponseStatusException statusException)  {
-                Assertions.assertEquals(HttpStatus.NOT_FOUND, statusException.getStatus());
-        }
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(new ArrayList<PscStatementDocument>()));
+        assertThrows(ResourceNotFoundException.class, ()-> pscStatementService.retrievePscStatementListFromDb( COMPANY_NUMBER, 0, 25));
     }
 
     @Test
@@ -131,7 +123,7 @@ public class PscStatementServiceTest {
 
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
 
-        assertEquals(expectedStatementList, statementList);
+        Assertions.assertEquals(expectedStatementList, statementList);
         verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
         verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
     }

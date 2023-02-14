@@ -21,6 +21,8 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 
+import static org.apache.commons.lang3.math.NumberUtils.min;
+
 @RestController
 @RequestMapping("/company/{company_number}/persons-with-significant-control-statements")
 public class PscStatementController {
@@ -55,10 +57,10 @@ public class PscStatementController {
             @RequestParam(value = "start_index", required = false, defaultValue = "0") final Integer startIndex) throws JsonProcessingException, ResourceNotFoundException {
         logger.info(String.format("Retrieving psc statement list data for company number %s, start index %d, items per page %d", company_number,
                 startIndex,
-                itemsPerPage));
+                Math.min(itemsPerPage, 100)));
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(company_number,
                 startIndex,
-                itemsPerPage);
+                Math.min(itemsPerPage, 100));
         return new ResponseEntity<>(statementList, HttpStatus.OK);
     }
 
