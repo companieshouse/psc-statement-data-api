@@ -8,17 +8,20 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
+import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.pscstatementdataapi.converter.EnumWriteConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementWriteConverter;
 import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateDeserializer;
 import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateSerializer;
+import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 
 @Configuration
 public class ApplicationConfig {
+
 
     @Bean
     public MongoCustomConversions mongoCustomConversions(){
@@ -27,6 +30,11 @@ public class ApplicationConfig {
                 new PscStatementReadConverter(objectMapper),
                 new PscStatementWriteConverter(objectMapper),
                 new EnumWriteConverter()));
+    }
+
+    @Bean
+    public InternalApiClient internalApiClient() {
+        return ApiSdkManager.getPrivateSDK();
     }
 
     private ObjectMapper mongoDbObjectMapper(){

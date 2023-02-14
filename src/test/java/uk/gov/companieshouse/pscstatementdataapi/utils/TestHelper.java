@@ -1,8 +1,12 @@
 package uk.gov.companieshouse.pscstatementdataapi.utils;
 
 import org.springframework.util.FileCopyUtils;
+import uk.gov.companieshouse.api.metrics.CountsApi;
+import uk.gov.companieshouse.api.metrics.MetricsApi;
+import uk.gov.companieshouse.api.metrics.PscApi;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
 
@@ -10,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class TestHelper {
 
@@ -64,6 +70,39 @@ public class TestHelper {
                 ClassLoader.getSystemClassLoader().getResourceAsStream("psc-statement-example.json"));
 
         return FileCopyUtils.copyToString(exampleJsonPayload);
+    }
+
+    public StatementList createStatementList() {
+        Statement statement = new Statement();
+        StatementList statementList = new StatementList();
+        statementList.setItems(Collections.singletonList(statement));
+        statementList.setActiveCount(1);
+        statementList.setCeasedCount(1);
+        statementList.setTotalResults(2);
+        statementList.setStartIndex(0);
+        statementList.setItemsPerPage(25);
+        return statementList;
+    }
+
+    public StatementList createStatementListNoMetrics() {
+        Statement statement = new Statement();
+        StatementList statementList = new StatementList();
+        statementList.setItems(Collections.singletonList(statement));
+        statementList.setStartIndex(0);
+        statementList.setItemsPerPage(25);
+        return statementList;
+    }
+
+    public MetricsApi createMetrics() {
+        MetricsApi metrics = new MetricsApi();
+        CountsApi counts = new CountsApi();
+        PscApi pscs = new PscApi();
+        pscs.setActiveStatementsCount(1);
+        pscs.setWithdrawnStatementsCount(1);
+        pscs.setTotalCount(2);
+        counts.setPersonsWithSignificantControl(pscs);
+        metrics.setCounts(counts);
+        return metrics;
     }
 
 }
