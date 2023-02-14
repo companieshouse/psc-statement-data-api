@@ -3,9 +3,12 @@ package uk.gov.companieshouse.pscstatementdataapi.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.Created;
@@ -28,6 +31,8 @@ public class PscStatementService {
   PscStatementTransformer pscStatementTransformer;
   @Autowired
   DateTransformer dateTransformer;
+  @Autowired
+  PscStatementApiService apiClientService;
 
   public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
@@ -36,7 +41,21 @@ public class PscStatementService {
 
   public void deletePscStatement(String companyNumber, String statementId) throws ResourceNotFoundException{
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
+
+    Statement statement = pscStatementDocument.getData();
+    ApiResponse<Void> apiResponse = apiClientService.invokeChsKafkaApiWithDeleteEvent(companyNumber, statementId, statement);
+
+    logger.info(String.format("ChsKafka api DELETED invoked successfully for companyNumber %s and statementId %s", companyNumber, statementId));
+    if (apiResponse == null) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, " error response received from ChsKafkaApi");
+    }
+    HttpStatus statusCode = HttpStatus.valueOf(apiResponse.getStatusCode());
+    if (!statusCode.is2xxSuccessful()) {
+      throw new ResponseStatusException(HttpStatus.valueOf(apiResponse.getStatusCode()), " error response received from ChsKafkaApi");
+    }
+
     pscStatementRepository.delete(pscStatementDocument);
+    logger.info(String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s", companyNumber, statementId));
   }
 
   private PscStatementDocument getPscStatementDocument(String companyNumber, String statementId) throws ResourceNotFoundException{

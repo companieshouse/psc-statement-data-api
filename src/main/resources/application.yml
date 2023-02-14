@@ -12,6 +12,18 @@ chs:
       key: ${CHS_API_KEY:chsApiKey}
       enabled: ${DSQ_STREAM_HOOK_ENABLED:true}
 
+psc-statements:
+  api:
+    resource:
+      changed:
+        uri: ${PSC_STATEMENTS_API_RESOURCE_CHANGED_URI:/resource-changed}
+      kind: ${PSC_STATEMENTS_API_RESOURCE_KIND:persons-with-significant-control-statement}
+
+api:
+  psc-statements-data-api-key: ${CHS_API_KEY:localhost}
+  api-url: ${API_URL:http://api.chs.local:4001}
+  internal-api-url: ${INTERNAL_API_URL:localhost}
+
 logger:
   namespace: psc-statement-data-api
 
