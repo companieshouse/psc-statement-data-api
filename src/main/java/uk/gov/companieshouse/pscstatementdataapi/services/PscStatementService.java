@@ -5,8 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
-import uk.gov.companieshouse.api.model.accounts.directorsreport.StatementsLinks;
-import uk.gov.companieshouse.api.model.psc.PscLinks;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
@@ -115,7 +113,7 @@ public class PscStatementService {
 
   private Created getCreatedFromCurrentRecord(String companyNumber,String statementId) {
     Optional<PscStatementDocument> document = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
-    return document.map(PscStatementDocument::getCreated).orElse(null);
+    return document.isPresent() ? document.get().getCreated(): null;
   }
 
   private StatementList createStatementList(List < PscStatementDocument > statementDocuments,
