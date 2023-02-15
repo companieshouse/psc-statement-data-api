@@ -24,7 +24,7 @@ public class PscStatementApiService {
     private String resourceChangedUri;
     @Value("${psc-statements.api.resource.kind}")
     private String resourceKind;
-    private static final String PSC_STATEMENTS_URI = "/company/%s/persons-with-significant-control-statement/%s/internal";
+    private static final String PSC_STATEMENTS_URI = "/company/%s/persons-with-significant-control-statements/%s/internal";
     private static final String DELETE_EVENT_TYPE = "deleted";
     @Autowired
     private Logger logger;
