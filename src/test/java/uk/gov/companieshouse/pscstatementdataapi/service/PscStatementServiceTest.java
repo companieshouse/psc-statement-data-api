@@ -2,7 +2,6 @@ package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -30,6 +29,7 @@ import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
@@ -38,7 +38,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class PscStatementServiceTest {
@@ -110,13 +115,8 @@ public class PscStatementServiceTest {
     @Test
     void whenNoStatementsExistGetStatementListShouldThrow() throws JsonProcessingException{
 
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.empty());
-            try {
-               pscStatementService.retrievePscStatementListFromDb( COMPANY_NUMBER, 0, 25);
-            }
-            catch (ResponseStatusException statusException)  {
-                Assertions.assertEquals(HttpStatus.NOT_FOUND, statusException.getStatus());
-        }
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(new ArrayList<PscStatementDocument>()));
+        assertThrows(ResourceNotFoundException.class, ()-> pscStatementService.retrievePscStatementListFromDb( COMPANY_NUMBER, 0, 25));
     }
 
     @Test

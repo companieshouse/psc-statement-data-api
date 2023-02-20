@@ -9,6 +9,7 @@ import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
@@ -54,7 +55,7 @@ public class PscStatementService {
     Optional<List<PscStatementDocument>> statementListOptional =
             pscStatementRepository.getStatementList(companyNumber, startIndex, itemsPerPage);
 
-    List<PscStatementDocument> pscStatementDocuments = statementListOptional.orElseThrow(() ->
+    List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs-> !docs.isEmpty()).orElseThrow(() ->
             new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
                     "Resource not found for company number: %s", companyNumber)));
 
@@ -137,13 +138,20 @@ public class PscStatementService {
   private StatementList createStatementList(List < PscStatementDocument > statementDocuments,
                                             int startIndex, int itemsPerPage, Optional < MetricsApi > metrics, String companyNumber) {
     StatementList statementList = new StatementList();
+    StatementLinksType links = new StatementLinksType();
+    links.setSelf(String.format("/company/%s/persons-with-significant-control-statements", companyNumber));
     List < Statement > statements = statementDocuments.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
     statementList.setItemsPerPage(itemsPerPage);
+    statementList.setLinks(links);
     statementList.setStartIndex(startIndex);
     metrics.ifPresentOrElse(metricsApi -> {
-              statementList.setActiveCount(metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
-              statementList.setCeasedCount(metricsApi.getCounts().getPersonsWithSignificantControl().getWithdrawnStatementsCount());
-              statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getTotalCount());
+              try {
+                statementList.setActiveCount(metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
+                statementList.setCeasedCount(metricsApi.getCounts().getPersonsWithSignificantControl().getWithdrawnStatementsCount());
+                statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getTotalCount());
+              } catch (NullPointerException exp) {
+                logger.error(String.format("No PSC data in metrics for company number %s", companyNumber));
+              }
             },
             () -> {
               logger.info(String.format("No company metrics data found for company number: %s", companyNumber));

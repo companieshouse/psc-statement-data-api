@@ -6,6 +6,7 @@ import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.PscApi;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
@@ -81,6 +82,7 @@ public class TestHelper {
         statementList.setTotalResults(2);
         statementList.setStartIndex(0);
         statementList.setItemsPerPage(25);
+        statementList.setLinks(createLinks());
         return statementList;
     }
 
@@ -90,7 +92,14 @@ public class TestHelper {
         statementList.setItems(Collections.singletonList(statement));
         statementList.setStartIndex(0);
         statementList.setItemsPerPage(25);
+        statementList.setLinks(createLinks());
         return statementList;
+    }
+
+    private StatementLinksType createLinks() {
+        StatementLinksType links = new StatementLinksType();
+        links.setSelf(String.format("/company/%s/persons-with-significant-control-statements", COMPANY_NUMBER));
+        return links;
     }
 
     public MetricsApi createMetrics() {

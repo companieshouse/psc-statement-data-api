@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -8,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +28,7 @@ import uk.gov.companieshouse.api.handler.metrics.request.PrivateCompanyMetricsGe
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,35 +54,43 @@ public class CompanyMetricsApiServiceTest {
     @InjectMocks
     private CompanyMetricsApiService companyMetricsApiService;
 
-    @Test
-    void shouldInvokeCompanyMetricsEndpointSuccessfully()
-            throws ApiErrorResponseException, URIValidationException {
-
+    @BeforeEach
+    void Setup() {
         companyMetricsApiService.internalApiClient = internalApiClient;
         when(internalApiClient.privateCompanyMetricsResourceHandler()).thenReturn(
                 privateCompanyMetricsResourceHandler);
         when(privateCompanyMetricsResourceHandler.getCompanyMetrics(any())).thenReturn(
                 privateCompanyMetricsGet);
+    }
+
+    @Test
+    void shouldInvokeCompanyMetricsEndpointSuccessfully()
+            throws ApiErrorResponseException, URIValidationException {
+
         when(privateCompanyMetricsGet.execute()).thenReturn(response);
-
         Optional<MetricsApi> apiResponse = companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER);
-
         assertThat(apiResponse).isNotNull();
         verify(privateCompanyMetricsResourceHandler, times(1)).getCompanyMetrics(any());
         verify(privateCompanyMetricsGet, times(1)).execute();
     }
 
     @Test
-    void should_handle_exception_when_company_metrics_endpoint_throws_exception()
+    void shouldHandleExcptionWhenCompanyMetricsThrows()
             throws ApiErrorResponseException, URIValidationException {
 
-        companyMetricsApiService.internalApiClient = internalApiClient;
-        when(internalApiClient.privateCompanyMetricsResourceHandler()).thenReturn(
-                privateCompanyMetricsResourceHandler);
-        when(privateCompanyMetricsResourceHandler.getCompanyMetrics(any())).thenReturn(
-                privateCompanyMetricsGet);
         when(privateCompanyMetricsGet.execute()).thenThrow(ApiErrorResponseException.class);
         assertThrows(ResponseStatusException.class, () -> companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER));
+        verify(privateCompanyMetricsResourceHandler, times(1)).getCompanyMetrics(any());
+        verify(privateCompanyMetricsGet, times(1)).execute();
+    }
+
+    @Test
+    void shouldReturnEmptyWhenMetricsNotFound() throws ApiErrorResponseException, URIValidationException {
+
+
+        when(privateCompanyMetricsGet.execute()).thenThrow(ResourceNotFoundException.class);
+        Optional<MetricsApi> apiResponse = companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER);
+        assertThat(apiResponse).isEmpty();
         verify(privateCompanyMetricsResourceHandler, times(1)).getCompanyMetrics(any());
         verify(privateCompanyMetricsGet, times(1)).execute();
     }
