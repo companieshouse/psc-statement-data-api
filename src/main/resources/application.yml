@@ -16,7 +16,7 @@ psc-statements:
   api:
     resource:
       changed:
-        uri: ${PSC_STATEMENTS_API_RESOURCE_CHANGED_URI:/resource-changed}
+        uri: ${PSC_STATEMENTS_API_RESOURCE_CHANGED_URI:/private/resource-changed}
       kind: ${PSC_STATEMENTS_API_RESOURCE_KIND:persons-with-significant-control-statement}
 
 api:

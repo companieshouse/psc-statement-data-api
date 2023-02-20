@@ -33,7 +33,7 @@ public class PscStatementControllerTest {
     private static final String ERIC_IDENTITY = "Test-Identity";
     private static final String ERIC_IDENTITY_TYPE = "Key";
     private static final String ERIC_PRIVILEGES = "internal-app";
-    private static final String X_REQUEST_ID = "654321";
+    private static final String X_REQUEST_ID = TestHelper.X_REQUEST_ID;
 
 
     @MockBean
@@ -116,7 +116,7 @@ public class PscStatementControllerTest {
     void callPscStatementDeleteRequest() throws Exception {
 
         doNothing()
-                .when(pscStatementService).deletePscStatement(anyString(), anyString());
+                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString());
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)

@@ -64,11 +64,11 @@ public class PscStatementService {
   }
 
 
-  public void deletePscStatement(String companyNumber, String statementId) throws ResourceNotFoundException{
+  public void deletePscStatement(String contextId, String companyNumber, String statementId) throws ResourceNotFoundException{
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
 
     Statement statement = pscStatementDocument.getData();
-    ApiResponse<Void> apiResponse = apiClientService.invokeChsKafkaApiWithDeleteEvent(companyNumber, statementId, statement);
+    ApiResponse<Void> apiResponse = apiClientService.invokeChsKafkaApiWithDeleteEvent(contextId, companyNumber, statementId, statement);
 
     logger.info(String.format("ChsKafka api DELETED invoked successfully for companyNumber %s and statementId %s", companyNumber, statementId));
     if (apiResponse == null) {
@@ -131,7 +131,7 @@ public class PscStatementService {
 
   private Created getCreatedFromCurrentRecord(String companyNumber,String statementId) {
     Optional<PscStatementDocument> document = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
-    return document.isPresent() ? document.get().getCreated(): null;
+    return document.map(PscStatementDocument::getCreated).orElse(null);
   }
 
   private StatementList createStatementList(List < PscStatementDocument > statementDocuments,

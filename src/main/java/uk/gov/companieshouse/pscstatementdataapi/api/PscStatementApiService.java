@@ -29,11 +29,11 @@ public class PscStatementApiService {
     @Autowired
     private Logger logger;
 
-    public ApiResponse<Void> invokeChsKafkaApiWithDeleteEvent(String companyNumber, String statementId, Statement statement) {
+    public ApiResponse<Void> invokeChsKafkaApiWithDeleteEvent(String contextId, String companyNumber, String statementId, Statement statement) {
         try {
             PrivateChangedResourcePost changedResourcePost = getChangedResourcePost(
                     resourceChangedUri,
-                    mapChangedResource(companyNumber, statementId, statement));
+                    mapChangedResource(contextId, companyNumber, statementId, statement));
             return changedResourcePost.execute();
         } catch (ApiErrorResponseException exp) {
             HttpStatus statusCode = HttpStatus.valueOf(exp.getStatusCode());
@@ -48,7 +48,7 @@ public class PscStatementApiService {
         return internalApiClient.privateChangedResourceHandler().postChangedResource(uri, changedResource);
     }
 
-    private ChangedResource mapChangedResource(String companyNumber, String statementId, Statement statement) {
+    private ChangedResource mapChangedResource(String contextId, String companyNumber, String statementId, Statement statement) {
         ChangedResourceEvent event = new ChangedResourceEvent();
         ChangedResource changedResource = new ChangedResource();
         event.setPublishedAt(String.valueOf(OffsetDateTime.now()));
@@ -57,6 +57,7 @@ public class PscStatementApiService {
         changedResource.setResourceUri(String.format(PSC_STATEMENTS_URI, companyNumber, statementId));
         changedResource.event(event);
         changedResource.setResourceKind(resourceKind);
+        changedResource.setContextId(contextId);
         return changedResource;
     }
 }

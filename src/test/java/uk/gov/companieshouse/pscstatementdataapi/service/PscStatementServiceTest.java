@@ -9,16 +9,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import uk.gov.companieshouse.api.metrics.CountsApi;
-import uk.gov.companieshouse.api.metrics.MetricsApi;
-import uk.gov.companieshouse.api.metrics.PscApi;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
@@ -34,7 +32,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -46,6 +43,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 public class PscStatementServiceTest {
 
+    private static final String CONTEXT_ID = TestHelper.X_REQUEST_ID;
     private static final String STATEMENT_ID = TestHelper.PSC_STATEMENT_ID;
     private static final String COMPANY_NUMBER = TestHelper.COMPANY_NUMBER;
     private static final String DELTA_AT = TestHelper.DELTA_AT;
@@ -59,6 +57,8 @@ public class PscStatementServiceTest {
     PscStatementTransformer statementTransformer;
     @Mock
     CompanyMetricsApiService companyMetricsApiService;
+    @Mock
+    PscStatementApiService apiClientService;
     @Spy
     DateTransformer dateTransformer;
 
@@ -138,21 +138,25 @@ public class PscStatementServiceTest {
 
     @Test
     void deletePscStatementDeletesStatement() {
+        ApiResponse<Void> response = new ApiResponse<>(200, null);
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        pscStatementService.deletePscStatement(COMPANY_NUMBER, STATEMENT_ID);
+        when(apiClientService.invokeChsKafkaApiWithDeleteEvent(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document.getData())).thenReturn(response);
+
+        pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID);
+
         verify(repository).delete(document);
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
     }
     @Test
     void deleteThrowsExceptionWhenInvalidIdGiven() {
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        assertThrows(ResourceNotFoundException.class, () -> pscStatementService.deletePscStatement(COMPANY_NUMBER, "invalid_id"));
+        assertThrows(ResourceNotFoundException.class, () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, "invalid_id"));
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, "invalid_id");
     }
     @Test
     void deleteThrowsExceptionWhenInvalidCompanyNumberGiven() {
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        assertThrows(ResourceNotFoundException.class, () -> pscStatementService.deletePscStatement("invalid_company_no", STATEMENT_ID));
+        assertThrows(ResourceNotFoundException.class, () -> pscStatementService.deletePscStatement(CONTEXT_ID, "invalid_company_no", STATEMENT_ID));
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId("invalid_company_no", STATEMENT_ID);
     }
 

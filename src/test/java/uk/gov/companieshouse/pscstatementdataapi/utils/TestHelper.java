@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 
 public class TestHelper {
@@ -23,6 +22,7 @@ public class TestHelper {
     public static final String COMPANY_NUMBER = "companyNumber";
     public static final String DELTA_AT = "20180101093435661593";
     public static final String ETAG = "etag";
+    public static final String X_REQUEST_ID = "654321";
     public static final Statement.KindEnum KIND = Statement.KindEnum.PERSONS_WITH_SIGNIFICANT_CONTROL_STATEMENT;
     public static final Statement.StatementEnum STATEMENT = Statement.StatementEnum.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNFICANT_CONTROL;
 
