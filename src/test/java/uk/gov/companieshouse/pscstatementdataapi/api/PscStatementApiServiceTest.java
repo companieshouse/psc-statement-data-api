@@ -22,8 +22,6 @@ import static org.mockito.Mockito.*;
 public class PscStatementApiServiceTest {
 
     @Mock
-    ApiClientService apiClientService;
-    @Mock
     InternalApiClient internalApiClient;
     @Mock
     PrivateChangedResourceHandler privateChangedResourceHandler;
@@ -43,7 +41,6 @@ public class PscStatementApiServiceTest {
 
     @Test
     void invokeChsKafkaEndpointWithDelete() throws ApiErrorResponseException {
-        when(apiClientService.getApiClient()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenReturn(response);
@@ -52,7 +49,6 @@ public class PscStatementApiServiceTest {
                 TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID, testHelper.getStatement());
         Assertions.assertThat(apiResponse).isNotNull();
 
-        verify(apiClientService, times(1)).getApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
         verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
         verify(privateChangedResourcePost, times(1)).execute();
@@ -60,7 +56,6 @@ public class PscStatementApiServiceTest {
 
     @Test
     void invokeChsKafkaEndpointWithDeleteThrowsException() throws ApiErrorResponseException {
-        when(apiClientService.getApiClient()).thenReturn(internalApiClient);
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenThrow(RuntimeException.class);
@@ -68,7 +63,6 @@ public class PscStatementApiServiceTest {
         Assert.assertThrows(RuntimeException.class, () -> pscStatementApiService.invokeChsKafkaApiWithDeleteEvent(
                 TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID, testHelper.getStatement()));
 
-        verify(apiClientService, times(1)).getApiClient();
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
         verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
         verify(privateChangedResourcePost, times(1)).execute();

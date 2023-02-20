@@ -19,7 +19,7 @@ import uk.gov.companieshouse.logging.Logger;
 public class PscStatementApiService {
 
     @Autowired
-    ApiClientService apiClientService;
+    InternalApiClient internalApiClient;
     @Value("${psc-statements.api.resource.changed.uri}")
     private String resourceChangedUri;
     @Value("${psc-statements.api.resource.kind}")
@@ -31,21 +31,14 @@ public class PscStatementApiService {
 
     public ApiResponse<Void> invokeChsKafkaApiWithDeleteEvent(String contextId, String companyNumber, String statementId, Statement statement) {
         try {
-            PrivateChangedResourcePost changedResourcePost = getChangedResourcePost(
-                    resourceChangedUri,
-                    mapChangedResource(contextId, companyNumber, statementId, statement));
+            PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
+                    .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, statement));
             return changedResourcePost.execute();
         } catch (ApiErrorResponseException exp) {
             HttpStatus statusCode = HttpStatus.valueOf(exp.getStatusCode());
             logger.error("Unsuccessful call to /resource-changed endpoint for a Psc Statement delete event", exp);
             throw new ResponseStatusException(statusCode, exp.getMessage());
         }
-    }
-
-    private PrivateChangedResourcePost getChangedResourcePost(String uri, ChangedResource changedResource) {
-
-        InternalApiClient internalApiClient = apiClientService.getApiClient();
-        return internalApiClient.privateChangedResourceHandler().postChangedResource(uri, changedResource);
     }
 
     private ChangedResource mapChangedResource(String contextId, String companyNumber, String statementId, Statement statement) {
