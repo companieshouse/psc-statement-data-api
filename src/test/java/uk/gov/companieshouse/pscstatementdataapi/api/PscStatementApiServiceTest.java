@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.api;
 
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,11 +11,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import static org.mockito.Mockito.*;
@@ -21,6 +25,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class PscStatementApiServiceTest {
 
+    @Mock
+    private Logger logger;
     @Mock
     InternalApiClient internalApiClient;
     @Mock
@@ -55,12 +61,13 @@ public class PscStatementApiServiceTest {
     }
 
     @Test
-    void invokeChsKafkaEndpointWithDeleteThrowsException() throws ApiErrorResponseException {
+    void invokeChsKafkaEndpointWithDeleteThrowsApiErrorException() throws ApiErrorResponseException {
+        ApiErrorResponseException exception = new ApiErrorResponseException(new HttpResponseException.Builder(408, "Test Request timeout", new HttpHeaders()));
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
-        when(privateChangedResourcePost.execute()).thenThrow(RuntimeException.class);
+        when(privateChangedResourcePost.execute()).thenThrow(exception);
 
-        Assert.assertThrows(RuntimeException.class, () -> pscStatementApiService.invokeChsKafkaApiWithDeleteEvent(
+        Assert.assertThrows(ResponseStatusException.class, () -> pscStatementApiService.invokeChsKafkaApiWithDeleteEvent(
                 TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID, testHelper.getStatement()));
 
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
