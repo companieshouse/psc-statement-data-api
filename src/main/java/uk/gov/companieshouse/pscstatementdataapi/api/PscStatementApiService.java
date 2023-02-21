@@ -47,7 +47,7 @@ public class PscStatementApiService {
         event.setPublishedAt(String.valueOf(OffsetDateTime.now()));
         event.setType(DELETE_EVENT_TYPE);
         changedResource.setDeletedData(statement);
-        changedResource.setResourceUri(String.format(PSC_STATEMENTS_URI + "/internal", companyNumber, statementId));
+        changedResource.setResourceUri(String.format(PSC_STATEMENTS_URI, companyNumber, statementId));
         changedResource.event(event);
         changedResource.setResourceKind(resourceKind);
         changedResource.setContextId(contextId);
