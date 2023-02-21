@@ -24,7 +24,7 @@ public class PscStatementApiService {
     private String resourceChangedUri;
     @Value("${psc-statements.api.resource.kind}")
     private String resourceKind;
-    private static final String PSC_STATEMENTS_URI = "/company/%s/persons-with-significant-control-statements/%s/internal";
+    private static final String PSC_STATEMENTS_URI = "/company/%s/persons-with-significant-control-statements/%s";
     private static final String DELETE_EVENT_TYPE = "deleted";
     @Autowired
     private Logger logger;
@@ -47,7 +47,7 @@ public class PscStatementApiService {
         event.setPublishedAt(String.valueOf(OffsetDateTime.now()));
         event.setType(DELETE_EVENT_TYPE);
         changedResource.setDeletedData(statement);
-        changedResource.setResourceUri(String.format(PSC_STATEMENTS_URI, companyNumber, statementId));
+        changedResource.setResourceUri(String.format(PSC_STATEMENTS_URI + "/internal", companyNumber, statementId));
         changedResource.event(event);
         changedResource.setResourceKind(resourceKind);
         changedResource.setContextId(contextId);

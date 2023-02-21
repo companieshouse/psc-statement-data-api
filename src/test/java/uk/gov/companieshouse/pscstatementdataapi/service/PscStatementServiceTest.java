@@ -8,8 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;

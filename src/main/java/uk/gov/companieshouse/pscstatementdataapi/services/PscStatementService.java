@@ -132,7 +132,7 @@ public class PscStatementService {
 
   private Created getCreatedFromCurrentRecord(String companyNumber,String statementId) {
     Optional<PscStatementDocument> document = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
-    return document.map(PscStatementDocument::getCreated).orElse(null);
+    return document.isPresent() ? document.get().getCreated(): null;
   }
 
   private StatementList createStatementList(List < PscStatementDocument > statementDocuments,
