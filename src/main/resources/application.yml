@@ -12,6 +12,13 @@ chs:
       key: ${CHS_API_KEY:chsApiKey}
       enabled: ${DSQ_STREAM_HOOK_ENABLED:true}
 
+psc-statements:
+  api:
+    resource:
+      changed:
+        uri: ${PSC_STATEMENTS_API_RESOURCE_CHANGED_URI:/private/resource-changed}
+      kind: ${PSC_STATEMENTS_API_RESOURCE_KIND:persons-with-significant-control-statement}
+
 logger:
   namespace: psc-statement-data-api
 
