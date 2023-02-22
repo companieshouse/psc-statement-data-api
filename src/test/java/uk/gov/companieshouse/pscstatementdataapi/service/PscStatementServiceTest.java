@@ -2,14 +2,12 @@ package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import com.google.api.client.http.HttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
@@ -158,21 +156,6 @@ public class PscStatementServiceTest {
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
         assertThrows(ResourceNotFoundException.class, () -> pscStatementService.deletePscStatement(CONTEXT_ID, "invalid_company_no", STATEMENT_ID));
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId("invalid_company_no", STATEMENT_ID);
-    }
-    @Test
-    void deleteThrowsExceptionWhenApiResponseIsNull() {
-        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        when(apiClientService.invokeChsKafkaApiWithDeleteEvent(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document.getData())).thenReturn(null);
-        assertThrows(ResponseStatusException.class, () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID));
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
-    }
-    @Test
-    void deleteThrowsExceptionWhenApiResponseIsNotOkay() {
-        ApiResponse<Void> response = new ApiResponse<>(408,new HttpHeaders());
-        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        when(apiClientService.invokeChsKafkaApiWithDeleteEvent(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document.getData())).thenReturn(response);
-        assertThrows(ResponseStatusException.class, () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID));
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
     }
 
     @Test

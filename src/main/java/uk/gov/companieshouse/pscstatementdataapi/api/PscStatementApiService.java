@@ -3,9 +3,7 @@ package uk.gov.companieshouse.pscstatementdataapi.api;
 import java.time.OffsetDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
@@ -14,6 +12,7 @@ import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResource
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
 
 @Service
 public class PscStatementApiService {
@@ -30,15 +29,9 @@ public class PscStatementApiService {
     private Logger logger;
 
     public ApiResponse<Void> invokeChsKafkaApiWithDeleteEvent(String contextId, String companyNumber, String statementId, Statement statement) {
-        try {
-            PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
-                    .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, statement));
-            return changedResourcePost.execute();
-        } catch (ApiErrorResponseException exp) {
-            HttpStatus statusCode = HttpStatus.valueOf(exp.getStatusCode());
-            logger.error("Unsuccessful call to /resource-changed endpoint for a Psc Statement delete event", exp);
-            throw new ResponseStatusException(statusCode, exp.getMessage());
-        }
+        PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
+                .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, statement));
+        return handleApiCall(changedResourcePost);
     }
 
     private ChangedResource mapChangedResource(String contextId, String companyNumber, String statementId, Statement statement) {
@@ -52,6 +45,18 @@ public class PscStatementApiService {
         changedResource.setResourceKind(resourceKind);
         changedResource.setContextId(contextId);
         return changedResource;
+    }
+
+    private ApiResponse<Void> handleApiCall(PrivateChangedResourcePost changedResourcePost) {
+        try {
+            return changedResourcePost.execute();
+        } catch (ApiErrorResponseException exception) {
+            logger.error("Unsuccessful call to /resource-changed endpoint", exception);
+            throw new ServiceUnavailableException(exception.getMessage());
+        } catch (RuntimeException exception) {
+            logger.error("Error occurred while calling /resource-changed endpoint", exception);
+            throw exception;
+        }
     }
 }
 

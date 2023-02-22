@@ -3,10 +3,8 @@ package uk.gov.companieshouse.pscstatementdataapi.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
-import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
@@ -69,16 +67,7 @@ public class PscStatementService {
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
 
     Statement statement = pscStatementDocument.getData();
-    ApiResponse<Void> apiResponse = apiClientService.invokeChsKafkaApiWithDeleteEvent(contextId, companyNumber, statementId, statement);
-
-    logger.info(String.format("ChsKafka api DELETED invoked successfully for companyNumber %s and statementId %s", companyNumber, statementId));
-    if (apiResponse == null) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, " error response received from ChsKafkaApi");
-    }
-    HttpStatus statusCode = HttpStatus.valueOf(apiResponse.getStatusCode());
-    if (!statusCode.is2xxSuccessful()) {
-      throw new ResponseStatusException(HttpStatus.valueOf(apiResponse.getStatusCode()), " error response received from ChsKafkaApi");
-    }
+    apiClientService.invokeChsKafkaApiWithDeleteEvent(contextId, companyNumber, statementId, statement);
 
     pscStatementRepository.delete(pscStatementDocument);
     logger.info(String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s", companyNumber, statementId));
