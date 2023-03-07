@@ -19,6 +19,8 @@ public class PscStatementApiService {
 
     @Autowired
     InternalApiClient internalApiClient;
+    @Value("${chs.kafka.api.endpoint}")
+    private String chsKafkaApiUrl;
     @Value("${psc-statements.api.resource.changed.uri}")
     private String resourceChangedUri;
     @Value("${psc-statements.api.resource.kind}")
@@ -30,12 +32,14 @@ public class PscStatementApiService {
     private Logger logger;
 
     public ApiResponse<Void> invokeChsKafkaApi(String contextId, String companyNumber, String statementId) {
+        internalApiClient.setInternalBasePath(chsKafkaApiUrl);
         PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
                 .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, null));
         return handleApiCall(changedResourcePost);
     }
 
     public ApiResponse<Void> invokeChsKafkaApiWithDeleteEvent(String contextId, String companyNumber, String statementId, Statement statement) {
+        internalApiClient.setInternalBasePath(chsKafkaApiUrl);
         PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
                 .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, statement));
         return handleApiCall(changedResourcePost);
