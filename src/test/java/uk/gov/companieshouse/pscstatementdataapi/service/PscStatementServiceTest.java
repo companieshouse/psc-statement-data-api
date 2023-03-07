@@ -70,12 +70,14 @@ public class PscStatementServiceTest {
     PscStatementService pscStatementService;
 
     private TestHelper testHelper;
+    private Statement statement;
     private CompanyPscStatement companyPscStatement;
     private PscStatementDocument document;
 
     @BeforeEach
     void setUp() {
         testHelper = new TestHelper();
+        statement = testHelper.createStatement();
         document = testHelper.createEmptyPscStatementDocument();
         companyPscStatement = testHelper.createCompanyPscStatement();
     }
@@ -137,8 +139,9 @@ public class PscStatementServiceTest {
     @Test
     void deletePscStatementDeletesStatement() {
         ApiResponse<Void> response = new ApiResponse<>(200, null);
+        document.setData(statement);
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        when(apiClientService.invokeChsKafkaApiWithDeleteEvent(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document.getData())).thenReturn(response);
+        when(apiClientService.invokeChsKafkaApiWithDeleteEvent(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, statement)).thenReturn(response);
 
         pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID);
 
