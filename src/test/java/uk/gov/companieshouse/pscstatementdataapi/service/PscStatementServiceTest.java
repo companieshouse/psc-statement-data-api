@@ -70,12 +70,14 @@ public class PscStatementServiceTest {
     PscStatementService pscStatementService;
 
     private TestHelper testHelper;
+    private Statement statement;
     private CompanyPscStatement companyPscStatement;
     private PscStatementDocument document;
 
     @BeforeEach
     void setUp() {
         testHelper = new TestHelper();
+        statement = testHelper.createStatement();
         document = testHelper.createEmptyPscStatementDocument();
         companyPscStatement = testHelper.createCompanyPscStatement();
     }
@@ -137,8 +139,9 @@ public class PscStatementServiceTest {
     @Test
     void deletePscStatementDeletesStatement() {
         ApiResponse<Void> response = new ApiResponse<>(200, null);
+        document.setData(statement);
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        when(apiClientService.invokeChsKafkaApiWithDeleteEvent(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document.getData())).thenReturn(response);
+        when(apiClientService.invokeChsKafkaApiWithDeleteEvent(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, statement)).thenReturn(response);
 
         pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID);
 
@@ -177,6 +180,8 @@ public class PscStatementServiceTest {
         created.setAt(dateTime);
         document.setCreated(created);
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
+        ApiResponse<Void> response = new ApiResponse<>(200, null);
+        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
@@ -194,6 +199,8 @@ public class PscStatementServiceTest {
         updated.setAt(dateTime);
         document.setUpdated(updated);
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, dateTransformer.transformDate(DELTA_AT))).thenReturn(Arrays.asList(document));
+        ApiResponse<Void> response = new ApiResponse<>(200, null);
+        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);

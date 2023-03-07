@@ -46,6 +46,51 @@ public class PscStatementApiServiceTest {
     }
 
     @Test
+    void invokeChsKafkaEndpoint() throws ApiErrorResponseException {
+        when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
+        when(privateChangedResourcePost.execute()).thenReturn(response);
+
+        ApiResponse<?> apiResponse = pscStatementApiService.invokeChsKafkaApi(
+                TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
+        Assertions.assertThat(apiResponse).isNotNull();
+
+        verify(internalApiClient, times(1)).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost, times(1)).execute();
+    }
+
+    @Test
+    void invokeChsKafkaEndpointThrowsApiErrorException() throws ApiErrorResponseException {
+        ApiErrorResponseException exception = new ApiErrorResponseException(new HttpResponseException.Builder(408, "Test Request timeout", new HttpHeaders()));
+        when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
+        when(privateChangedResourcePost.execute()).thenThrow(exception);
+
+        Assert.assertThrows(ServiceUnavailableException.class, () -> pscStatementApiService.invokeChsKafkaApi(
+                TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID));
+
+        verify(internalApiClient, times(1)).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost, times(1)).execute();
+    }
+
+    @Test
+    void invokeChsKafkaEndpointThrowsRuntimeException() throws ApiErrorResponseException {
+        RuntimeException exception = new RuntimeException("Test Runtime exception");
+        when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
+        when(privateChangedResourcePost.execute()).thenThrow(exception);
+
+        Assert.assertThrows(RuntimeException.class, () -> pscStatementApiService.invokeChsKafkaApi(
+                TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID));
+
+        verify(internalApiClient, times(1)).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost, times(1)).execute();
+    }
+
+    @Test
     void invokeChsKafkaEndpointWithDelete() throws ApiErrorResponseException {
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);

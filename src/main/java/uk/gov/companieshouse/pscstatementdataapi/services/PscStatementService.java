@@ -87,6 +87,8 @@ public class PscStatementService {
 
     if (isLatestRecord) {
 
+      apiClientService.invokeChsKafkaApi(contextId, companyNumber, statementId);
+
       PscStatementDocument document = pscStatementTransformer.transformPscStatement(companyNumber, statementId, companyPscStatement);
 
       saveToDb(contextId, companyNumber, statementId, document);

@@ -21,8 +21,6 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 
-import static org.apache.commons.lang3.math.NumberUtils.min;
-
 @RestController
 @RequestMapping("/company/{company_number}/persons-with-significant-control-statements")
 public class PscStatementController {
