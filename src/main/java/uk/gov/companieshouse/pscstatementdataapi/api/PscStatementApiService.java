@@ -32,14 +32,14 @@ public class PscStatementApiService {
     private Logger logger;
 
     public ApiResponse<Void> invokeChsKafkaApi(String contextId, String companyNumber, String statementId) {
-        internalApiClient.setInternalBasePath(chsKafkaApiUrl);
+        internalApiClient.setBasePath(chsKafkaApiUrl);
         PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
                 .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, null));
         return handleApiCall(changedResourcePost);
     }
 
     public ApiResponse<Void> invokeChsKafkaApiWithDeleteEvent(String contextId, String companyNumber, String statementId, Statement statement) {
-        internalApiClient.setInternalBasePath(chsKafkaApiUrl);
+        internalApiClient.setBasePath(chsKafkaApiUrl);
         PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
                 .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, statement));
         return handleApiCall(changedResourcePost);
