@@ -108,7 +108,7 @@ public class TestHelper {
         PscApi pscs = new PscApi();
         pscs.setActiveStatementsCount(1);
         pscs.setWithdrawnStatementsCount(1);
-        pscs.setTotalCount(2);
+        pscs.setStatementsCount(2);
         counts.setPersonsWithSignificantControl(pscs);
         metrics.setCounts(counts);
         return metrics;
