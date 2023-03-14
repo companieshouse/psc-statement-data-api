@@ -139,7 +139,7 @@ public class PscStatementService {
               try {
                 statementList.setActiveCount(metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
                 statementList.setCeasedCount(metricsApi.getCounts().getPersonsWithSignificantControl().getWithdrawnStatementsCount());
-                statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getTotalCount());
+                statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getStatementsCount());
               } catch (NullPointerException exp) {
                 logger.error(String.format("No PSC data in metrics for company number %s", companyNumber));
               }
