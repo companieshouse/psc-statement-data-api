@@ -4,6 +4,8 @@ package uk.gov.companieshouse.pscstatementdataapi.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Spy;
 import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig;
+
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.pscstatementdataapi.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
+import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
 import uk.gov.companieshouse.pscstatementdataapi.transform.DateTransformer;
 
 import java.time.LocalDateTime;
@@ -21,6 +24,8 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.HOURS;
+
+import java.time.LocalDate;
 
 @Testcontainers
 @DataMongoTest(excludeAutoConfiguration = EmbeddedMongoAutoConfiguration.class)
@@ -71,8 +76,6 @@ public class RepositoryITest extends AbstractMongoConfig {
 
     @Test
     void find_updated_should_return_correct_statement() {
-        Created createdNow = new Created();
-        createdNow.setAt(LocalDateTime.now());
 
         PscStatementDocument newDocument = createPscStatementDocument("1");
 
@@ -90,6 +93,9 @@ public class RepositoryITest extends AbstractMongoConfig {
         document.setId(statementId);
         document.setCompanyNumber(COMPANY_NUMBER);
         document.setData(new Statement());
+        Updated updated = new Updated();
+        updated.setAt(LocalDateTime.of(2019, 1, 1, 1, 1));
+        document.setUpdated(updated);
 
         return document;
     }
