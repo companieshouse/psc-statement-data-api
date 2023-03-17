@@ -1,41 +1,36 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import uk.gov.companieshouse.pscstatementdataapi.auth.EricAuthFilter;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import uk.gov.companieshouse.api.interceptor.InternalUserInterceptor;
+import uk.gov.companieshouse.api.interceptor.UserAuthenticationInterceptor;
 
 @Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    EricAuthFilter ericAuthFilter;
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.httpBasic().disable()
-                .csrf().disable()
-                .formLogin().disable()
-                .logout().disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .addFilterAt(ericAuthFilter,
-                        BasicAuthenticationFilter.class)
-                .authorizeRequests()
-                .anyRequest().permitAll();
-    }
+public class WebSecurityConfig implements WebMvcConfigurer {
+
+    //Methods that will not go through internal role validation
+    List<String> externalMethods = Arrays.asList("GET");
+    //Key type is automatically checked by the authenticator add other allowed auth types here
+    List<String> otherAllowedAuthMethods = Arrays.asList("oauth2");
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
-        // Excluding healthcheck endpoint from security filter
-        web.ignoring().antMatchers("/psc-statements/healthcheck");
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(userAuthenticationInterceptor());
     }
 
+    @Bean
+    public InternalUserInterceptor internalUserInterceptor() {
+        return new InternalUserInterceptor();
+    }
+
+    @Bean
+    public UserAuthenticationInterceptor userAuthenticationInterceptor() {
+        return new UserAuthenticationInterceptor(externalMethods, otherAllowedAuthMethods, internalUserInterceptor());
+    }
 }
