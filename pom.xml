@@ -201,9 +201,6 @@
                 <configuration>
                     <argLine>-Dfile.encoding=UTF-8</argLine>
                     <argLine>${surefireArgLine}</argLine>
-                    <excludes>
-                        <exclude>**/*ITest.java</exclude>
-                    </excludes>
                     <skipTests>${skip.unit.tests}</skipTests>
                     <environmentVariables>
                         <CHS_API_KEY>key</CHS_API_KEY>
@@ -240,7 +237,6 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>pre-integration-test</id>
                         <phase>pre-integration-test</phase>
                         <goals>
                             <goal>prepare-agent</goal>
@@ -249,6 +245,7 @@
                             <!-- Sets the path to the file which contains the execution model. -->
                             <destFile>${sonar.jacoco.reports}/jacoco-it.exec</destFile>
                             <propertyName>failsafeArgLine</propertyName>
+                            <propertyName>surefireArgLine</propertyName>
                         </configuration>
                     </execution>
                     <execution>

@@ -1,31 +1,23 @@
 package uk.gov.companieshouse.pscstatementdataapi.repository;
 
 
-import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Spy;
-import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig;
-
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.psc.Statement;
-import uk.gov.companieshouse.pscstatementdataapi.model.Created;
+import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
 import uk.gov.companieshouse.pscstatementdataapi.transform.DateTransformer;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
-
-import static java.time.temporal.ChronoUnit.HOURS;
-
-import java.time.LocalDate;
 
 @Testcontainers
 @DataMongoTest(excludeAutoConfiguration = EmbeddedMongoAutoConfiguration.class)
