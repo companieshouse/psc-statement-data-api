@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.steps;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -14,7 +15,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import uk.gov.companieshouse.api.disqualification.CorporateDisqualificationApi;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 
@@ -62,10 +62,14 @@ public class PscStatementsSteps {
     @Given("a psc statement exists for company number {string} with statement id {string}")
     public void psc_statement_exists_exists_for(String companyNumber, String statementId) throws IOException {
         File statementFile = new ClassPathResource("/json/output/psc_statement.json").getFile();
-        PscStatementDocument pscStatement = objectMapper.readValue(statementFile, PscStatementDocument.class);
-        pscStatement.setId(statementId);
-        pscStatement.setCompanyNumber(companyNumber);
-        mongoTemplate.save(pscStatement);
+        Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
+
+        PscStatementDocument document = new PscStatementDocument();
+        document.setId(statementId);
+        document.setCompanyNumber(companyNumber);
+        document.setData(pscStatement);
+        mongoTemplate.save(document);
+        assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)).isNotEmpty();
     }
 
     @When("I send an GET request for company number {string} with statement id {string}")
@@ -88,5 +92,20 @@ public class PscStatementsSteps {
     public void i_should_receive_status_code(Integer statusCode) {
         int expectedStatusCode = CucumberContext.CONTEXT.get("statusCode");
         Assertions.assertThat(expectedStatusCode).isEqualTo(statusCode);
+    }
+    @Then("the psc statement Get call response body should match {string} file")
+    public void the_corporate_get_call_response_body_should_match(String dataFile) throws IOException {
+        File file = new ClassPathResource("/json/output/" + dataFile + ".json").getFile();
+        Statement expected = objectMapper.readValue(file, Statement.class);
+
+        Statement actual = CucumberContext.CONTEXT.get("getResponseBody");
+
+        assertThat(expected.getEtag()).isEqualTo(actual.getEtag());
+        assertThat(expected.getKind()).isEqualTo(actual.getKind());
+        assertThat(expected.getLinks()).isEqualTo(actual.getLinks());
+    }
+    @After
+    public void dbStop(){
+        mongoDBContainer.stop();
     }
 }

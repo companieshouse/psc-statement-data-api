@@ -6,7 +6,9 @@ Feature: Process Psc Statement Requests
     And a psc statement exists for company number "<companyNumber>" with statement id "<statementId>"
     When I send an GET request for company number "<companyNumber>" with statement id "<statementId>"
     Then I should receive 200 status code
+    And the psc statement Get call response body should match "<result>" file
 
     Examples:
-      | companyNumber | statementId                 |
-      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 |
+      | companyNumber | statementId                 | result        |
+      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | psc_statement |
+
