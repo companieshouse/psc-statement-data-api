@@ -1,17 +1,17 @@
 package uk.gov.companieshouse.pscstatementdataapi.repository;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Spy;
+import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.psc.Statement;
-import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
 import uk.gov.companieshouse.pscstatementdataapi.transform.DateTransformer;
