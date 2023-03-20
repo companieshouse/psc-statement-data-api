@@ -8,5 +8,5 @@ Feature: Process Psc Statement Requests
     Then I should receive 200 status code
 
     Examples:
-      | companyNumber | statementId                 | result                                   |
-      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | retrieve_corporate_disqualified_officer  |
+      | companyNumber | statementId                 |
+      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 |
