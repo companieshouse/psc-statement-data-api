@@ -23,7 +23,9 @@ import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
@@ -253,6 +255,11 @@ public class PscStatementsSteps {
 
     @When("a statement exists with id {string}")
     public void statement_exists(String statementId) {
+        Assertions.assertThat(pscStatementRepository.existsById(statementId)).isTrue();
+    }
+
+    @When("no statement exists with id {string}")
+    public void no_statement_exists(String statementId) {
         Assertions.assertThat(pscStatementRepository.existsById(statementId)).isTrue();
     }
 

@@ -19,6 +19,7 @@ Feature: Process Psc Statement Requests
     When I send a PUT request with payload "<data>" file for company number "<companyNumber>" with statement id "<statementId>"
     Then I should receive 200 status code
     And the CHS Kafka API is invoked for company number "<companyNumber>" with statement id "<statementId>"
+    And a statement exists with id "<statementId>"
 
     Examples:
       | companyNumber | statementId                 | data                  |

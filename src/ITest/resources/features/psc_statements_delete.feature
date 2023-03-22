@@ -7,6 +7,7 @@ Feature: Delete statement information
     When I send DELETE request for company number "company_number" with statement id "id_to_delete"
     Then I should receive 200 status code
     And the CHS Kafka API delete is invoked for company number "company_number" with statement id "id_to_delete" and the correct statement data
+    And no statement exists with id "id_to_delete"
 
   Scenario: Delete psc statement while database is down (should be 503)
 
