@@ -19,16 +19,27 @@ public class PscStatementApiService {
 
     @Autowired
     InternalApiClient internalApiClient;
+    @Value("${chs.kafka.api.endpoint}")
+    private String chsKafkaApiUrl;
     @Value("${psc-statements.api.resource.changed.uri}")
     private String resourceChangedUri;
     @Value("${psc-statements.api.resource.kind}")
     private String resourceKind;
     private static final String PSC_STATEMENTS_URI = "/company/%s/persons-with-significant-control-statements/%s";
+    private static final String CHANGED_EVENT_TYPE = "changed";
     private static final String DELETE_EVENT_TYPE = "deleted";
     @Autowired
     private Logger logger;
 
+    public ApiResponse<Void> invokeChsKafkaApi(String contextId, String companyNumber, String statementId) {
+        internalApiClient.setBasePath(chsKafkaApiUrl);
+        PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
+                .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, null));
+        return handleApiCall(changedResourcePost);
+    }
+
     public ApiResponse<Void> invokeChsKafkaApiWithDeleteEvent(String contextId, String companyNumber, String statementId, Statement statement) {
+        internalApiClient.setBasePath(chsKafkaApiUrl);
         PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
                 .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, statement));
         return handleApiCall(changedResourcePost);
@@ -38,8 +49,12 @@ public class PscStatementApiService {
         ChangedResourceEvent event = new ChangedResourceEvent();
         ChangedResource changedResource = new ChangedResource();
         event.setPublishedAt(String.valueOf(OffsetDateTime.now()));
-        event.setType(DELETE_EVENT_TYPE);
-        changedResource.setDeletedData(statement);
+        if (statement != null) {
+            event.setType(DELETE_EVENT_TYPE);
+            changedResource.setDeletedData(statement);
+        } else {
+            event.setType(CHANGED_EVENT_TYPE);
+        }
         changedResource.setResourceUri(String.format(PSC_STATEMENTS_URI, companyNumber, statementId));
         changedResource.event(event);
         changedResource.setResourceKind(resourceKind);
