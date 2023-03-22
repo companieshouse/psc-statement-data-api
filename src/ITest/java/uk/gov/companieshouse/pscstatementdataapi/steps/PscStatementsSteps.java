@@ -258,9 +258,9 @@ public class PscStatementsSteps {
         Assertions.assertThat(pscStatementRepository.existsById(statementId)).isTrue();
     }
 
-    @When("no statement exists with id {string}")
+    @Then("no statement exists with id {string}")
     public void no_statement_exists(String statementId) {
-        Assertions.assertThat(pscStatementRepository.existsById(statementId)).isTrue();
+        Assertions.assertThat(pscStatementRepository.existsById(statementId)).isFalse();
     }
 
     @Then("the CHS Kafka API is invoked for company number {string} with statement id {string}")
