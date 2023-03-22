@@ -2,10 +2,13 @@ package uk.gov.companieshouse.pscstatementdataapi.config;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
+import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 /**
  * Loads the application context.
@@ -21,4 +24,7 @@ public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
 
     @MockBean
     public CompanyMetricsApiService companyMetricsApiService;
+
+    @MockBean
+    public InternalApiClient internalApiClient;
 }
