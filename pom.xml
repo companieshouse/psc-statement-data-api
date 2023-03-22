@@ -205,33 +205,11 @@
                         <exclude>**/*ITest.java</exclude>
                     </excludes>
                     <skipTests>${skip.unit.tests}</skipTests>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${maven-failsafe-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <argLine>-Dfile.encoding=UTF-8</argLine>
-                    <argLine>${failsafeArgLine}</argLine>
-                    <systemPropertyVariables>
+                    <environmentVariables>
                         <CHS_API_KEY>key</CHS_API_KEY>
                         <API_URL>key</API_URL>
                         <PAYMENTS_API_URL>key</PAYMENTS_API_URL>
-                    </systemPropertyVariables>
-                    <classesDirectory>${project.build.outputDirectory}</classesDirectory>
-                    <skipITs>${skip.integration.tests}</skipITs>
-                    <includes>
-                        <include>**/*itest.java</include>
-                    </includes>
+                    </environmentVariables>
                 </configuration>
             </plugin>
             <plugin>
@@ -297,6 +275,33 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>${jib-maven-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
+                    <argLine>${failsafeArgLine}</argLine>
+                    <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                    <skipITs>${skip.integration.tests}</skipITs>
+                    <includes>
+                        <include>**/*itest.java</include>
+                    </includes>
+                    <environmentVariables>
+                        <CHS_API_KEY>key</CHS_API_KEY>
+                        <API_URL>key</API_URL>
+                        <PAYMENTS_API_URL>key</PAYMENTS_API_URL>
+                    </environmentVariables>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

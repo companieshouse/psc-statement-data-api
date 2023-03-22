@@ -101,7 +101,7 @@ public class PscStatementsSteps {
     }
 
     @Given("the database is down")
-    public void the_disqualification_db_is_down() {
+    public void the_psc_statements_db_is_down() {
         mongoDBContainer.stop();
     }
 

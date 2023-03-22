@@ -8,7 +8,7 @@ Feature: Delete statement information
     Then I should receive 200 status code
     And the CHS Kafka API delete is invoked for company number "company_number" with statement id "id_to_delete" and the correct statement data
 
-  Scenario: Delete psc statement while database is down
+  Scenario: Delete psc statement while database is down (should be 503)
 
     Given Psc statements data api service is running
     And a psc statement exists for company number "company_number" with statement id "id_to_delete"
@@ -25,7 +25,7 @@ Feature: Delete statement information
     Then I should receive 404 status code
     And the CHS Kafka API is not invoked
 
-  Scenario: Delete psc statement when kafka-api is not available
+  Scenario: Delete psc statement when kafka-api is not available (should be 503)
 
     Given Psc statements data api service is running
     And a psc statement exists for company number "company_number" with statement id "id_to_delete"
