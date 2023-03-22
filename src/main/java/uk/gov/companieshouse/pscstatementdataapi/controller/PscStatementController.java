@@ -54,13 +54,15 @@ public class PscStatementController {
     public ResponseEntity<StatementList> searchPscStatementsList(
             @PathVariable String company_number,
             @RequestParam(value = "items_per_page", required = false, defaultValue = "25") Integer itemsPerPage,
-            @RequestParam(value = "start_index", required = false, defaultValue = "0") final Integer startIndex) throws JsonProcessingException, ResourceNotFoundException {
+            @RequestParam(value = "start_index", required = false, defaultValue = "0") final Integer startIndex,
+            @RequestParam(value = "register_view", required = false) boolean registerView) {
         itemsPerPage = Math.min(itemsPerPage, 100);
         logger.info(String.format("Retrieving psc statement list data for company number %s, start index %d, items per page %d", company_number,
                 startIndex,
                 itemsPerPage));
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(company_number,
                 startIndex,
+                registerView,
                 itemsPerPage);
         return new ResponseEntity<>(statementList, HttpStatus.OK);
     }

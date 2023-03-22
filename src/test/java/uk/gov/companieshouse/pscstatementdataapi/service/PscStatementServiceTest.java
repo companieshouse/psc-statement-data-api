@@ -8,6 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
+import uk.gov.companieshouse.api.metrics.MetricsApi;
+import uk.gov.companieshouse.api.metrics.RegisterApi;
+import uk.gov.companieshouse.api.metrics.RegistersApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
@@ -26,12 +29,12 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
+import java.time.OffsetDateTime;
+import java.util.*;
 
+import static com.mongodb.internal.connection.tlschannel.util.Util.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertNotNull;
@@ -99,14 +102,14 @@ public class PscStatementServiceTest {
         StatementList expectedStatementList = testHelper.createStatementList();
         document.setData(expectedStatement);
 
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
 
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false,25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
         verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
     }
 
@@ -114,24 +117,104 @@ public class PscStatementServiceTest {
     void whenNoStatementsExistGetStatementListShouldThrow() throws JsonProcessingException{
 
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(new ArrayList<PscStatementDocument>()));
-        assertThrows(ResourceNotFoundException.class, ()-> pscStatementService.retrievePscStatementListFromDb( COMPANY_NUMBER, 0, 25));
+        assertThrows(ResourceNotFoundException.class, ()-> pscStatementService.retrievePscStatementListFromDb( COMPANY_NUMBER, 0, false,25));
     }
 
     @Test
-    void statementListReturnedForCompanyNumberButNoMetricsFound_ShouldReturnList() throws ResourceNotFoundException, IOException {
-        Statement expectedStatement = new Statement();
-        StatementList expectedStatementList = testHelper.createStatementListNoMetrics();
-        document.setData(expectedStatement);
+    void statementListReturnedForCompanyNumberButNoMetricsFound_ShouldThrow() throws ResourceNotFoundException, IOException {
 
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
 
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
+        Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
+            pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false,25);
+        });
+
+        String expectedMessage = "No company metrics data found for company number: companyNumber";
+        String actualMessage = ex.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void statementListReturnedByCompanyNumberFromRepositoryRegisterView() throws ResourceNotFoundException, IOException {
+        Statement expectedStatement = new Statement();
+        StatementList expectedStatementList = testHelper.createStatementList();
+        document.setData(expectedStatement);
+
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView()));
+        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, 25);
-        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+    }
+
+    @Test
+    void statementListIncWithdrawnCountOneReturnedByCompanyNumberFromRepositoryRegisterView() throws ResourceNotFoundException, IOException {
+        Statement expectedStatement = new Statement();
+        expectedStatement.setCeasedOn(LocalDate.parse("2022-12-20"));
+        StatementList expectedStatementList = testHelper.createStatementList();
+        List<Statement> statement = (List<Statement>) expectedStatementList.getItems();
+        statement.get(0).setCeasedOn(LocalDate.parse("2022-12-20"));
+        document.setData(expectedStatement);
+
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView()));
+        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
+
+        assertEquals(expectedStatementList, statementList);
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+    }
+
+    @Test
+    void whenCompanyNotInPublicRegisterGetStatementListShouldThrow() throws ResourceNotFoundException, IOException {
+        MetricsApi metricsApi = testHelper.createMetrics();
+        RegistersApi registersApi = new RegistersApi();
+        metricsApi.setRegisters(registersApi);
+
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.ofNullable(metricsApi));
+
+        Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
+            pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
+        });
+
+        String expectedMessage = "company companyNumber not in public register";
+        String actualMessage = ex.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verify(repository, times(0)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+    }
+
+    @Test
+    void whenNoStatementsExistInPublicRegisterGetStatementListShouldThrow() throws ResourceNotFoundException, IOException {
+        MetricsApi metricsApi = testHelper.createMetrics();
+        RegistersApi registersApi = new RegistersApi();
+        RegisterApi api = new RegisterApi();
+        api.setMovedOn(OffsetDateTime.parse("2022-12-20T06:00Z"));
+        api.setRegisterMovedTo("public-register");
+        registersApi.setPersonsWithSignificantControl(api);
+        metricsApi.setRegisters(registersApi);
+
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.ofNullable(metricsApi));
+        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(Optional.of(new ArrayList<PscStatementDocument>()));
+
+        Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
+            pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
+        });
+
+        String expectedMessage = "Resource not found for company number: companyNumber";
+        String actualMessage = ex.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2022-12-20T06:00Z"), 25);
     }
 
     @Test
