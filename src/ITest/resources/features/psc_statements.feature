@@ -10,7 +10,7 @@ Feature: Process Psc Statement Requests
 
     Examples:
       | companyNumber | statementId                 | result        |
-      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | psc_statement |
+      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH | psc_statement |
 
 
   Scenario Outline: Processing psc statement information successfully
