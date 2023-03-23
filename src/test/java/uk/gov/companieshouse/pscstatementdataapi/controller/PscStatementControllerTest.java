@@ -32,7 +32,7 @@ public class PscStatementControllerTest {
     private static final String GET_STATEMENT_LIST_URL = String.format("/company/%s/persons-with-significant-control-statements", TestHelper.COMPANY_NUMBER);
     private static final String ERIC_IDENTITY = "Test-Identity";
     private static final String ERIC_IDENTITY_TYPE = "key";
-    private static final String ERIC_PRIVILEGES = "internal-app";
+    private static final String ERIC_PRIVILEGES = "*";
     private static final String X_REQUEST_ID = TestHelper.X_REQUEST_ID;
 
 
@@ -80,7 +80,7 @@ public class PscStatementControllerTest {
                         .header("x-request-id", X_REQUEST_ID)
                         .header("ERIC-Identity", ERIC_IDENTITY)
                         .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
-                        .header("ERIC-Authorised-Key-Privileges", ERIC_PRIVILEGES)
+                        .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES)
                         .content(testHelper.createJsonCompanyPscStatementPayload()))
                 .andExpect(status().isOk());
     }
@@ -138,7 +138,7 @@ public class PscStatementControllerTest {
                         .header("x-request-id", X_REQUEST_ID)
                         .header("ERIC-Identity", ERIC_IDENTITY)
                         .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
-                        .header("ERIC-Authorised-Key-Privileges", ERIC_PRIVILEGES))
+                        .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))
                 .andExpect(status().isOk());
     }
 

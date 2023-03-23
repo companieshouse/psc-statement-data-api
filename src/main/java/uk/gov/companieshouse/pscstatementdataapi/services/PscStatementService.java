@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
+import uk.gov.companieshouse.api.metrics.RegisterApi;
+import uk.gov.companieshouse.api.metrics.RegistersApi;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
@@ -55,37 +57,47 @@ public class PscStatementService {
 
     Optional<MetricsApi> companyMetrics = companyMetricsApiService.getCompanyMetrics(companyNumber);
 
-    MetricsApi metricsData;
-    try {
-      metricsData = companyMetrics.get();
-    } catch (NoSuchElementException ex) {
-      throw new ResourceNotFoundException(HttpStatus.NOT_FOUND,
-              String.format("No company metrics data found for company number: %s", companyNumber));
+    if (registerView) {
+      return retrievePscStatementListFromDbRegisterView(companyNumber, companyMetrics, startIndex, itemsPerPage);
     }
 
-    if (registerView) {
-      logger.info(String.format("In register view for company number: %s", companyNumber));
+    Optional<List<PscStatementDocument>> statementListOptional = pscStatementRepository.getStatementList(companyNumber, startIndex, itemsPerPage);
+    List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs -> !docs.isEmpty()).orElseThrow(() ->
+            new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
+                    "Resource not found for company number: %s", companyNumber)));
 
-      if (metricsData.getRegisters() != null && metricsData.getRegisters().getPersonsWithSignificantControl() != null &&
-              metricsData.getRegisters().getPersonsWithSignificantControl().getRegisterMovedTo().equals("public-register")) {
+    return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, null, companyNumber, registerView);
+  }
+
+  public StatementList retrievePscStatementListFromDbRegisterView(String companyNumber, Optional<MetricsApi> companyMetrics, int startIndex, int itemsPerPage) {
+
+    logger.info(String.format("In register view for company number: %s", companyNumber));
+    MetricsApi metricsData;
+      try {
+        metricsData = companyMetrics.get();
+      } catch (NoSuchElementException ex) {
+        throw new ResourceNotFoundException(HttpStatus.NOT_FOUND,
+                String.format("No company metrics data found for company number: %s", companyNumber));
+      }
+
+    String registerMovedTo = Optional.ofNullable(metricsData)
+            .map(MetricsApi::getRegisters)
+            .map(RegistersApi::getPersonsWithSignificantControl)
+            .map(RegisterApi::getRegisterMovedTo)
+            .orElseThrow(() -> new ResourceNotFoundException(HttpStatus.NOT_FOUND,
+                    String.format("company %s not on public register", companyNumber)));
+
+      if (registerMovedTo.equals("public-register")) {
         Optional<List<PscStatementDocument>> statementListOptional = pscStatementRepository.getStatementListRegisterView(companyNumber, startIndex,
                 metricsData.getRegisters().getPersonsWithSignificantControl().getMovedOn(), itemsPerPage);
         List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs -> !docs.isEmpty()).orElseThrow(() ->
                 new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
                         "Resource not found for company number: %s", companyNumber)));
 
-        return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, metricsData, companyNumber, registerView);
+        return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, null, metricsData, companyNumber, true);
       } else {
-        throw new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format("company %s not in public register", companyNumber));
+        throw new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format("company %s not on public register", companyNumber));
       }
-    }
-
-      Optional<List<PscStatementDocument>> statementListOptional = pscStatementRepository.getStatementList(companyNumber, startIndex, itemsPerPage);
-      List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs -> !docs.isEmpty()).orElseThrow(() ->
-              new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
-                      "Resource not found for company number: %s", companyNumber)));
-
-      return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, metricsData, companyNumber, registerView);
   }
 
 
@@ -112,6 +124,8 @@ public class PscStatementService {
     boolean isLatestRecord = isLatestRecord(companyNumber, statementId, companyPscStatement.getDeltaAt());
 
     if (isLatestRecord) {
+
+      apiClientService.invokeChsKafkaApi(contextId, companyNumber, statementId);
 
       PscStatementDocument document = pscStatementTransformer.transformPscStatement(companyNumber, statementId, companyPscStatement);
 
@@ -151,7 +165,7 @@ public class PscStatementService {
   }
 
   private StatementList createStatementList(List < PscStatementDocument > statementDocuments,
-                                            int startIndex, int itemsPerPage, MetricsApi companyMetrics, String companyNumber, boolean registerView) {
+                                            int startIndex, int itemsPerPage, Optional<MetricsApi> companyMetrics, MetricsApi metricsData, String companyNumber, boolean registerView) {
 
     StatementList statementList = new StatementList();
     StatementLinksType links = new StatementLinksType();
@@ -163,19 +177,24 @@ public class PscStatementService {
       Long withdrawnCount = statements.stream()
               .filter(statement -> statement.getCeasedOn() != null).count();
 
-        if (withdrawnCount > 0) {
-          statementList.setCeasedCount(withdrawnCount.intValue());
-          statementList.setTotalResults(companyMetrics.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount()
+      statementList.setCeasedCount(withdrawnCount.intValue());
+      statementList.setTotalResults(metricsData.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount()
                   + statementList.getCeasedCount());
-        } else {
-          statementList.setCeasedCount(companyMetrics.getCounts().getPersonsWithSignificantControl().getWithdrawnStatementsCount());
-          statementList.setTotalResults(companyMetrics.getCounts().getPersonsWithSignificantControl().getStatementsCount());
-        }
+      statementList.setActiveCount(metricsData.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
     } else {
-      statementList.setCeasedCount(companyMetrics.getCounts().getPersonsWithSignificantControl().getWithdrawnStatementsCount());
-      statementList.setTotalResults(companyMetrics.getCounts().getPersonsWithSignificantControl().getStatementsCount());
+      companyMetrics.ifPresentOrElse(metricsApi -> {
+                try {
+                  statementList.setActiveCount(metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
+                  statementList.setCeasedCount(metricsApi.getCounts().getPersonsWithSignificantControl().getWithdrawnStatementsCount());
+                  statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getStatementsCount());
+                } catch (NullPointerException exp) {
+                  logger.error(String.format("No PSC data in metrics for company number %s", companyNumber));
+                }
+              },
+              () -> {
+                logger.info(String.format("No company metrics data found for company number: %s", companyNumber));
+              });
     }
-    statementList.setActiveCount(companyMetrics.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
 
     statementList.setItemsPerPage(itemsPerPage);
     statementList.setLinks(links);
