@@ -15,7 +15,7 @@ public class AbstractMongoConfig {
 
     @DynamicPropertySource
     public static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri2", mongoDBContainer::getReplicaSetUrl);
+        registry.add("spring.data.mongodb.uri21", mongoDBContainer::getReplicaSetUrl);
         mongoDBContainer.start();
     }
 }
