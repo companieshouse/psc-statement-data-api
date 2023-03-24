@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 import uk.gov.companieshouse.pscstatementdataapi.config.AbstractIntegrationTest;
 
 @RunWith(Cucumber.class)
-@CucumberOptions(features = "src/itest/resources/features",
+@CucumberOptions(features = "src/ITest/resources/features",
         plugin = {"pretty", "json:target/cucumber-report.json"})
 @CucumberContextConfiguration
 public class CucumberFeaturesRunnerITest extends AbstractIntegrationTest {
