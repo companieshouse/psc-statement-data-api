@@ -114,7 +114,8 @@ public class PscStatementsSteps {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
+        headers.set("ERIC-Identity-Type", "key");
+        headers.set("ERIC-Authorised-Key-Roles", "*");
         HttpEntity<String> request = new HttpEntity<String>(null, headers);
 
         ResponseEntity<Statement> response = restTemplate.exchange(uri, HttpMethod.GET, request,
@@ -130,7 +131,8 @@ public class PscStatementsSteps {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
+        headers.set("ERIC-Identity-Type", "key");
+        headers.set("ERIC-Authorised-Key-Roles", "*");
         HttpEntity<String> request = new HttpEntity<String>(null, headers);
 
         ResponseEntity<StatementList> response = restTemplate.exchange(uri, HttpMethod.GET, request,
@@ -183,8 +185,8 @@ public class PscStatementsSteps {
         CucumberContext.CONTEXT.set("contextId", this.contextId);
         headers.set("x-request-id", this.contextId);
         headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
-        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
+        headers.set("ERIC-Identity-Type", "key");
+        headers.set("ERIC-Authorised-Key-Roles", "*");
 
         HttpEntity request = new HttpEntity(data, headers);
         String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal";
@@ -220,8 +222,8 @@ public class PscStatementsSteps {
         CucumberContext.CONTEXT.set("contextId", "5234234234");
         headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
         headers.set("ERIC-Identity", "TEST-IDENTITY");
-        headers.set("ERIC-Identity-Type", "KEY");
-        headers.set("ERIC-Authorised-Key-Privileges", "internal-app");
+        headers.set("ERIC-Identity-Type", "key");
+        headers.set("ERIC-Authorised-Key-Roles", "*");
 
         HttpEntity<String> request = new HttpEntity<String>(null, headers);
 

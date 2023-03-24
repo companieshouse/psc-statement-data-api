@@ -17,7 +17,7 @@ Feature: Response codes for psc statements
 
     Given Psc statements data api service is running
     When I send a PUT request with no ERIC headers
-    Then I should receive 403 status code
+    Then I should receive 401 status code
 
   Scenario Outline: Put psc statement when kafka-api is not available (Should be 503 and nothing saved to db)
 
