@@ -32,7 +32,11 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static com.mongodb.internal.connection.tlschannel.util.Util.assertTrue;
 import static org.junit.Assert.assertEquals;
