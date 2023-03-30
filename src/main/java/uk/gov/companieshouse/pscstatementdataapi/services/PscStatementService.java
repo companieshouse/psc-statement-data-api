@@ -66,7 +66,7 @@ public class PscStatementService {
             new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
                     "Resource not found for company number: %s", companyNumber)));
 
-    return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, null, companyNumber, registerView);
+    return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, companyNumber, registerView);
   }
 
   public StatementList retrievePscStatementListFromDbRegisterView(String companyNumber, Optional<MetricsApi> companyMetrics, int startIndex, int itemsPerPage) {
@@ -94,7 +94,7 @@ public class PscStatementService {
                 new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
                         "Resource not found for company number: %s", companyNumber)));
 
-        return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, null, metricsData, companyNumber, true);
+        return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, companyNumber, true);
       } else {
         throw new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format("company %s not on public register", companyNumber));
       }
@@ -165,7 +165,7 @@ public class PscStatementService {
   }
 
   private StatementList createStatementList(List < PscStatementDocument > statementDocuments,
-                                            int startIndex, int itemsPerPage, Optional<MetricsApi> companyMetrics, MetricsApi metricsData, String companyNumber, boolean registerView) {
+                                            int startIndex, int itemsPerPage, Optional<MetricsApi> companyMetrics, String companyNumber, boolean registerView) {
 
     StatementList statementList = new StatementList();
     StatementLinksType links = new StatementLinksType();
@@ -173,28 +173,27 @@ public class PscStatementService {
 
     List < Statement > statements = statementDocuments.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
 
-    if (registerView) {
-      Long withdrawnCount = statements.stream()
-              .filter(statement -> statement.getCeasedOn() != null).count();
+    companyMetrics.ifPresentOrElse(metricsApi -> {
+      try {
+        if (registerView) {
+          Long withdrawnCount = statements.stream()
+                  .filter(statement -> statement.getCeasedOn() != null).count();
 
-      statementList.setCeasedCount(withdrawnCount.intValue());
-      statementList.setTotalResults(metricsData.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount()
+          statementList.setCeasedCount(withdrawnCount.intValue());
+          statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount()
                   + statementList.getCeasedCount());
-      statementList.setActiveCount(metricsData.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
-    } else {
-      companyMetrics.ifPresentOrElse(metricsApi -> {
-                try {
-                  statementList.setActiveCount(metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
-                  statementList.setCeasedCount(metricsApi.getCounts().getPersonsWithSignificantControl().getWithdrawnStatementsCount());
-                  statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getStatementsCount());
-                } catch (NullPointerException exp) {
-                  logger.error(String.format("No PSC data in metrics for company number %s", companyNumber));
-                }
-              },
-              () -> {
-                logger.info(String.format("No company metrics data found for company number: %s", companyNumber));
-              });
-    }
+          statementList.setActiveCount(metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
+        } else {
+          statementList.setActiveCount(metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount());
+          statementList.setCeasedCount(metricsApi.getCounts().getPersonsWithSignificantControl().getWithdrawnStatementsCount());
+          statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getStatementsCount());
+        }
+      } catch (NullPointerException exp) {
+        logger.error(String.format("No PSC data in metrics for company number %s", companyNumber));
+      }
+      }, () -> {
+      logger.info(String.format("No company metrics counts data found for company number: %s", companyNumber));
+    });
 
     statementList.setItemsPerPage(itemsPerPage);
     statementList.setLinks(links);

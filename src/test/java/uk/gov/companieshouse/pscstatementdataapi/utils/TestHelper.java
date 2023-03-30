@@ -89,6 +89,19 @@ public class TestHelper {
         return statementList;
     }
 
+    public StatementList createStatementListRegisterView() {
+        Statement statement = new Statement();
+        StatementList statementList = new StatementList();
+        statementList.setItems(Collections.singletonList(statement));
+        statementList.setActiveCount(1);
+        statementList.setCeasedCount(0);
+        statementList.setTotalResults(1);
+        statementList.setStartIndex(0);
+        statementList.setItemsPerPage(25);
+        statementList.setLinks(createLinks());
+        return statementList;
+    }
+
     public StatementList createStatementListNoMetrics() {
         Statement statement = new Statement();
         StatementList statementList = new StatementList();
@@ -122,8 +135,8 @@ public class TestHelper {
         CountsApi counts = new CountsApi();
         PscApi pscs = new PscApi();
         pscs.setActiveStatementsCount(1);
-        pscs.setWithdrawnStatementsCount(1);
-        pscs.setStatementsCount(2);
+        pscs.setWithdrawnStatementsCount(0);
+        pscs.setStatementsCount(1);
         counts.setPersonsWithSignificantControl(pscs);
         metrics.setCounts(counts);
 
