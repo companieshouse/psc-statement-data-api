@@ -7,13 +7,18 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.assertj.core.api.Assertions;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.companieshouse.api.metrics.MetricsApi;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.psc.Statement;
@@ -26,18 +31,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
+import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class PscStatementsSteps {
     private String contextId;
@@ -57,8 +65,11 @@ public class PscStatementsSteps {
     @Autowired
     public PscStatementApiService pscStatementApiService;
 
-    @Autowired
+    @Mock
     private CompanyMetricsApiService companyMetricsApiService;
+
+    @Autowired
+    private PscStatementService pscStatementService;
 
     @Before
     public void dbCleanUp(){
@@ -66,6 +77,8 @@ public class PscStatementsSteps {
             mongoDBContainer.start();
         }
         pscStatementRepository.deleteAll();
+        MockitoAnnotations.initMocks(this);
+        ReflectionTestUtils.setField(pscStatementService,"companyMetricsApiService",companyMetricsApiService);
     }
 
     @Given("Psc statements data api service is running")
@@ -74,7 +87,7 @@ public class PscStatementsSteps {
     }
 
     @Given("a psc statement exists for company number {string} with statement id {string}")
-    public void psc_statement_exists_for_campany_and_id(String companyNumber, String statementId) throws IOException {
+    public void psc_statement_exists_for_company_and_id(String companyNumber, String statementId) throws IOException {
         File statementFile = new ClassPathResource("/json/output/psc_statement.json").getFile();
         Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
 
@@ -125,8 +138,26 @@ public class PscStatementsSteps {
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
     }
 
+    @When("I send a GET request for company number {string} to company metrics api")
+    public void i_send_get_request_to_company_metrics_api(String companyNumber) throws IOException {
+        String uri = "/company/{company_number}/metrics";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "key");
+        headers.set("ERIC-Authorised-Key-Roles", "*");
+        HttpEntity<String> request = new HttpEntity<String>(null, headers);
+
+        ResponseEntity<MetricsApi> response = restTemplate.exchange(uri, HttpMethod.GET, request,
+                MetricsApi.class, companyNumber);
+
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
+        CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
+    }
+
     @When("I send a GET statement list request for company number {string}")
     public void get_statement_list_for_company_number(String companyNumber) throws IOException {
+        File metricsFile = new ClassPathResource("/json/input/company_metrics.json").getFile();
         String uri = "/company/{company_number}/persons-with-significant-control-statements";
 
         HttpHeaders headers = new HttpHeaders();
@@ -140,6 +171,44 @@ public class PscStatementsSteps {
 
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
+    }
+
+    @When("I send a GET statement list request for company number in register view {string}")
+    public void get_statement_list_for_company_number_register_view(String companyNumber) throws IOException {
+
+        String uri = "/company/{company_number}/persons-with-significant-control-statements?register_view=true";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "key");
+        headers.set("ERIC-Authorised-Key-Roles", "*");
+        HttpEntity<String> request = new HttpEntity<String>(null, headers);
+        ResponseEntity<StatementList> response;
+    try {
+        response = restTemplate.exchange(uri, HttpMethod.GET, request,
+                StatementList.class, companyNumber);
+    } catch (Exception ex) {
+        response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
+        CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
+    }
+
+    @When("Company Metrics API is available")
+    public void company_metrics_api_service_available() throws IOException {
+        File metricsFile = new ClassPathResource("/json/input/company_metrics.json").getFile();
+        MetricsApi metrics = objectMapper.readValue(metricsFile, MetricsApi.class);
+        Optional<MetricsApi> metricsApi = Optional.ofNullable(metrics);
+
+        when(companyMetricsApiService.getCompanyMetrics(any())).thenReturn(metricsApi);
+
+        doThrow(ServiceUnavailableException.class)
+                .when(pscStatementApiService).invokeChsKafkaApiWithDeleteEvent(any(), any(), any(), any());
+    }
+
+    @When("Company Metrics API is unavailable")
+    public void company_metrics_api_service_unavailable() throws IOException {
+        when(companyMetricsApiService.getCompanyMetrics(any())).thenReturn(Optional.empty());
     }
 
     @Then("I should receive {int} status code")
@@ -166,11 +235,12 @@ public class PscStatementsSteps {
 
         StatementList actual = CucumberContext.CONTEXT.get("getResponseBody");
 
+        assertThat(expected.getCeasedCount()).isEqualTo(actual.getCeasedCount());
+        assertThat(expected.getTotalResults()).isEqualTo(actual.getTotalResults());
         assertThat(expected.getItemsPerPage()).isEqualTo(actual.getItemsPerPage());
         assertThat(expected.getItems()).isEqualTo(actual.getItems());
         assertThat(expected.getLinks()).isEqualTo(actual.getLinks());
     }
-
 
 
     @When("I send a PUT request with payload {string} file for company number {string} with statement id {string}")
