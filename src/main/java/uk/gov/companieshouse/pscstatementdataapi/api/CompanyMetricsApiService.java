@@ -3,6 +3,7 @@ package uk.gov.companieshouse.pscstatementdataapi.api;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.InternalApiClient;
@@ -18,6 +19,9 @@ import uk.gov.companieshouse.logging.Logger;
 public class CompanyMetricsApiService {
 
     private static final String GET_COMPANY_METRICS_ENDPOINT = "/company/%s/metrics";
+
+    @Value("${chs.kafka.api.endpoint}")
+    private String basePath;
 
     @Autowired
     InternalApiClient internalApiClient;
@@ -37,8 +41,9 @@ public class CompanyMetricsApiService {
         logger.trace(String.format("Started : getCompanyMetrics for Company Number %s ",
                 companyNumber
         ));
-        String resourceHandler = internalApiClient.getInternalBasePath();
-        logger.trace(String.format("Created client %s", resourceHandler));
+        internalApiClient.setInternalBasePath("http://localhost:8888");
+        internalApiClient.setBasePath("http://localhost:8888");
+
         PrivateCompanyMetricsGet companyMetrics =
                 internalApiClient.privateCompanyMetricsResourceHandler()
                         .getCompanyMetrics(

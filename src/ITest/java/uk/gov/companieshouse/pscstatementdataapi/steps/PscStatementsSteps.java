@@ -1,6 +1,8 @@
 package uk.gov.companieshouse.pscstatementdataapi.steps;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -8,30 +10,34 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
+import uk.gov.companieshouse.pscstatementdataapi.config.WiremockTestConfig;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
+import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
 
 import java.io.File;
@@ -62,7 +68,8 @@ public class PscStatementsSteps {
 
     @Before
     public void dbCleanUp(){
-        if (!mongoDBContainer.isRunning()) {
+        WiremockTestConfig.setupWiremock();
+        if (mongoDBContainer.getContainerId() == null) {
             mongoDBContainer.start();
         }
         pscStatementRepository.deleteAll();
@@ -74,7 +81,7 @@ public class PscStatementsSteps {
     }
 
     @Given("a psc statement exists for company number {string} with statement id {string}")
-    public void psc_statement_exists_for_campany_and_id(String companyNumber, String statementId) throws IOException {
+    public void psc_statement_exists_for_company_and_id(String companyNumber, String statementId) throws IOException {
         File statementFile = new ClassPathResource("/json/output/psc_statement.json").getFile();
         Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
 
@@ -125,9 +132,45 @@ public class PscStatementsSteps {
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
     }
 
+    @When("I send a GET request for company number {string} to company metrics api")
+    public void i_send_get_request_to_company_metrics_api(String companyNumber) throws IOException {
+        String uri = "/company/{company_number}/metrics";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "key");
+        headers.set("ERIC-Authorised-Key-Roles", "*");
+        HttpEntity<String> request = new HttpEntity<String>(null, headers);
+
+        ResponseEntity<MetricsApi> response = restTemplate.exchange(uri, HttpMethod.GET, request,
+                MetricsApi.class, companyNumber);
+
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
+        CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
+    }
+
     @When("I send a GET statement list request for company number {string}")
     public void get_statement_list_for_company_number(String companyNumber) throws IOException {
         String uri = "/company/{company_number}/persons-with-significant-control-statements";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "key");
+        headers.set("ERIC-Authorised-Key-Roles", "*");
+        HttpEntity<String> request = new HttpEntity<String>(null, headers);
+
+        ResponseEntity<StatementList> response = restTemplate.exchange(uri, HttpMethod.GET, request,
+                StatementList.class, companyNumber);
+
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCodeValue());
+        CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
+    }
+
+    @When("I send a GET statement list request for company number in register view {string}")
+    public void get_statement_list_for_company_number_register_view(String companyNumber) throws IOException {
+        WiremockTestConfig.companyMetricsApi(HttpStatus.OK.value(), companyNumber);
+
+        String uri = "/company/{company_number}/persons-with-significant-control-statements?register_view=true";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("ERIC-Identity", "TEST-IDENTITY");
@@ -159,6 +202,20 @@ public class PscStatementsSteps {
         assertThat(expected.getLinks()).isEqualTo(actual.getLinks());
     }
 
+    @Then("the company metrics api Get call response body should match {string} file")
+    public void the_company_metrics_get_call_response_body_should_match(String dataFile) throws IOException {
+        File file = new ClassPathResource("/json/input/" + dataFile + ".json").getFile();
+        MetricsApi expected = objectMapper.readValue(file, MetricsApi.class);
+
+        MetricsApi actual = CucumberContext.CONTEXT.get("getResponseBody");
+
+        assertThat(expected
+                .getRegisters()
+                .getPersonsWithSignificantControl()
+                .getRegisterMovedTo())
+                .isEqualTo(actual.getRegisters().getPersonsWithSignificantControl().getRegisterMovedTo());
+    }
+
     @Then("the psc statement list Get call response body should match {string} file")
     public void the_psc_statement_list_get_call_response_body_should_match(String dataFile) throws IOException {
         File file = new ClassPathResource("/json/output/" + dataFile + ".json").getFile();
@@ -170,7 +227,6 @@ public class PscStatementsSteps {
         assertThat(expected.getItems()).isEqualTo(actual.getItems());
         assertThat(expected.getLinks()).isEqualTo(actual.getLinks());
     }
-
 
 
     @When("I send a PUT request with payload {string} file for company number {string} with statement id {string}")
@@ -274,10 +330,5 @@ public class PscStatementsSteps {
     public void nothing_persisted_to_database() {
         List<PscStatementDocument> pscDocs = pscStatementRepository.findAll();
         Assertions.assertThat(pscDocs).hasSize(0);
-    }
-
-    @After
-    public void dbStop(){
-        mongoDBContainer.stop();
     }
 }

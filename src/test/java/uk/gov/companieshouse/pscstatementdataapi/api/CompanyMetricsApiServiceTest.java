@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.pscstatementdataapi.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -16,11 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.InternalApiClient;
-import uk.gov.companieshouse.pscstatementdataapi.config.ApplicationConfig;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.metrics.PrivateCompanyMetricsResourceHandler;
@@ -95,3 +92,4 @@ public class CompanyMetricsApiServiceTest {
         verify(privateCompanyMetricsGet, times(1)).execute();
     }
 }
+
