@@ -201,9 +201,6 @@ public class PscStatementsSteps {
         Optional<MetricsApi> metricsApi = Optional.ofNullable(metrics);
 
         when(companyMetricsApiService.getCompanyMetrics(any())).thenReturn(metricsApi);
-
-        doThrow(ServiceUnavailableException.class)
-                .when(pscStatementApiService).invokeChsKafkaApiWithDeleteEvent(any(), any(), any(), any());
     }
 
     @When("Company Metrics API is unavailable")
