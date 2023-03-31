@@ -42,7 +42,7 @@ Feature: Process Psc Statement Requests
 
     Given Psc statements data api service is running
     And Psc statements exist for company number "<companyNumber>"
-    And Company Metrics API is available
+    And Company Metrics API is available for company number "<companyNumber>"
     And I should receive 200 status code
     When I send a GET statement list request for company number in register view "<companyNumber>"
     Then I should receive 200 status code
@@ -70,7 +70,7 @@ Feature: Process Psc Statement Requests
 
     Given Psc statements data api service is running
     And nothing is persisted in the database
-    And Company Metrics API is available
+    And Company Metrics API is available for company number "<companyNumber>"
     When I send a GET statement list request for company number in register view "<companyNumber>"
     Then I should receive 404 status code
 

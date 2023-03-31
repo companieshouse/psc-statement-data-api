@@ -192,9 +192,10 @@ public class PscStatementsSteps {
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
     }
 
-    @When("Company Metrics API is available")
-    public void company_metrics_api_service_available() throws IOException {
-        File metricsFile = new ClassPathResource("/json/input/company_metrics_OC421554.json").getFile();
+    @When("Company Metrics API is available for company number {string}")
+    public void company_metrics_api_service_available(String companyNumber) throws IOException {
+        File metricsFile = new ClassPathResource("/json/input/company_metrics_"
+                + companyNumber + ".json").getFile();
         MetricsApi metrics = objectMapper.readValue(metricsFile, MetricsApi.class);
         Optional<MetricsApi> metricsApi = Optional.ofNullable(metrics);
 
