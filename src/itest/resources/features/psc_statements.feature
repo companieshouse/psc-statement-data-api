@@ -35,8 +35,8 @@ Feature: Process Psc Statement Requests
     And the psc statement list Get call response body should match "<result>" file
 
     Examples:
-      | companyNumber | result              |
-      | OC421554      | psc_statements_list |
+      | companyNumber |              result          |
+      | OC421554      | psc_statements_list_OC421554 |
 
   Scenario Outline: Processing Psc Statement List GET register view request successfully
 
@@ -49,8 +49,8 @@ Feature: Process Psc Statement Requests
     And the psc statement list Get call response body should match "<result>" file
 
     Examples:
-      | companyNumber | result                            |
-      | OC421554      | psc_statements_list_register_view |
+      | companyNumber |                       result               |
+      | OC421554      | psc_statements_list_register_view_OC421554 |
 
   Scenario Outline: Processing Psc Statement List GET register view request unsuccessfully
     when metrics is unavailable

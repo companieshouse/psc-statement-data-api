@@ -1,0 +1,43 @@
+{
+    "counts" : {
+      "persons-with-significant-control" : {
+        "active_statements_count" : 1.0,
+        "total_count" : 2.0,
+        "active_pscs_count" : 1.0,
+        "ceased_pscs_count" : 0.0,
+        "pscs_count" : 1.0,
+        "statements_count" : 1.0,
+        "withdrawn_statements_count" : 0.0
+      },
+      "appointments" : {
+        "total_count" : 2.0,
+        "active_secretaries_count" : 1.0,
+        "resigned_count" : 0.0,
+        "active_llp_members_count" : 0.0,
+        "active_directors_count" : 1.0,
+        "active_count" : 2.0
+      }
+    },
+    "registers" : {
+      "directors" : {
+        "register_moved_to" : "public-register",
+        "moved_on" : "2020-11-09T14:52:14.000Z"
+      },
+      "usual_residential_address" : {
+        "register_moved_to" : "public-register",
+        "moved_on" : "2020-11-09T14:52:14.000Z"
+      },
+      "secretaries" : {
+        "moved_on" : "2020-11-09T14:52:14.000Z",
+        "register_moved_to" : "public-register"
+      },
+      "members" : {
+        "register_moved_to" : "public-register",
+        "moved_on" : "2020-11-09T14:52:14.000Z"
+      },
+      "persons_with_significant_control" : {
+        "register_moved_to" : "public-register",
+        "moved_on" : "2020-11-09T14:52:14.000Z"
+      }
+    }
+  }

@@ -7,13 +7,11 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.assertj.core.api.Assertions;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -63,10 +61,10 @@ public class PscStatementsSteps {
     private MongoTemplate mongoTemplate;
 
     @Autowired
-    public PscStatementApiService pscStatementApiService;
-
-    @Mock
     private CompanyMetricsApiService companyMetricsApiService;
+
+    @Autowired
+    public PscStatementApiService pscStatementApiService;
 
     @Autowired
     private PscStatementService pscStatementService;
@@ -78,7 +76,6 @@ public class PscStatementsSteps {
         }
         pscStatementRepository.deleteAll();
         MockitoAnnotations.initMocks(this);
-        ReflectionTestUtils.setField(pscStatementService,"companyMetricsApiService",companyMetricsApiService);
     }
 
     @Given("Psc statements data api service is running")
@@ -157,7 +154,8 @@ public class PscStatementsSteps {
 
     @When("I send a GET statement list request for company number {string}")
     public void get_statement_list_for_company_number(String companyNumber) throws IOException {
-        File metricsFile = new ClassPathResource("/json/input/company_metrics.json").getFile();
+        File metricsFile = new ClassPathResource("/json/input/company_metrics_" +
+                companyNumber + ".json").getFile();
         String uri = "/company/{company_number}/persons-with-significant-control-statements";
 
         HttpHeaders headers = new HttpHeaders();
@@ -196,7 +194,7 @@ public class PscStatementsSteps {
 
     @When("Company Metrics API is available")
     public void company_metrics_api_service_available() throws IOException {
-        File metricsFile = new ClassPathResource("/json/input/company_metrics.json").getFile();
+        File metricsFile = new ClassPathResource("/json/input/company_metrics_OC421554.json").getFile();
         MetricsApi metrics = objectMapper.readValue(metricsFile, MetricsApi.class);
         Optional<MetricsApi> metricsApi = Optional.ofNullable(metrics);
 
