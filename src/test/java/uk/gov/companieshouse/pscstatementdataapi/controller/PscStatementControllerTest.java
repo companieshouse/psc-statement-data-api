@@ -65,15 +65,15 @@ public class PscStatementControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("ERIC-IDENTITY", ERIC_IDENTITY)
                         .header("ERIC-IDENTITY-TYPE", ERIC_IDENTITY_TYPE))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.etag").value(TestHelper.ETAG));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.etag").value(TestHelper.ETAG));
     }
 
     @Test
     void callPscStatementPutRequest() throws Exception {
         doNothing()
                 .when(pscStatementService).processPscStatement(anyString(), anyString(), anyString(),
-                isA(CompanyPscStatement.class));
+                        isA(CompanyPscStatement.class));
 
         mockMvc.perform(put(PUT_URL)
                         .contentType(APPLICATION_JSON)
@@ -86,7 +86,22 @@ public class PscStatementControllerTest {
     }
     @Test
     void callPscStatementListGetRequestWithParams() throws Exception {
-        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 2, 5))
+        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 2, false, 5))
+                .thenReturn(testHelper.createStatementList());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get(GET_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("ERIC-IDENTITY", ERIC_IDENTITY)
+                        .header("ERIC-IDENTITY-TYPE", ERIC_IDENTITY_TYPE)
+                        .header("items_per_page", 5)
+                        .header("start_index", 2))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void callPscStatementListGetRequestWithRegisterView() throws Exception {
+        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 2, true, 5))
                 .thenReturn(testHelper.createStatementList());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -101,7 +116,7 @@ public class PscStatementControllerTest {
 
     @Test
     void callPscStatementListGetRequestNoParams() throws Exception {
-        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 0, 25))
+        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 0, false, 25))
                 .thenReturn(testHelper.createStatementList());
 
         mockMvc.perform(MockMvcRequestBuilders

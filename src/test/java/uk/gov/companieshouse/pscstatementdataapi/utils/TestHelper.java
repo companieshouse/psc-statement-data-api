@@ -4,6 +4,8 @@ import org.springframework.util.FileCopyUtils;
 import uk.gov.companieshouse.api.metrics.CountsApi;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.PscApi;
+import uk.gov.companieshouse.api.metrics.RegisterApi;
+import uk.gov.companieshouse.api.metrics.RegistersApi;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 
 public class TestHelper {
@@ -86,6 +89,19 @@ public class TestHelper {
         return statementList;
     }
 
+    public StatementList createStatementListRegisterView() {
+        Statement statement = new Statement();
+        StatementList statementList = new StatementList();
+        statementList.setItems(Collections.singletonList(statement));
+        statementList.setActiveCount(1);
+        statementList.setCeasedCount(0);
+        statementList.setTotalResults(1);
+        statementList.setStartIndex(0);
+        statementList.setItemsPerPage(25);
+        statementList.setLinks(createLinks());
+        return statementList;
+    }
+
     public StatementList createStatementListNoMetrics() {
         Statement statement = new Statement();
         StatementList statementList = new StatementList();
@@ -111,6 +127,27 @@ public class TestHelper {
         pscs.setStatementsCount(2);
         counts.setPersonsWithSignificantControl(pscs);
         metrics.setCounts(counts);
+        return metrics;
+    }
+
+    public MetricsApi createMetricsRegisterView() {
+        MetricsApi metrics = new MetricsApi();
+        CountsApi counts = new CountsApi();
+        PscApi pscs = new PscApi();
+        pscs.setActiveStatementsCount(1);
+        pscs.setWithdrawnStatementsCount(0);
+        pscs.setStatementsCount(1);
+        counts.setPersonsWithSignificantControl(pscs);
+        metrics.setCounts(counts);
+
+        RegistersApi registers = new RegistersApi();
+        RegisterApi pscStatements = new RegisterApi();
+        pscStatements.setRegisterMovedTo("public-register");
+        String date = "2020-12-20T06:00:00Z";
+        OffsetDateTime dt = OffsetDateTime.parse(date);
+        pscStatements.setMovedOn(dt);
+        registers.setPersonsWithSignificantControl(pscStatements);
+        metrics.setRegisters(registers);
         return metrics;
     }
 
