@@ -37,7 +37,7 @@ public class CompanyMetricsApiService {
         logger.trace(String.format("Started : getCompanyMetrics for Company Number %s ",
                 companyNumber
         ));
-        String resourceHandler = internalApiClient.getInternalBasePath();
+        String resourceHandler = internalApiClient.getBasePath();
         logger.trace(String.format("Created client %s", resourceHandler));
         PrivateCompanyMetricsGet companyMetrics =
                 internalApiClient.privateCompanyMetricsResourceHandler()
