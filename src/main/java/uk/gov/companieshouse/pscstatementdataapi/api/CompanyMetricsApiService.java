@@ -12,6 +12,7 @@ import uk.gov.companieshouse.api.handler.metrics.request.PrivateCompanyMetricsGe
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 
 @Service
@@ -21,6 +22,7 @@ public class CompanyMetricsApiService {
 
     @Autowired
     InternalApiClient internalApiClient;
+
     /**
      * Invoke Company Metrics API.
      */
@@ -37,8 +39,9 @@ public class CompanyMetricsApiService {
         logger.trace(String.format("Started : getCompanyMetrics for Company Number %s ",
                 companyNumber
         ));
-        String resourceHandler = internalApiClient.getBasePath();
-        logger.trace(String.format("Created client %s", resourceHandler));
+        String basePath = System.getenv("API_URL");
+        internalApiClient.setBasePath(basePath);
+        logger.trace(String.format("Created client %s", internalApiClient.getBasePath()));
         PrivateCompanyMetricsGet companyMetrics =
                 internalApiClient.privateCompanyMetricsResourceHandler()
                         .getCompanyMetrics(
