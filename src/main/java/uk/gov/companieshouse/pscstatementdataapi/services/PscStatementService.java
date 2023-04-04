@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.pscstatementdataapi.services;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -81,8 +82,7 @@ public class PscStatementService {
   }
 
   public void processPscStatement(String contextId, String companyNumber, String statementId,
-                                  CompanyPscStatement companyPscStatement) {
-
+                                  CompanyPscStatement companyPscStatement) throws BadRequestException {
     boolean isLatestRecord = isLatestRecord(companyNumber, statementId, companyPscStatement.getDeltaAt());
 
     if (isLatestRecord) {
@@ -98,6 +98,9 @@ public class PscStatementService {
   }
 
   private boolean isLatestRecord(String companyNumber, String statementId, String deltaAt) {
+    if(StringUtils.isBlank(deltaAt)) {
+      throw new BadRequestException("delta_at not provided", new Exception());
+    }
     List<PscStatementDocument> statements = pscStatementRepository.findUpdatedPscStatement(companyNumber, statementId, dateTransformer.transformDate(deltaAt));
     return statements.isEmpty();
   }
