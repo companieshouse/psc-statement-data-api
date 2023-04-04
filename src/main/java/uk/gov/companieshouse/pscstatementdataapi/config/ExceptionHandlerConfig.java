@@ -17,7 +17,7 @@ public class ExceptionHandlerConfig {
     @ExceptionHandler(value= ResourceNotFoundException.class)
     public ResponseEntity<String> handleNotFoundException(ResourceNotFoundException exception){
         logger.error(exception.getMessage());
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+        return ResponseEntity.notFound().build();
     }
 
     @ExceptionHandler(value = {IllegalArgumentException.class})
