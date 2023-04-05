@@ -16,7 +16,6 @@ public interface PscStatementRepository extends MongoRepository<PscStatementDocu
     @Query("{'company_number' : ?0, '_id' : ?1}")
     Optional<PscStatementDocument> getPscStatementByCompanyNumberAndStatementId(String companyNumber, String statementId);
 
-
     @Query("{'company_number' : ?0, '_id': ?1, 'updated.at':{$gte : { \"$date\" : \"?2\" } }}")
     List<PscStatementDocument> findUpdatedPscStatement(String companyNumber, String statementId, String at);
 
