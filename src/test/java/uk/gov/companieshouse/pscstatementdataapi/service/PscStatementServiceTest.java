@@ -325,7 +325,7 @@ public class PscStatementServiceTest {
         Updated updated = new Updated();
         updated.setAt(dateTime);
         document.setUpdated(updated);
-        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, dateTransformer.transformDate(DELTA_AT))).thenReturn(Arrays.asList(document));
+        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, dateTransformer.transformDate(DELTA_AT))).thenReturn(Optional.ofNullable(document));
         ApiResponse<Void> response = new ApiResponse<>(200, null);
         when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
