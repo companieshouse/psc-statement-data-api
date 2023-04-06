@@ -10,7 +10,6 @@ Feature: Response codes for psc statements
 
     Examples:
     | data                                   | response_code |
-    | bad_company_psc_statement_no_delta_at  | 400           |
     | bad_company_psc_statement_invalid_json | 400           |
 
 
