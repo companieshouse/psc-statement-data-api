@@ -136,11 +136,14 @@ public class PscStatementService {
   }
 
   private boolean isLatestRecord(String companyNumber, String statementId, String deltaAt) {
+    Optional<PscStatementDocument> statement;
     if(StringUtils.isBlank(deltaAt)) {
-      throw new BadRequestException("delta_at not provided", new Exception());
+      statement = pscStatementRepository.findById(statementId).filter(doc -> !StringUtils.isBlank(doc.getDeltaAt()));
+    } else {
+      statement = pscStatementRepository.findUpdatedPscStatement(companyNumber, statementId,
+              dateTransformer.transformDate(deltaAt));
     }
-    List<PscStatementDocument> statements = pscStatementRepository.findUpdatedPscStatement(companyNumber, statementId, dateTransformer.transformDate(deltaAt));
-    return statements.isEmpty();
+    return statement.isEmpty();
   }
 
   private void saveToDb(String contextId, String companyNumber, String statementId, PscStatementDocument document) {
