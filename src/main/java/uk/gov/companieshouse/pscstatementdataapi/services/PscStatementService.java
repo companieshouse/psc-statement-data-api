@@ -138,7 +138,7 @@ public class PscStatementService {
   private boolean isLatestRecord(String companyNumber, String statementId, String deltaAt) {
     Optional<PscStatementDocument> statement;
     if(StringUtils.isBlank(deltaAt)) {
-      statement = pscStatementRepository.findById(statementId);
+      statement = pscStatementRepository.findById(statementId).filter(doc -> !StringUtils.isBlank(doc.getDeltaAt()));
     } else {
       statement = pscStatementRepository.findUpdatedPscStatement(companyNumber, statementId,
               dateTransformer.transformDate(deltaAt));

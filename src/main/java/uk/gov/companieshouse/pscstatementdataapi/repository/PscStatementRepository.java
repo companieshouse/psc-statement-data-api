@@ -17,7 +17,7 @@ public interface PscStatementRepository extends MongoRepository<PscStatementDocu
     Optional<PscStatementDocument> getPscStatementByCompanyNumberAndStatementId(String companyNumber, String statementId);
 
 
-    @Query("{'company_number' : ?0, '_id': ?1, { \"$toInt\" : 'delta_at' }:{$gte : { \"$toInt\" : \"?2\" } }}")
+    @Query("{'company_number' : ?0, '_id': ?1, 'delta_at' : {$gte : ?2 }}")
     Optional<PscStatementDocument> findUpdatedPscStatement(String companyNumber, String statementId, String at);
 
     @Aggregation(pipeline = {
