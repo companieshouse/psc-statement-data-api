@@ -88,6 +88,7 @@ public class RepositoryITest extends AbstractMongoConfig {
         Updated updated = new Updated();
         updated.setAt(LocalDateTime.of(2019, 1, 1, 1, 1));
         document.setUpdated(updated);
+        document.setDeltaAt(DELTA_AT);
 
         return document;
     }

@@ -1,6 +1,8 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mongodb.MongoException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -28,7 +30,7 @@ public class ExceptionHandlerConfig {
         return ResponseEntity.notFound().build();
     }
 
-    @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class})
+    @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class, MongoException.class})
     public ResponseEntity<Object> handleServiceUnavailableException(Exception exception) {
         logger.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);

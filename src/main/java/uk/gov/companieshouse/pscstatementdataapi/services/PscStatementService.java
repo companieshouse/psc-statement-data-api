@@ -4,6 +4,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
@@ -101,14 +103,15 @@ public class PscStatementService {
       }
   }
 
-
+  @Transactional
   public void deletePscStatement(String contextId, String companyNumber, String statementId) throws ResourceNotFoundException{
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
 
     Statement statement = pscStatementDocument.getData();
-    apiClientService.invokeChsKafkaApiWithDeleteEvent(contextId, companyNumber, statementId, statement);
 
     pscStatementRepository.delete(pscStatementDocument);
+    apiClientService.invokeChsKafkaApiWithDeleteEvent(contextId, companyNumber, statementId, statement);
+
     logger.info(String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s", companyNumber, statementId));
   }
 
@@ -119,17 +122,16 @@ public class PscStatementService {
                     "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber)));
   }
 
+  @Transactional
   public void processPscStatement(String contextId, String companyNumber, String statementId,
                                   CompanyPscStatement companyPscStatement) throws BadRequestException {
     boolean isLatestRecord = isLatestRecord(companyNumber, statementId, companyPscStatement.getDeltaAt());
 
     if (isLatestRecord) {
-
-      apiClientService.invokeChsKafkaApi(contextId, companyNumber, statementId);
-
       PscStatementDocument document = pscStatementTransformer.transformPscStatement(companyNumber, statementId, companyPscStatement);
 
       saveToDb(contextId, companyNumber, statementId, document);
+      apiClientService.invokeChsKafkaApi(contextId, companyNumber, statementId);
     } else {
       logger.info("Psc Statement not persisted as the record provided is not the latest record.");
     }
