@@ -34,3 +34,4 @@ mongodb:
   pscStatements:
     collection:
       name: company_psc_statements
+  transactional: ${TRANSACTIONAL_ON:false}
