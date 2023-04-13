@@ -22,7 +22,6 @@ import java.util.Arrays;
 @Configuration
 public class ApplicationConfig {
 
-
     @Bean
     public MongoCustomConversions mongoCustomConversions(){
         ObjectMapper objectMapper = mongoDbObjectMapper();
