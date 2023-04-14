@@ -140,8 +140,7 @@ public class PscStatementService {
     if(StringUtils.isBlank(deltaAt)) {
       statement = pscStatementRepository.findById(statementId).filter(doc -> !StringUtils.isBlank(doc.getDeltaAt()));
     } else {
-      statement = pscStatementRepository.findUpdatedPscStatement(companyNumber, statementId,
-              dateTransformer.transformDateZoned(deltaAt));
+      statement = pscStatementRepository.findUpdatedPscStatement(companyNumber, statementId, deltaAt);
     }
     return statement.isEmpty();
   }

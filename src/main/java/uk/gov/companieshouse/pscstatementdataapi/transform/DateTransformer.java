@@ -18,8 +18,4 @@ public class DateTransformer {
         OffsetDateTime offsetDatetime = ZonedDateTime.parse(date, zonedDateTimeformatter).toOffsetDateTime();
         return offsetDatetime.format(dateTimeFormatter);
     }
-
-    public String transformDateZoned(String date){
-        return ZonedDateTime.parse(date, zonedDateTimeformatter).toOffsetDateTime().format(zonedDateTimeformatter);
-    }
 }
