@@ -66,6 +66,7 @@ public class RepositoryITest extends AbstractMongoConfig {
     void find_updated_should_return_correct_statement() {
 
         PscStatementDocument newDocument = createPscStatementDocument("1");
+        newDocument.setDeltaAt(DELTA_AT);
 
         pscStatementRepository.save(newDocument);
 
