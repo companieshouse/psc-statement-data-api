@@ -14,7 +14,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
-import uk.gov.companieshouse.pscstatementdataapi.transform.DateTransformer;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -25,9 +24,6 @@ public class RepositoryITest extends AbstractMongoConfig {
 
     @Autowired
     private PscStatementRepository pscStatementRepository;
-
-    @Spy
-    DateTransformer dateTransformer;
 
     private final String COMPANY_NUMBER = "companyNumber";
 
@@ -73,9 +69,7 @@ public class RepositoryITest extends AbstractMongoConfig {
 
         pscStatementRepository.save(newDocument);
 
-        String date = dateTransformer.transformDate(DELTA_AT);
-
-        Assertions.assertThat(pscStatementRepository.findUpdatedPscStatement(COMPANY_NUMBER, "1", date)).isNotEmpty();
+        Assertions.assertThat(pscStatementRepository.findUpdatedPscStatement(COMPANY_NUMBER, "1", DELTA_AT)).isNotEmpty();
 
     }
 

@@ -22,7 +22,6 @@ import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import uk.gov.companieshouse.pscstatementdataapi.transform.DateTransformer;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
 
 import java.util.List;
@@ -39,8 +38,6 @@ public class PscStatementService {
   PscStatementRepository pscStatementRepository;
   @Autowired
   PscStatementTransformer pscStatementTransformer;
-  @Autowired
-  DateTransformer dateTransformer;
   @Autowired
   CompanyMetricsApiService companyMetricsApiService;
 
