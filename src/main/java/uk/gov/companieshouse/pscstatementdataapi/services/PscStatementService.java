@@ -43,8 +43,6 @@ public class PscStatementService {
   DateTransformer dateTransformer;
   @Autowired
   CompanyMetricsApiService companyMetricsApiService;
-  @Autowired
-  ExemptionsResourceHandler exemptionsHandler;
 
   @Autowired
   InternalApiClient internalApiClient;
@@ -174,9 +172,7 @@ public class PscStatementService {
     StatementLinksType links = new StatementLinksType();
     links.setSelf(String.format("/company/%s/persons-with-significant-control-statements", companyNumber));
     
-    if () {
-      links.setExemptions(String.format("/company/%s/exemptions", companyNumber));
-    }
+    links.setExemptions(String.format("/company/%s/exemptions", companyNumber));
 
     List < Statement > statements = statementDocuments.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
 

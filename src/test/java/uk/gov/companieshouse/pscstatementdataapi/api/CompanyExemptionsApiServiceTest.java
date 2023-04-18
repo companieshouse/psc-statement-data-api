@@ -14,8 +14,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
@@ -23,6 +26,7 @@ import uk.gov.companieshouse.api.handler.delta.PrivateDeltaResourceHandler;
 import uk.gov.companieshouse.api.handler.delta.exemptions.request.PrivateCompanyExemptionsGetAll;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +46,9 @@ public class CompanyExemptionsApiServiceTest {
     @Mock
     private InternalApiClient internalApiClient;
 
+    private final Logger logger = Mockito.mock(Logger.class);
+
+    @Spy
     @InjectMocks
     private CompanyExemptionsApiService companyExemptionsApiService;
 

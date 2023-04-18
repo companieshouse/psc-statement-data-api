@@ -115,6 +115,7 @@ public class TestHelper {
     private StatementLinksType createLinks() {
         StatementLinksType links = new StatementLinksType();
         links.setSelf(String.format("/company/%s/persons-with-significant-control-statements", COMPANY_NUMBER));
+        links.setExemptions(String.format("/company/%s/exemptions", COMPANY_NUMBER));
         return links;
     }
 
