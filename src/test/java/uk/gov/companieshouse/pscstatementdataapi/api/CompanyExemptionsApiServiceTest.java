@@ -18,7 +18,8 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.server.ResponseStatusException;
+
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
@@ -27,6 +28,7 @@ import uk.gov.companieshouse.api.handler.delta.exemptions.request.PrivateCompany
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,6 +68,26 @@ public class CompanyExemptionsApiServiceTest {
         Optional<CompanyExemptions> apiResponse = companyExemptionsApiService.getCompanyExeptions(COMPANY_NUMBER);
 
         assertThat(apiResponse).isNotNull();
+        verify(resourceHandler, times(1)).getCompanyExemptionsResource(any());
+        verify(companyExemptionsGetAll, times(1)).execute();
+    }
+
+    @Test
+    void handleExceptionWhenGetExemptionsThrows() throws ApiErrorResponseException, URIValidationException {
+        when(companyExemptionsGetAll.execute()).thenThrow(ApiErrorResponseException.class);
+
+        assertThrows(ResponseStatusException.class, () -> companyExemptionsApiService.getCompanyExeptions(COMPANY_NUMBER));
+
+        verify(resourceHandler, times(1)).getCompanyExemptionsResource(any());
+        verify(companyExemptionsGetAll, times(1)).execute();
+    }
+
+    @Test
+    void returnsEmptyWhenExemptionsNotFound() throws ApiErrorResponseException, URIValidationException {
+        when(companyExemptionsGetAll.execute()).thenThrow(ResourceNotFoundException.class);
+        Optional<CompanyExemptions> apiResponse = companyExemptionsApiService.getCompanyExeptions(COMPANY_NUMBER);
+
+        assertThat(apiResponse).isEmpty();
         verify(resourceHandler, times(1)).getCompanyExemptionsResource(any());
         verify(companyExemptionsGetAll, times(1)).execute();
     }
