@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.handler.exemptions.ExemptionsResourceHandler;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
 import uk.gov.companieshouse.api.metrics.RegistersApi;
@@ -42,6 +43,8 @@ public class PscStatementService {
   DateTransformer dateTransformer;
   @Autowired
   CompanyMetricsApiService companyMetricsApiService;
+  @Autowired
+  ExemptionsResourceHandler exemptionsHandler;
 
   @Autowired
   InternalApiClient internalApiClient;
@@ -170,6 +173,10 @@ public class PscStatementService {
     StatementList statementList = new StatementList();
     StatementLinksType links = new StatementLinksType();
     links.setSelf(String.format("/company/%s/persons-with-significant-control-statements", companyNumber));
+    
+    if () {
+      links.setExemptions(String.format("/company/%s/exemptions", companyNumber));
+    }
 
     List < Statement > statements = statementDocuments.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
 
