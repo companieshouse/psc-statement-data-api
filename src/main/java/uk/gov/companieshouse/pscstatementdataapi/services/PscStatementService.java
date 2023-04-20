@@ -212,7 +212,7 @@ public class PscStatementService {
 
   private boolean hasPscExemptions(String companyNumber) {
     Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExeptions(companyNumber);
-    if (!companyExemptions.isEmpty()) {
+    if (companyExemptions.isEmpty()) {
       return false;
     } else {
       Optional<Exemptions> exemptions = Optional.ofNullable(companyExemptions.get().getExemptions());

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.utils;
 
 import org.springframework.util.FileCopyUtils;
+import uk.gov.companieshouse.api.exemptions.*;
 import uk.gov.companieshouse.api.metrics.CountsApi;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.PscApi;
@@ -19,6 +20,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.List;
+
+import static uk.gov.companieshouse.api.exemptions.PscExemptAsTradingOnRegulatedMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_TRADING_ON_REGULATED_MARKET;
+import static uk.gov.companieshouse.api.exemptions.PscExemptAsTradingOnUkRegulatedMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_TRADING_ON_UK_REGULATED_MARKET;
 
 public class TestHelper {
 
@@ -29,6 +34,8 @@ public class TestHelper {
     public static final String X_REQUEST_ID = "654321";
     public static final Statement.KindEnum KIND = Statement.KindEnum.PERSONS_WITH_SIGNIFICANT_CONTROL_STATEMENT;
     public static final Statement.StatementEnum STATEMENT = Statement.StatementEnum.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNFICANT_CONTROL;
+
+    private static final LocalDate EXEMPTION_DATE = LocalDate.of(2022, 11, 3);
 
     private Statement statement;
     private CompanyPscStatement companyPscStatement;
@@ -88,6 +95,19 @@ public class TestHelper {
         statementList.setLinks(createLinks());
         return statementList;
     }
+    public StatementList createStatementListWithExemptions() {
+        Statement statement = new Statement();
+        StatementList statementList = new StatementList();
+        statementList.setItems(Collections.singletonList(statement));
+        statementList.setActiveCount(1);
+        statementList.setCeasedCount(1);
+        statementList.setTotalResults(2);
+        statementList.setStartIndex(0);
+        statementList.setItemsPerPage(25);
+        statementList.setLinks(createLinksWithExemptions());
+        return statementList;
+    }
+
 
     public StatementList createStatementListRegisterView() {
         Statement statement = new Statement();
@@ -113,6 +133,12 @@ public class TestHelper {
     }
 
     private StatementLinksType createLinks() {
+        StatementLinksType links = new StatementLinksType();
+        links.setSelf(String.format("/company/%s/persons-with-significant-control-statements", COMPANY_NUMBER));
+        return links;
+    }
+
+    private StatementLinksType createLinksWithExemptions() {
         StatementLinksType links = new StatementLinksType();
         links.setSelf(String.format("/company/%s/persons-with-significant-control-statements", COMPANY_NUMBER));
         links.setExemptions(String.format("/company/%s/exemptions", COMPANY_NUMBER));
@@ -150,6 +176,35 @@ public class TestHelper {
         registers.setPersonsWithSignificantControl(pscStatements);
         metrics.setRegisters(registers);
         return metrics;
+    }
+
+    public CompanyExemptions createExemptions () {
+        CompanyExemptions exemptions = new CompanyExemptions();
+        exemptions.setExemptions(getExemptions());
+        return exemptions;
+    }
+
+    private Exemptions getExemptions() {
+        ExemptionItem exemptionItem = new ExemptionItem();
+        exemptionItem.exemptFrom(EXEMPTION_DATE);
+        exemptionItem.exemptTo(EXEMPTION_DATE);
+
+        List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
+
+
+        PscExemptAsTradingOnRegulatedMarketItem nonUkEeaStateMarket = new PscExemptAsTradingOnRegulatedMarketItem();
+        nonUkEeaStateMarket.setItems(exemptionItems);
+        nonUkEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_TRADING_ON_REGULATED_MARKET);
+
+        PscExemptAsTradingOnUkRegulatedMarketItem ukEeaStateMarket = new PscExemptAsTradingOnUkRegulatedMarketItem();
+        ukEeaStateMarket.setItems(exemptionItems);
+        ukEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_TRADING_ON_UK_REGULATED_MARKET);
+
+        Exemptions exemptions = new Exemptions();
+        exemptions.setPscExemptAsTradingOnRegulatedMarket(nonUkEeaStateMarket);
+        exemptions.setPscExemptAsTradingOnUkRegulatedMarket(ukEeaStateMarket);
+
+        return exemptions;
     }
 
 }

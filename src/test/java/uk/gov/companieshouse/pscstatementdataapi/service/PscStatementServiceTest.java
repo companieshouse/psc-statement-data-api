@@ -15,6 +15,7 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
@@ -69,6 +70,8 @@ public class PscStatementServiceTest {
     CompanyMetricsApiService companyMetricsApiService;
     @Mock
     PscStatementApiService apiClientService;
+    @Mock
+    CompanyExemptionsApiService companyExemptionsApiService;
     @Spy
     DateTransformer dateTransformer;
 
@@ -111,6 +114,24 @@ public class PscStatementServiceTest {
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false,25);
+
+        assertEquals(expectedStatementList, statementList);
+        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
+        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+    }
+
+    @Test
+    void statementListReturnedByCompanyNumberFromRepositoryWithExemptions() throws ResourceNotFoundException, IOException {
+        Statement expectedStatement = new Statement();
+        StatementList expectedStatementList = testHelper.createStatementListWithExemptions();
+        document.setData(expectedStatement);
+
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(companyExemptionsApiService.getCompanyExeptions(any())).thenReturn(Optional.ofNullable(testHelper.createExemptions()));
 
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false,25);
 
