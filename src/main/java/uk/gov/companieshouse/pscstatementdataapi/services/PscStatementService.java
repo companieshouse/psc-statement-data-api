@@ -4,7 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
-import uk.gov.companieshouse.api.handler.exemptions.ExemptionsResourceHandler;
+import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
+import uk.gov.companieshouse.api.exemptions.Exemptions;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
 import uk.gov.companieshouse.api.metrics.RegistersApi;
@@ -13,6 +14,7 @@ import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
@@ -43,7 +45,8 @@ public class PscStatementService {
   DateTransformer dateTransformer;
   @Autowired
   CompanyMetricsApiService companyMetricsApiService;
-
+  @Autowired
+  CompanyExemptionsApiService companyExemptionsApiService;
   @Autowired
   InternalApiClient internalApiClient;
   @Autowired
@@ -171,8 +174,9 @@ public class PscStatementService {
     StatementList statementList = new StatementList();
     StatementLinksType links = new StatementLinksType();
     links.setSelf(String.format("/company/%s/persons-with-significant-control-statements", companyNumber));
-    
-    links.setExemptions(String.format("/company/%s/exemptions", companyNumber));
+    if (hasPscExemptions(companyNumber)) {
+      links.setExemptions(String.format("/company/%s/exemptions", companyNumber));
+    }
 
     List < Statement > statements = statementDocuments.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
 
@@ -204,5 +208,22 @@ public class PscStatementService {
 
     statementList.setItems(statements);
     return statementList;
+  }
+
+  private boolean hasPscExemptions(String companyNumber) {
+    Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExeptions(companyNumber);
+    if (!companyExemptions.isEmpty()) {
+      return false;
+    } else {
+      Optional<Exemptions> exemptions = Optional.ofNullable(companyExemptions.get().getExemptions());
+      
+      return exemptions.filter(x -> 
+        x.getPscExemptAsSharesAdmittedOnMarket() != null ||
+        x.getPscExemptAsTradingOnEuRegulatedMarket() != null ||
+        x.getPscExemptAsTradingOnRegulatedMarket() != null ||
+        x.getPscExemptAsTradingOnUkRegulatedMarket() != null)
+        .isPresent();
+
+    }
   }
 }
