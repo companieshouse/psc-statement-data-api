@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
+
+import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 
@@ -68,6 +71,9 @@ public class PscStatementsSteps {
 
     @Autowired
     private PscStatementService pscStatementService;
+
+    @Autowired
+    private CompanyExemptionsApiService companyExemptionsApiService;
 
     @Before
     public void dbCleanUp(){
@@ -205,6 +211,16 @@ public class PscStatementsSteps {
     @When("Company Metrics API is unavailable")
     public void company_metrics_api_service_unavailable() throws IOException {
         when(companyMetricsApiService.getCompanyMetrics(any())).thenReturn(Optional.empty());
+    }
+
+    @When("Company Exemptions API is available for company number {string}")
+    public void company_exemptions_api_service_available(String companyNumber) throws IOException {
+        File exemptionsFile = new ClassPathResource("/json/input/company_exemptions_"
+                + companyNumber + ".json").getFile();
+        CompanyExemptions companyExemptions = objectMapper.readValue(exemptionsFile, CompanyExemptions.class);
+        Optional<CompanyExemptions> exemptionsApi = Optional.ofNullable(companyExemptions);
+
+        when(companyExemptionsApiService.getCompanyExeptions(any())).thenReturn(exemptionsApi);
     }
 
     @Then("I should receive {int} status code")
