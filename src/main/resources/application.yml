@@ -6,18 +6,15 @@ management:
         health: /healthcheck
 
 chs:
-  kafka:
-    api:
-      endpoint: ${CHS_KAFKA_API_URL:localhost}
-      key: ${CHS_API_KEY:chsApiKey}
-      enabled: ${DSQ_STREAM_HOOK_ENABLED:true}
-
-psc-statements:
   api:
-    resource:
-      changed:
-        uri: ${PSC_STATEMENTS_API_RESOURCE_CHANGED_URI:/private/resource-changed}
+    kafka:
+      url: ${CHS_KAFKA_API_URL:localhost}
+      uri: ${PSC_STATEMENTS_API_RESOURCE_CHANGED_URI:/private/resource-changed}
       kind: ${PSC_STATEMENTS_API_RESOURCE_KIND:persons-with-significant-control-statement}
+    exemptions:
+      url: ${CHS_EXEMPTIONS_DATA_API_URL:localhost}
+    metrics:
+      url: ${CHS_METRICS_DATA_API_URL:localhost}
 
 logger:
   namespace: psc-statement-data-api
