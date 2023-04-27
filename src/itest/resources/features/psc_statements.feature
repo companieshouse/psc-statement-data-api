@@ -56,7 +56,7 @@ Feature: Process Psc Statement Requests
     Given Psc statements data api service is running
     And Psc statements exist for company number "<companyNumber>"
     And Company Metrics API is available for company number "<companyNumber>"
-    And I should receive 200 status code
+    And Company Exemptions API is available for company number "<companyNumber>"
     When I send a GET statement list request for company number in register view "<companyNumber>"
     Then I should receive 200 status code
     And the psc statement list Get call response body should match "<result>" file
