@@ -19,11 +19,11 @@ public class PscStatementApiService {
 
     @Autowired
     InternalApiClient internalApiClient;
-    @Value("${chs.kafka.api.endpoint}")
+    @Value("${chs.api.kafka.url}")
     private String chsKafkaApiUrl;
-    @Value("${psc-statements.api.resource.changed.uri}")
+    @Value("${chs.api.kafka.uri}")
     private String resourceChangedUri;
-    @Value("${psc-statements.api.resource.kind}")
+    @Value("${chs.api.kafka.kind}")
     private String resourceKind;
     private static final String PSC_STATEMENTS_URI = "/company/%s/persons-with-significant-control-statements/%s";
     private static final String CHANGED_EVENT_TYPE = "changed";

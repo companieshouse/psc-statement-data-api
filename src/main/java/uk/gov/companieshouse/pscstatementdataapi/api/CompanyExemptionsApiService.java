@@ -3,6 +3,7 @@ package uk.gov.companieshouse.pscstatementdataapi.api;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,12 +23,14 @@ public class CompanyExemptionsApiService {
     @Autowired
     InternalApiClient internalApiClient;
 
+    @Value("${chs.api.exemptions.url}")
+    private String basePath;
+
     @Autowired
     Logger logger;
 
     public Optional<CompanyExemptions> getCompanyExeptions (final String companyNumber) {
         logger.trace(String.format("Started : getCompanyExemptions for Company Number %s ", companyNumber));
-        String basePath = System.getenv("API_URL");
         internalApiClient.setBasePath(basePath);
         logger.trace(String.format("Created client %s", internalApiClient.getBasePath()));
         PrivateCompanyExemptionsGetAll companyExemptions = 

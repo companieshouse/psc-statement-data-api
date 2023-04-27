@@ -3,6 +3,7 @@ package uk.gov.companieshouse.pscstatementdataapi.api;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.InternalApiClient;
@@ -22,6 +23,9 @@ public class CompanyMetricsApiService {
     @Autowired
     InternalApiClient internalApiClient;
 
+    @Value("${chs.api.metrics.url}")
+    private String basePath;
+
     /**
      * Invoke Company Metrics API.
      */
@@ -38,7 +42,6 @@ public class CompanyMetricsApiService {
         logger.trace(String.format("Started : getCompanyMetrics for Company Number %s ",
                 companyNumber
         ));
-        String basePath = System.getenv("API_URL");
         internalApiClient.setBasePath(basePath);
         logger.trace(String.format("Created client %s", internalApiClient.getBasePath()));
         PrivateCompanyMetricsGet companyMetrics =
