@@ -42,7 +42,8 @@ public class PscStatementController {
     public ResponseEntity<Void> processPcsStatement(@RequestHeader("x-request-id") String contextId,
                                                     @PathVariable("company_number") String companyNumber,
                                                     @PathVariable("statement_id") String statementId,
-                                                    @RequestBody CompanyPscStatement companyPscStatement) {
+                                                    @RequestBody CompanyPscStatement companyPscStatement
+    ) throws JsonProcessingException {
         logger.info(String.format("Processing psc statement data for company number %s and statement_id %s", companyNumber, statementId));
         pscStatementService.processPscStatement(contextId, companyNumber, statementId, companyPscStatement);
         return ResponseEntity.status(HttpStatus.OK).build();

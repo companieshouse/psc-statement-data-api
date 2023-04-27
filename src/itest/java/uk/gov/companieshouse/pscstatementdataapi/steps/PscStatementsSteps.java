@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class PscStatementsSteps {
@@ -98,6 +99,20 @@ public class PscStatementsSteps {
         document.setId(statementId);
         document.setCompanyNumber(companyNumber);
         document.setData(pscStatement);
+        mongoTemplate.save(document);
+        assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)).isNotEmpty();
+    }
+
+    @Given("a psc statement exists for company number {string} with statement id {string} and delta_at {string}")
+    public void psc_statement_exists_for_company_and_id_with_delta_at(String companyNumber, String statementId, String deltaAt) throws IOException {
+        File statementFile = new ClassPathResource("/json/output/psc_statement.json").getFile();
+        Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
+
+        PscStatementDocument document = new PscStatementDocument();
+        document.setId(statementId);
+        document.setCompanyNumber(companyNumber);
+        document.setData(pscStatement);
+        document.setDeltaAt(deltaAt);
         mongoTemplate.save(document);
         assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)).isNotEmpty();
     }
@@ -340,6 +355,13 @@ public class PscStatementsSteps {
     @When("a statement exists with id {string}")
     public void statement_exists(String statementId) {
         Assertions.assertThat(pscStatementRepository.existsById(statementId)).isTrue();
+    }
+
+    @When("a statement exists with id {string} and delta_at {string}")
+    public void statement_exists(String statementId, String deltaAt) throws NoSuchElementException {
+        Assertions.assertThat(pscStatementRepository.existsById(statementId)).isTrue();
+        Optional<PscStatementDocument> document = pscStatementRepository.findById(statementId);
+        Assertions.assertThat(pscStatementRepository.findById(statementId).get().getDeltaAt()).isEqualTo(deltaAt);
     }
 
     @Then("no statement exists with id {string}")

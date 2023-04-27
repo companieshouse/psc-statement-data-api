@@ -1,6 +1,6 @@
 Feature: Response codes for psc statements
 
-  Scenario Outline: Processing bad psc statement payload (should be 400)
+  Scenario Outline: Processing bad psc statement payload
 
     Given Psc statements data api service is running
     When I send a PUT request with payload "<data>" file for company number "<companyNumber>" with statement id "<statementId>"
@@ -9,8 +9,8 @@ Feature: Response codes for psc statements
     And nothing is persisted in the database
 
     Examples:
-    | data                      | response_code |
-    | bad_company_psc_statement | 500           |
+    | data                                   | response_code |
+    | bad_company_psc_statement_invalid_json | 400           |
 
 
   Scenario: Processing psc statement with no ERIC headers

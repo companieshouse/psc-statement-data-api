@@ -32,7 +32,6 @@ import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
-import uk.gov.companieshouse.pscstatementdataapi.transform.DateTransformer;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
@@ -42,7 +41,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -80,8 +78,6 @@ public class PscStatementServiceTest {
     PscStatementApiService apiClientService;
     @Mock
     CompanyExemptionsApiService companyExemptionsApiService;
-    @Spy
-    DateTransformer dateTransformer;
 
     @Spy
     @InjectMocks
@@ -333,7 +329,6 @@ public class PscStatementServiceTest {
 
         verify(repository).save(document);
         verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
-        verify(dateTransformer, times(1)).transformDate(any());
         assertNotNull(document.getCreated().getAt());
     }
 
@@ -352,7 +347,6 @@ public class PscStatementServiceTest {
 
         verify(repository).save(document);
         verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
-        verify(dateTransformer, times(1)).transformDate(any());
         assertEquals(document.getCreated().getAt(), dateTime);
     }
 
@@ -362,7 +356,7 @@ public class PscStatementServiceTest {
         Updated updated = new Updated();
         updated.setAt(dateTime);
         document.setUpdated(updated);
-        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, dateTransformer.transformDate(DELTA_AT))).thenReturn(Arrays.asList(document));
+        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.ofNullable(document));
         ApiResponse<Void> response = new ApiResponse<>(200, null);
         when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
@@ -469,11 +463,34 @@ public class PscStatementServiceTest {
         companyExemptions.setExemptions(exemptions);
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
         when(companyExemptionsApiService.getCompanyExeptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
-        
+
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
         linksType.setSelf("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements");
 
         assertEquals(list.getLinks(), linksType);
+    }
+    @Test
+    void processPscStatementCreatesIfDeltaAtIsMissing() {
+        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.empty());
+        ApiResponse<Void> response = new ApiResponse<>(200, null);
+        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
+
+        pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
+        verify(repository, times(1)).save(document);
+        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+    }
+
+    @Test
+    void processPscStatementDoesNotUpdateIfDeltaAtIsMissing() {
+        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.ofNullable(document));
+        ApiResponse<Void> response = new ApiResponse<>(200, null);
+        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
+
+        pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
+        verify(repository, times(0)).save(document);
+        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
     }
 }

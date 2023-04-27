@@ -25,6 +25,19 @@ Feature: Process Psc Statement Requests
       | companyNumber | statementId                 | data                  |
       | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | company_psc_statement |
 
+  Scenario Outline: Processing old psc statement information
+
+    Given Psc statements data api service is running
+    And a psc statement exists for company number "<companyNumber>" with statement id "<statementId>" and delta_at "<deltaAt>"
+    When I send a PUT request with payload "<oldData>" file for company number "<companyNumber>" with statement id "<statementId>"
+    Then I should receive 200 status code
+    And the CHS Kafka API is not invoked
+    And a statement exists with id "<statementId>" and delta_at "<deltaAt>"
+
+    Examples:
+      | companyNumber | statementId                 | deltaAt              | oldData                      |
+      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | 20211008152823383176 | company_psc_statement_old    |
+
 
   Scenario Outline: Processing Psc Statement List GET request successfully
 
