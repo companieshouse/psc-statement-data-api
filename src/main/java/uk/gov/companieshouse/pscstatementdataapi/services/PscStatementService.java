@@ -218,10 +218,10 @@ public class PscStatementService {
     Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExeptions(companyNumber);
 
     return companyExemptions.filter(x ->
-            x.getExemptions().getPscExemptAsSharesAdmittedOnMarket() != null ||
+            x.getExemptions() != null &&
+            (x.getExemptions().getPscExemptAsSharesAdmittedOnMarket() != null ||
             x.getExemptions().getPscExemptAsTradingOnEuRegulatedMarket() != null ||
             x.getExemptions().getPscExemptAsTradingOnRegulatedMarket() != null ||
-            x.getExemptions().getPscExemptAsTradingOnUkRegulatedMarket() != null).isPresent();
-
+            x.getExemptions().getPscExemptAsTradingOnUkRegulatedMarket() != null)).isPresent();
   }
 }
