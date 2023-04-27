@@ -212,18 +212,12 @@ public class PscStatementService {
 
   private boolean hasPscExemptions(String companyNumber) {
     Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExeptions(companyNumber);
-    if (companyExemptions.isEmpty()) {
-      return false;
-    } else {
-      Optional<Exemptions> exemptions = Optional.ofNullable(companyExemptions.get().getExemptions());
-      
-      return exemptions.filter(x -> 
-        x.getPscExemptAsSharesAdmittedOnMarket() != null ||
-        x.getPscExemptAsTradingOnEuRegulatedMarket() != null ||
-        x.getPscExemptAsTradingOnRegulatedMarket() != null ||
-        x.getPscExemptAsTradingOnUkRegulatedMarket() != null)
-        .isPresent();
 
-    }
+    return companyExemptions.filter(x ->
+            x.getExemptions().getPscExemptAsSharesAdmittedOnMarket() != null ||
+            x.getExemptions().getPscExemptAsTradingOnEuRegulatedMarket() != null ||
+            x.getExemptions().getPscExemptAsTradingOnRegulatedMarket() != null ||
+            x.getExemptions().getPscExemptAsTradingOnUkRegulatedMarket() != null).isPresent();
+
   }
 }
