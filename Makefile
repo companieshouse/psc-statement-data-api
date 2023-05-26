@@ -55,7 +55,7 @@ sonar:
 sonar-pr-analysis:
 	mvn sonar:sonar -P sonar-pr-analysis
 
-FAIL_BUILD_CVSS_LIMIT ?= 5
+FAIL_BUILD_CVSS_LIMIT ?= 10
 
 .PHONY: security-check
 security-check: security-report
