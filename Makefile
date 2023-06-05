@@ -64,4 +64,4 @@ security-check: security-report
 .PHONY: security-report
 security-report:
 	mvn org.owasp:dependency-check-maven:check -DassemblyAnalyzerEnabled=false
-	mvn sonar:sonar
+	mvn clean install sonar:sonar
