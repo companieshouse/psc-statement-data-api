@@ -11,8 +11,8 @@ import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
-import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
-import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
+import uk.gov.companieshouse.api.model.PscStatementDocument;
+import uk.gov.companieshouse.api.model.Updated;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

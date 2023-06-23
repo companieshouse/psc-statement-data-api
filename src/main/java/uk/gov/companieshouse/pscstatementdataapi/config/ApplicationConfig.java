@@ -9,11 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import uk.gov.companieshouse.api.InternalApiClient;
-import uk.gov.companieshouse.pscstatementdataapi.converter.EnumWriteConverter;
-import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
-import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementWriteConverter;
-import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateDeserializer;
-import uk.gov.companieshouse.pscstatementdataapi.serialization.LocalDateSerializer;
+import uk.gov.companieshouse.api.converter.EnumWriteConverter;
+import uk.gov.companieshouse.api.converter.ReadConverter;
+import uk.gov.companieshouse.api.converter.WriteConverter;
+import uk.gov.companieshouse.api.delta.PscStatement;
+import uk.gov.companieshouse.api.serialization.LocalDateDeserializer;
+import uk.gov.companieshouse.api.serialization.LocalDateSerializer;
 import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.time.LocalDate;
@@ -26,8 +27,8 @@ public class ApplicationConfig {
     public MongoCustomConversions mongoCustomConversions(){
         ObjectMapper objectMapper = mongoDbObjectMapper();
         return new MongoCustomConversions(Arrays.asList(
-                new PscStatementReadConverter(objectMapper),
-                new PscStatementWriteConverter(objectMapper),
+                new ReadConverter<>(objectMapper, PscStatement.class),
+                new WriteConverter<PscStatement>(objectMapper),
                 new EnumWriteConverter()));
     }
 

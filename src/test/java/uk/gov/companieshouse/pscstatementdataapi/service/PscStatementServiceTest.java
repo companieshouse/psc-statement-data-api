@@ -23,13 +23,13 @@ import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
-import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
-import uk.gov.companieshouse.pscstatementdataapi.model.Created;
-import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
-import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
+import uk.gov.companieshouse.api.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.api.model.Created;
+import uk.gov.companieshouse.api.model.PscStatementDocument;
+import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
@@ -143,7 +143,7 @@ public class PscStatementServiceTest {
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
-        when(companyExemptionsApiService.getCompanyExeptions(any())).thenReturn(Optional.ofNullable(testHelper.createExemptions()));
+        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(Optional.ofNullable(testHelper.createExemptions()));
 
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false,25);
 
@@ -379,7 +379,7 @@ public class PscStatementServiceTest {
         exemptions.setPscExemptAsSharesAdmittedOnMarket(pscExemptAsSharesAdmittedOnMarketItem);
         companyExemptions.setExemptions(exemptions);
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
-        when(companyExemptionsApiService.getCompanyExeptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
+        when(companyExemptionsApiService.getCompanyExemptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
         
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
@@ -400,7 +400,7 @@ public class PscStatementServiceTest {
         exemptions.setPscExemptAsTradingOnEuRegulatedMarket(pscExemptAsTradingOnEuRegulatedMarketItem);
         companyExemptions.setExemptions(exemptions);
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
-        when(companyExemptionsApiService.getCompanyExeptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
+        when(companyExemptionsApiService.getCompanyExemptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
         
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
@@ -421,7 +421,7 @@ public class PscStatementServiceTest {
         exemptions.setPscExemptAsTradingOnRegulatedMarket(pscExemptAsTradingOnRegulatedMarketItem);
         companyExemptions.setExemptions(exemptions);
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
-        when(companyExemptionsApiService.getCompanyExeptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
+        when(companyExemptionsApiService.getCompanyExemptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
         
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
@@ -442,7 +442,7 @@ public class PscStatementServiceTest {
         exemptions.setPscExemptAsTradingOnUkRegulatedMarket(pscExemptAsTradingOnUkRegulatedMarketItem);
         companyExemptions.setExemptions(exemptions);
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
-        when(companyExemptionsApiService.getCompanyExeptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
+        when(companyExemptionsApiService.getCompanyExemptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
         
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
@@ -462,7 +462,7 @@ public class PscStatementServiceTest {
         Exemptions exemptions = new Exemptions();
         companyExemptions.setExemptions(exemptions);
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
-        when(companyExemptionsApiService.getCompanyExeptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
+        when(companyExemptionsApiService.getCompanyExemptions(COMPANY_NUMBER)).thenReturn(optionalExempt);
 
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
