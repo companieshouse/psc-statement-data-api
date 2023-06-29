@@ -23,8 +23,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,8 +36,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
-import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
-import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
+import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
@@ -235,7 +235,7 @@ public class PscStatementsSteps {
         CompanyExemptions companyExemptions = objectMapper.readValue(exemptionsFile, CompanyExemptions.class);
         Optional<CompanyExemptions> exemptionsApi = Optional.ofNullable(companyExemptions);
 
-        when(companyExemptionsApiService.getCompanyExeptions(any())).thenReturn(exemptionsApi);
+        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(exemptionsApi);
     }
 
     @Then("I should receive {int} status code")

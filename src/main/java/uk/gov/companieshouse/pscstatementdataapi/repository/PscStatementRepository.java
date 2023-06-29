@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
 import org.springframework.stereotype.Repository;
-import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
+import uk.gov.companieshouse.api.model.PscStatementDocument;
 
 import java.time.OffsetDateTime;
 import java.util.List;

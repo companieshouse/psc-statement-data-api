@@ -16,13 +16,13 @@ import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
-import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
-import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
-import uk.gov.companieshouse.pscstatementdataapi.model.Created;
-import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
+import uk.gov.companieshouse.api.exception.BadRequestException;
+import uk.gov.companieshouse.api.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.api.model.Created;
+import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -214,7 +214,7 @@ public class PscStatementService {
   }
 
   private boolean hasPscExemptions(String companyNumber) {
-    Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExeptions(companyNumber);
+    Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExemptions(companyNumber);
 
     return companyExemptions.filter(x ->
             x.getExemptions() != null &&
