@@ -12,7 +12,7 @@ import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.converter.EnumWriteConverter;
-import uk.gov.companieshouse.api.delta.PscStatement;
+import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.serialization.LocalDateDeserializer;
 import uk.gov.companieshouse.api.serialization.LocalDateSerializer;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
@@ -29,7 +29,7 @@ public class ApplicationConfig {
     public MongoCustomConversions mongoCustomConversions(){
         ObjectMapper objectMapper = mongoDbObjectMapper();
         return new MongoCustomConversions(Arrays.asList(
-                new PscStatementReadConverter(objectMapper, PscStatement.class),
+                new PscStatementReadConverter(objectMapper, Statement.class),
                 new PscStatementWriteConverter(objectMapper),
                 new EnumWriteConverter()));
     }
