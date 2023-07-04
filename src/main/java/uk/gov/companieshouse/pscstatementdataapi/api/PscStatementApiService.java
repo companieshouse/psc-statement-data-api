@@ -12,7 +12,7 @@ import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResource
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 
 @Service
 public class PscStatementApiService {

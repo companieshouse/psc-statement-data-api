@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.pscstatementdataapi.repository;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Spy;
 import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig;
 
 import org.assertj.core.api.Assertions;
@@ -12,8 +11,8 @@ import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoCo
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.psc.Statement;
-import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
-import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
+import uk.gov.companieshouse.api.model.PscStatementDocument;
+import uk.gov.companieshouse.api.model.Updated;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
