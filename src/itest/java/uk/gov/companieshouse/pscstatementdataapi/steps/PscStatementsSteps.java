@@ -92,7 +92,8 @@ public class PscStatementsSteps {
 
     @Given("a psc statement exists for company number {string} with statement id {string}")
     public void psc_statement_exists_for_company_and_id(String companyNumber, String statementId) throws IOException {
-        File statementFile = new ClassPathResource("/json/output/psc_statement.json").getFile();
+        String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/psc_statement.json");
+
         Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
 
         PscStatementDocument document = new PscStatementDocument();
@@ -105,7 +106,7 @@ public class PscStatementsSteps {
 
     @Given("a psc statement exists for company number {string} with statement id {string} and delta_at {string}")
     public void psc_statement_exists_for_company_and_id_with_delta_at(String companyNumber, String statementId, String deltaAt) throws IOException {
-        File statementFile = new ClassPathResource("/json/output/psc_statement.json").getFile();
+        String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/psc_statement.json");
         Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
 
         PscStatementDocument document = new PscStatementDocument();
@@ -119,7 +120,8 @@ public class PscStatementsSteps {
 
     @Given("Psc statements exist for company number {string}")
     public void psc_statements_exist_for_company(String companyNumber) throws IOException {
-        File statementFile = new ClassPathResource("/json/output/psc_statement.json").getFile();
+        String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/psc_statement.json");
+
         Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
         PscStatementDocument document = new PscStatementDocument();
         document.setId("1");
@@ -175,8 +177,7 @@ public class PscStatementsSteps {
 
     @When("I send a GET statement list request for company number {string}")
     public void get_statement_list_for_company_number(String companyNumber) throws IOException {
-        File metricsFile = new ClassPathResource("/json/input/company_metrics_" +
-                companyNumber + ".json").getFile();
+
         String uri = "/company/{company_number}/persons-with-significant-control-statements";
 
         HttpHeaders headers = new HttpHeaders();
@@ -215,8 +216,8 @@ public class PscStatementsSteps {
 
     @When("Company Metrics API is available for company number {string}")
     public void company_metrics_api_service_available(String companyNumber) throws IOException {
-        File metricsFile = new ClassPathResource("/json/input/company_metrics_"
-                + companyNumber + ".json").getFile();
+        String metricsFile = FileReaderUtil.readFile("src/itest/resources/json/input/company_metrics_" + companyNumber + ".json");
+
         MetricsApi metrics = objectMapper.readValue(metricsFile, MetricsApi.class);
         Optional<MetricsApi> metricsApi = Optional.ofNullable(metrics);
 
@@ -230,8 +231,8 @@ public class PscStatementsSteps {
 
     @When("Company Exemptions API is available for company number {string}")
     public void company_exemptions_api_service_available(String companyNumber) throws IOException {
-        File exemptionsFile = new ClassPathResource("/json/input/company_exemptions_"
-                + companyNumber + ".json").getFile();
+        String exemptionsFile = FileReaderUtil.readFile("src/itest/resources/json/input/company_exemptions_" + companyNumber + ".json");
+
         CompanyExemptions companyExemptions = objectMapper.readValue(exemptionsFile, CompanyExemptions.class);
         Optional<CompanyExemptions> exemptionsApi = Optional.ofNullable(companyExemptions);
 
@@ -245,8 +246,9 @@ public class PscStatementsSteps {
     }
     @Then("the psc statement Get call response body should match {string} file")
     public void the_psc_statement_get_call_response_body_should_match(String dataFile) throws IOException {
-        File file = new ClassPathResource("/json/output/" + dataFile + ".json").getFile();
-        Statement expected = objectMapper.readValue(file, Statement.class);
+        String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/" + dataFile + ".json");
+
+        Statement expected = objectMapper.readValue(statementFile, Statement.class);
 
         Statement actual = CucumberContext.CONTEXT.get("getResponseBody");
 
@@ -257,7 +259,9 @@ public class PscStatementsSteps {
 
     @Then("the psc statement list Get call response body should match {string} file")
     public void the_psc_statement_list_get_call_response_body_should_match(String dataFile) throws IOException {
-        File file = new ClassPathResource("/json/output/" + dataFile + ".json").getFile();
+
+        String file = FileReaderUtil.readFile("src/itest/resources/json/output/" + dataFile + ".json");
+
         StatementList expected = objectMapper.readValue(file, StatementList.class);
 
         StatementList actual = CucumberContext.CONTEXT.get("getResponseBody");
