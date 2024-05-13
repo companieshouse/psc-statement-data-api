@@ -2,11 +2,12 @@ package uk.gov.companieshouse.pscstatementdataapi.services;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
@@ -19,10 +20,9 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
-import uk.gov.companieshouse.api.exception.BadRequestException;
-import uk.gov.companieshouse.api.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.api.model.Created;
 import uk.gov.companieshouse.api.model.PscStatementDocument;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class PscStatementService {
@@ -66,7 +68,7 @@ public class PscStatementService {
 
     Optional<List<PscStatementDocument>> statementListOptional = pscStatementRepository.getStatementList(companyNumber, startIndex, itemsPerPage);
     List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs -> !docs.isEmpty()).orElseThrow(() ->
-            new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
+            new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
                     "Resource not found for company number: %s", companyNumber)));
 
     return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, companyNumber, registerView);
@@ -79,7 +81,7 @@ public class PscStatementService {
       try {
         metricsData = companyMetrics.get();
       } catch (NoSuchElementException ex) {
-        throw new ResourceNotFoundException(HttpStatus.NOT_FOUND,
+        throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
                 String.format("No company metrics data found for company number: %s", companyNumber));
       }
 
@@ -87,19 +89,19 @@ public class PscStatementService {
             .map(MetricsApi::getRegisters)
             .map(RegistersApi::getPersonsWithSignificantControl)
             .map(RegisterApi::getRegisterMovedTo)
-            .orElseThrow(() -> new ResourceNotFoundException(HttpStatus.NOT_FOUND,
+            .orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
                     String.format("company %s not on public register", companyNumber)));
 
       if (registerMovedTo.equals("public-register")) {
         Optional<List<PscStatementDocument>> statementListOptional = pscStatementRepository.getStatementListRegisterView(companyNumber, startIndex,
                 metricsData.getRegisters().getPersonsWithSignificantControl().getMovedOn(), itemsPerPage);
         List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs -> !docs.isEmpty()).orElseThrow(() ->
-                new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
+                new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
                         "Resource not found for company number: %s", companyNumber)));
 
         return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, companyNumber, true);
       } else {
-        throw new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format("company %s not on public register", companyNumber));
+        throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format("company %s not on public register", companyNumber));
       }
   }
 
@@ -118,7 +120,7 @@ public class PscStatementService {
   private PscStatementDocument getPscStatementDocument(String companyNumber, String statementId) throws ResourceNotFoundException{
     Optional<PscStatementDocument> statementOptional = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
     return statementOptional.orElseThrow(() ->
-            new ResourceNotFoundException(HttpStatus.NOT_FOUND, String.format(
+            new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
                     "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber)));
   }
 
