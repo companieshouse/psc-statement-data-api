@@ -13,14 +13,14 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
-import uk.gov.companieshouse.api.metrics.MetricsApi;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
+import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
@@ -154,7 +155,7 @@ public class PscStatementsSteps {
         ResponseEntity<Statement> response = restTemplate.exchange(uri, HttpMethod.GET, request,
                 Statement.class, companyNumber, statementId);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
     }
 
@@ -171,7 +172,7 @@ public class PscStatementsSteps {
         ResponseEntity<MetricsApi> response = restTemplate.exchange(uri, HttpMethod.GET, request,
                 MetricsApi.class, companyNumber);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
     }
 
@@ -189,7 +190,7 @@ public class PscStatementsSteps {
         ResponseEntity<StatementList> response = restTemplate.exchange(uri, HttpMethod.GET, request,
                 StatementList.class, companyNumber);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
     }
 
@@ -208,9 +209,9 @@ public class PscStatementsSteps {
         response = restTemplate.exchange(uri, HttpMethod.GET, request,
                 StatementList.class, companyNumber);
     } catch (Exception ex) {
-        response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        response = new ResponseEntity<>(HttpStatusCode.valueOf(NOT_FOUND.value()));
     }
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
     }
 
@@ -293,7 +294,7 @@ public class PscStatementsSteps {
         String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal";
         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, companyNumber, statementId);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
 
     @When("I send a PUT request with no ERIC headers")
@@ -312,7 +313,7 @@ public class PscStatementsSteps {
         String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal";
         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, "12345", "abcde");
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
 
     @When("I send DELETE request for company number {string} with statement id {string}")
@@ -330,7 +331,7 @@ public class PscStatementsSteps {
 
         ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, request, Void.class, companyNumber, statementId);
 
-        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode());
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
 
     @When("psc statement id does not exist for {string}")

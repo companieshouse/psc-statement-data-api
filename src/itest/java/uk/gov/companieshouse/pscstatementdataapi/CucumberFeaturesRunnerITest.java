@@ -11,7 +11,6 @@ import uk.gov.companieshouse.pscstatementdataapi.config.AbstractIntegrationTest;
 @RunWith(Cucumber.class)
 @CucumberOptions(features = "src/itest/resources/features",
         plugin = {"pretty", "json:target/cucumber-report.json"})
-@TestPropertySource(properties = {"mongodb.transactional = true"})
 @CucumberContextConfiguration
 public class CucumberFeaturesRunnerITest extends AbstractIntegrationTest {
 
