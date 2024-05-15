@@ -32,6 +32,7 @@
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <docker-java-api.version>3.3.6</docker-java-api.version>
 
         <!-- Internal -->
         <structured-logging.version>3.0.7</structured-logging.version>
@@ -207,21 +208,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>uk.org.webcompere</groupId>
-            <artifactId>system-stubs-core</artifactId>
-            <version>2.1.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.org.webcompere</groupId>
-            <artifactId>system-stubs-jupiter</artifactId>
-            <version>2.1.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-api</artifactId>
-            <version>3.3.6</version>
+            <version>${docker-java-api.version}</version>
         </dependency>
     </dependencies>
     <build>
