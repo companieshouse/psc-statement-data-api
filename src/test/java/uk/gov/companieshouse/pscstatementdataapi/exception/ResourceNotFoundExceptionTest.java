@@ -6,32 +6,29 @@ import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 
 class ResourceNotFoundExceptionTest {
 
     @Test
     void testResourceNotFoundException() {
         HttpStatusCode status = HttpStatusCode.valueOf(404);
-        String message =  "404 NOT_FOUND";
 
-        ResourceNotFoundException exception = new ResourceNotFoundException(status, any());
+        ResourceNotFoundException exception = new ResourceNotFoundException(status, "some error happened");
 
         assertEquals(status, exception.getStatusCode());
-        assertEquals(message, exception.getMessage());
+        assertEquals("404 NOT_FOUND \"some error happened\"", exception.getMessage());
     }
 
     @Test
     void testResourceNotFoundExceptionThrown() {
         HttpStatusCode status = HttpStatusCode.valueOf(404);
-        String message =  "404 NOT_FOUND";
 
         ResponseStatusException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            throw new ResourceNotFoundException(status, any());
+            throw new ResourceNotFoundException(status, "some error happened");
         });
 
         assertEquals(ResourceNotFoundException.class, exception.getClass());
         assertEquals(status, exception.getStatusCode());
-        assertEquals(message, exception.getMessage());
+        assertEquals("404 NOT_FOUND \"some error happened\"", exception.getMessage());
     }
 }
