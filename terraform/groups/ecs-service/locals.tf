@@ -9,7 +9,7 @@ locals {
   docker_repo                = "psc-statement-data-api"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
   lb_listener_rule_priority  = 85
-  lb_listener_paths          = ["/company/*/persons-with-significant-control-statements", "/psc-statement-data-api/healthcheck"]
+  lb_listener_paths          = ["/company/*/persons-with-significant-control-statements", "/company/*/persons-with-significant-control-statements/*", "/psc-statement-data-api/healthcheck"]
   healthcheck_path           = "/psc-statement-data-api/healthcheck" # healthcheck path for psc statement data api 
   healthcheck_matcher        = "200"
   vpc_name                   = local.stack_secrets["vpc_name"]
