@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.MethodNotAllowedException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.BadRequestException;
-import uk.gov.companieshouse.api.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
+
 import java.time.format.DateTimeParseException;
 
 @ControllerAdvice
