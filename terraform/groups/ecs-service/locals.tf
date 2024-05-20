@@ -4,7 +4,7 @@ locals {
   name_prefix                = "${local.stack_name}-${var.environment}"
   global_prefix              = "global-${var.environment}"
   service_name               = "psc-statement-data-api"
-  container_port             = 8080
+  container_port             = "8080"
   eric_port                  = "10000"
   docker_repo                = "psc-statement-data-api"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
