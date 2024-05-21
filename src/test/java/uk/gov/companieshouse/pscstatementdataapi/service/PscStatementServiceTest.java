@@ -87,17 +87,17 @@ public class PscStatementServiceTest extends AbstractMongoConfig {
     @InjectMocks
     PscStatementService pscStatementService;
 
-    private TestHelper testHelper;
-    private Statement statement;
-    private CompanyPscStatement companyPscStatement;
-    private PscStatementDocument document;
-    private PscExemptAsSharesAdmittedOnMarketItem pscExemptAsSharesAdmittedOnMarketItem;
-    private PscExemptAsTradingOnEuRegulatedMarketItem pscExemptAsTradingOnEuRegulatedMarketItem;
-    private PscExemptAsTradingOnRegulatedMarketItem pscExemptAsTradingOnRegulatedMarketItem;
-    private PscExemptAsTradingOnUkRegulatedMarketItem pscExemptAsTradingOnUkRegulatedMarketItem;
+    private static TestHelper testHelper;
+    private static Statement statement;
+    private static CompanyPscStatement companyPscStatement;
+    private static PscStatementDocument document;
+    private static PscExemptAsSharesAdmittedOnMarketItem pscExemptAsSharesAdmittedOnMarketItem;
+    private static PscExemptAsTradingOnEuRegulatedMarketItem pscExemptAsTradingOnEuRegulatedMarketItem;
+    private static PscExemptAsTradingOnRegulatedMarketItem pscExemptAsTradingOnRegulatedMarketItem;
+    private static PscExemptAsTradingOnUkRegulatedMarketItem pscExemptAsTradingOnUkRegulatedMarketItem;
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void setUp() {
         testHelper = new TestHelper();
         statement = testHelper.createStatement();
         document = testHelper.createEmptyPscStatementDocument();
