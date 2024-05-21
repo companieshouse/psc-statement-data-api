@@ -2,7 +2,7 @@ package uk.gov.companieshouse.pscstatementdataapi.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig;
+import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfigIntegration;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
 
 @Testcontainers
 @DataMongoTest
-public class RepositoryITest extends AbstractMongoConfig {
+public class RepositoryITest extends AbstractMongoConfigIntegration {
 
     @Autowired
     private PscStatementRepository pscStatementRepository;

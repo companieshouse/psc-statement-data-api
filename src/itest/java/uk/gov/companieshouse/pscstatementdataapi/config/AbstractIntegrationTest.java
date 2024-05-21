@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
@@ -16,7 +17,7 @@ import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @ActiveProfiles({"test"})
-public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
+public abstract class AbstractIntegrationTest extends AbstractMongoConfigIntegration {
 
     @MockBean
     public PscStatementApiService pscStatementApiService;
