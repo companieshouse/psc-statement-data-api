@@ -94,11 +94,6 @@ public class PscStatementServiceTest extends AbstractMongoConfig {
     private PscExemptAsTradingOnRegulatedMarketItem pscExemptAsTradingOnRegulatedMarketItem;
     private PscExemptAsTradingOnUkRegulatedMarketItem pscExemptAsTradingOnUkRegulatedMarketItem;
 
-    @BeforeAll
-    static void setup() {
-        mongoDBContainer.start();
-    }
-
     @BeforeEach
     void setUp() {
         testHelper = new TestHelper();
@@ -109,7 +104,9 @@ public class PscStatementServiceTest extends AbstractMongoConfig {
         pscExemptAsTradingOnEuRegulatedMarketItem = new PscExemptAsTradingOnEuRegulatedMarketItem();
         pscExemptAsTradingOnRegulatedMarketItem = new PscExemptAsTradingOnRegulatedMarketItem();
         pscExemptAsTradingOnUkRegulatedMarketItem = new PscExemptAsTradingOnUkRegulatedMarketItem();
+        mongoDBContainer.start();
     }
+
     @Test
     void statementReturnedByCompanyNumberAndStatementIdFromRepository() throws JsonProcessingException, ResourceNotFoundException {
         Statement expectedStatement = new Statement();
