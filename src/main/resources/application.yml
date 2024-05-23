@@ -12,9 +12,9 @@ chs:
       uri: ${PSC_STATEMENTS_API_RESOURCE_CHANGED_URI:/private/resource-changed}
       kind: ${PSC_STATEMENTS_API_RESOURCE_KIND:persons-with-significant-control-statement}
     exemptions:
-      url: ${API_LOCAL_URL:localhost}
+      url: ${CHS_EXEMPTION_API_LOCAL_URL:localhost}
     metrics:
-      url: ${API_LOCAL_URL:localhost}
+      url: ${CHS_METRICS_API_LOCAL_URL:localhost}
 
 logger:
   namespace: psc-statement-data-api
