@@ -6,7 +6,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 
 /**
