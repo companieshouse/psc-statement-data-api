@@ -18,7 +18,7 @@ import java.util.Optional;
 @Service
 public class CompanyMetricsApiService {
 
-    private static final String GET_COMPANY_METRICS_ENDPOINT = "/company/%s/metrics";
+    private static final String GET_COMPANY_METRICS_ENDPOINT = "${GET_COMPANY_METRICS_ENDPOINT}";
     private final Logger logger;
 
 
