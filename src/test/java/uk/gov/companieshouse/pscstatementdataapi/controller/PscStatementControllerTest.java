@@ -2,7 +2,9 @@ package uk.gov.companieshouse.pscstatementdataapi.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -10,6 +12,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.pscstatementdataapi.api.ApiClientServiceImpl;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiClientImpl;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
@@ -38,6 +44,13 @@ public class PscStatementControllerTest {
 
     @MockBean
     private PscStatementService pscStatementService;
+    @MockBean
+    private Logger logger;
+    @MockBean
+    @Qualifier("apiClientServiceImpl")
+    private ApiClientServiceImpl apiClientService;
+    @MockBean
+    private CompanyMetricsApiClientImpl companyMetricsApiClient;
     @Autowired
     private MockMvc mockMvc;
     @Autowired

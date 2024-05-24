@@ -13,8 +13,6 @@ chs:
       kind: ${PSC_STATEMENTS_API_RESOURCE_KIND:persons-with-significant-control-statement}
     exemptions:
       url: ${CHS_EXEMPTION_API_LOCAL_URL:localhost}
-
-api:
   company:
     metrics:
       endpoint: ${COMPANY_METRICS_API_URL:https://localhost}

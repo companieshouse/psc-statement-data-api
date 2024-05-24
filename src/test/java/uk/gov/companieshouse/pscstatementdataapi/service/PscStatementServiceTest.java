@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.exemptions.Exemptions;
 import uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem;
@@ -24,6 +26,8 @@ import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.ApiClientServiceImpl;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiClientImpl;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.api.model.Created;
@@ -78,6 +82,11 @@ public class PscStatementServiceTest {
     PscStatementApiService apiClientService;
     @Mock
     CompanyExemptionsApiService companyExemptionsApiService;
+    @MockBean
+    private CompanyMetricsApiClientImpl companyMetricsApiClient;
+    @MockBean
+    @Qualifier("apiClientServiceImpl")
+    private ApiClientServiceImpl apiClientServiceImpl;
 
     @Spy
     @InjectMocks
