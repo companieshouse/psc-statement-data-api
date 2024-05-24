@@ -233,6 +233,7 @@
                         <API_URL>key</API_URL>
                         <DOCUMENT_API_LOCAL_URL>key</DOCUMENT_API_LOCAL_URL>
                         <PAYMENTS_API_URL>key</PAYMENTS_API_URL>
+                        <COMPANY_METRICS_API_URL>key</COMPANY_METRICS_API_URL>
                     </environmentVariables>
                 </configuration>
             </plugin>
