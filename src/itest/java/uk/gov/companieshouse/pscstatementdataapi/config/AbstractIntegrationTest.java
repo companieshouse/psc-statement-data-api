@@ -7,9 +7,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.pscstatementdataapi.api.ApiClientServiceImpl;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiClientImpl;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
+//import uk.gov.companieshouse.pscstatementdataapi.api.ApiClientServiceImpl;
+import uk.gov.companieshouse.api.sdk.impl.ApiClientServiceImpl;
+//import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiClientImpl;
+
+//import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
+
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 
 /**
@@ -37,6 +41,6 @@ public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
     @Qualifier("apiClientServiceImpl")
     private ApiClientServiceImpl apiClientService;
 
-    @MockBean
-    private CompanyMetricsApiClientImpl companyMetricsApiClient;
+//    @MockBean
+//    private CompanyMetricsApiClientImpl companyMetricsApiClient;
 }

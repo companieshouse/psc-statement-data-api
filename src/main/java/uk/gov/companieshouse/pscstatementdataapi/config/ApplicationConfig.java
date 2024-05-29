@@ -6,10 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.converter.EnumWriteConverter;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.serialization.LocalDateDeserializer;
@@ -36,6 +38,11 @@ public class ApplicationConfig {
     @Bean
     public InternalApiClient internalApiClient() {
         return ApiSdkManager.getPrivateSDK();
+    }
+
+    @Bean
+    public CompanyMetricsApiService companyMetricsApiService() {
+        return new CompanyMetricsApiService();
     }
 
     @Bean
