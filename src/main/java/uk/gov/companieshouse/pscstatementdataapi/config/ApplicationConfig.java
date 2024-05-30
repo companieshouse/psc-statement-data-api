@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +17,10 @@ import uk.gov.companieshouse.api.converter.EnumWriteConverter;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.serialization.LocalDateDeserializer;
 import uk.gov.companieshouse.api.serialization.LocalDateSerializer;
+import uk.gov.companieshouse.pscstatementdataapi.controller.PscStatementController;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementWriteConverter;
+import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.time.LocalDate;
@@ -40,7 +43,7 @@ public class ApplicationConfig {
         return ApiSdkManager.getPrivateSDK();
     }
 
-    @Bean
+    @Bean()
     public CompanyMetricsApiService companyMetricsApiService() {
         return new CompanyMetricsApiService();
     }

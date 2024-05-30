@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -25,7 +26,6 @@ import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-//import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
@@ -69,6 +69,7 @@ public class PscStatementsSteps {
     private MongoTemplate mongoTemplate;
 
     @Autowired
+    @Qualifier("companyMetricsApiService")
     private CompanyMetricsApiService companyMetricsApiService;
 
     @Autowired

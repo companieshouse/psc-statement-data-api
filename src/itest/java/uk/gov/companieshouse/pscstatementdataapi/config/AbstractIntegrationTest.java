@@ -29,6 +29,7 @@ public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
     public PscStatementApiService pscStatementApiService;
 
     @MockBean
+    @Qualifier("companyMetricsApiService")
     public CompanyMetricsApiService companyMetricsApiService;
 
     @MockBean

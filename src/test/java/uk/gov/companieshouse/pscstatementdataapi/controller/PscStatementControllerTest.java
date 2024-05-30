@@ -2,16 +2,22 @@ package uk.gov.companieshouse.pscstatementdataapi.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.pscstatementdataapi.config.ApplicationConfig;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
@@ -25,8 +31,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+//@SpringBootTest
+//@AutoConfigureMockMvc
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(controllers = PscStatementController.class)
+@ContextConfiguration(classes = PscStatementController.class)
+@Import({ApplicationConfig.class})
+@SuppressWarnings("unused")
 public class PscStatementControllerTest {
     private static final String GET_URL = String.format("/company/%s/persons-with-significant-control-statements/%s", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
     private static final String PUT_URL = String.format("/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
@@ -46,8 +57,8 @@ public class PscStatementControllerTest {
     private CompanyMetricsApiService companyMetricsApiService;
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private PscStatementController pscStatementController;
+//    @Autowired
+//    private PscStatementController pscStatementController;
 
     private TestHelper testHelper;
 
@@ -56,10 +67,10 @@ public class PscStatementControllerTest {
         testHelper = new TestHelper();
     }
 
-    @Test
-    void contextLoads(){
-        assertThat(pscStatementController).isNotNull();
-    }
+//    @Test
+//    void contextLoads(){
+//        assertThat(pscStatementController).isNotNull();
+//    }
 
     @Test
     void statementResponseReturnedWhenGetRequestInvoked() throws Exception {

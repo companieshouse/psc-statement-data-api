@@ -1,10 +1,9 @@
 package uk.gov.companieshouse.pscstatementdataapi.services;
 
-import ch.qos.logback.core.Appender;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,21 +40,27 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Service
 public class PscStatementService {
 
-  @Autowired
-  private Logger logger;
-  @Autowired
-  PscStatementRepository pscStatementRepository;
-  @Autowired
-  PscStatementTransformer pscStatementTransformer;
-  @Autowired
-  CompanyMetricsApiService companyMetricsApiService;
-  @Autowired
-  CompanyExemptionsApiService companyExemptionsApiService;
-  @Autowired
-  InternalApiClient internalApiClient;
-  @Autowired
-  PscStatementApiService apiClientService;
+  private final Logger logger;
+  
+  private final PscStatementRepository pscStatementRepository;
+  
+  private final PscStatementTransformer pscStatementTransformer;
+  
+  private final CompanyMetricsApiService companyMetricsApiService;
+  
+  private final CompanyExemptionsApiService companyExemptionsApiService;
+  
+  private final PscStatementApiService apiClientService;
 
+  @Autowired
+  public PscStatementService(Logger logger, PscStatementRepository pscStatementRepository, PscStatementTransformer pscStatementTransformer, CompanyMetricsApiService companyMetricsApiService, CompanyExemptionsApiService companyExemptionsApiService, PscStatementApiService apiClientService) {
+    this.logger = logger;
+    this.pscStatementRepository = pscStatementRepository;
+    this.pscStatementTransformer = pscStatementTransformer;
+    this.companyMetricsApiService = companyMetricsApiService;
+    this.companyExemptionsApiService = companyExemptionsApiService;
+    this.apiClientService = apiClientService;
+  }
 
 
   public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {

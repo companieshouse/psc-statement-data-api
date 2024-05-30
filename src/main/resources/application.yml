@@ -34,6 +34,3 @@ mongodb:
     collection:
       name: company_psc_statements
   transactional: ${TRANSACTIONAL_ON:false}
-
-
-#GET_COMPANY_METRICS_ENDPOINT: "/company/%s/metrics"
