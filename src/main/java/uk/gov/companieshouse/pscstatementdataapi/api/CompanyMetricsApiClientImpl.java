@@ -7,9 +7,8 @@ import org.springframework.stereotype.Component;
 public class CompanyMetricsApiClientImpl extends ApiClientServiceImpl {
 
     public CompanyMetricsApiClientImpl(
-            @Value("${api.company.metrics.key}") String companyMetricsApiKey,
-            @Value("${api.company.metrics.endpoint}") String internalApiUrl) {
+            @Value("${chs.company.metrics.key}") String companyMetricsApiKey,
+            @Value("${chs.company.metrics.endpoint}") String internalApiUrl) {
         super(companyMetricsApiKey, internalApiUrl);
     }
-
 }
