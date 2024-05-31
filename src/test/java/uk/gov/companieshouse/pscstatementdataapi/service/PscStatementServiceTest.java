@@ -1,16 +1,14 @@
 package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.exemptions.Exemptions;
 import uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem;
@@ -21,23 +19,19 @@ import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
 import uk.gov.companieshouse.api.metrics.RegistersApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.api.model.Created;
+import uk.gov.companieshouse.api.model.PscStatementDocument;
+import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
-import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.pscstatementdataapi.api.ApiClientServiceImpl;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiClientImpl;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
-import uk.gov.companieshouse.api.model.Created;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
-import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import java.io.IOException;
@@ -50,16 +44,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.mongodb.internal.connection.tlschannel.util.Util.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class PscStatementServiceTest {
@@ -82,11 +69,6 @@ public class PscStatementServiceTest {
     PscStatementApiService apiClientService;
     @Mock
     CompanyExemptionsApiService companyExemptionsApiService;
-    @MockBean
-    private CompanyMetricsApiClientImpl companyMetricsApiClient;
-    @MockBean
-    @Qualifier("apiClientServiceImpl")
-    private ApiClientServiceImpl apiClientServiceImpl;
 
     @Spy
     @InjectMocks
