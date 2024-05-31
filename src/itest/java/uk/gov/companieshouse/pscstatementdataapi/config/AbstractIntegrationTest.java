@@ -1,15 +1,12 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.pscstatementdataapi.api.ApiClientServiceImpl;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiClientImpl;
-import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 
 /**
@@ -32,11 +29,4 @@ public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
 
     @MockBean
     public InternalApiClient internalApiClient;
-
-    @MockBean
-    @Qualifier("apiClientServiceImpl")
-    private ApiClientServiceImpl apiClientService;
-
-    @MockBean
-    private CompanyMetricsApiClientImpl companyMetricsApiClient;
 }
