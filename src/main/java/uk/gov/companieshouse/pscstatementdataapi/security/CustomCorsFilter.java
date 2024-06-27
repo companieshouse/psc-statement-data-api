@@ -2,8 +2,6 @@ package uk.gov.companieshouse.pscstatementdataapi.security;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -28,20 +26,7 @@ public class CustomCorsFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-        Enumeration<String> headers = httpServletRequest.getHeaderNames();
-        Collection<String> respheaders = httpServletResponse.getHeaderNames();
-
-
-        while (headers.hasMoreElements()) {
-            String header = headers.nextElement();
-            System.out.println("request header: " + header + ": " + httpServletRequest.getHeader(header));
-        }
-
-        for (String header : respheaders) {
-            System.out.println("response header: " + header + ": " + httpServletResponse.getHeader(header));
-        }
-
-        // If request is options then ERIC hasn't set up headers
+        // If request is options then ERIC hasn't set up headers, immediately respond to preflight
         // Otherwise All headers except allowed Methods have already been set
         if (httpServletRequest.getMethod().equalsIgnoreCase("OPTIONS")) {
             httpServletResponse.setHeader("Access-Control-Allow-Origin", "*");

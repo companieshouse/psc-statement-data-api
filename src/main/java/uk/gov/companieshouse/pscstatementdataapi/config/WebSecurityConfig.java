@@ -15,6 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CsrfFilter;
 
 import uk.gov.companieshouse.api.interceptor.InternalUserInterceptor;
+import uk.gov.companieshouse.api.interceptor.UserAuthenticationInterceptor;
 import uk.gov.companieshouse.pscstatementdataapi.security.CustomCorsFilter;
 
 @Configuration
@@ -41,8 +42,8 @@ public class WebSecurityConfig implements WebMvcConfigurer{
     }
 
     @Bean
-    public UserAuthInterceptor userAuthenticationInterceptor() {
-        return new UserAuthInterceptor(externalMethods, otherAllowedAuthMethods, internalUserInterceptor());
+    public UserAuthenticationInterceptor userAuthenticationInterceptor() {
+        return new UserAuthenticationInterceptor(externalMethods, otherAllowedAuthMethods, internalUserInterceptor());
     }
 
     @Bean
