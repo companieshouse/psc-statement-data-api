@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,7 +33,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
     @Bean
     public List<String> externalMethods() {
-        return Arrays.asList("GET");
+        return Arrays.asList(HttpMethod.GET.name());
     }
     //Key type is automatically checked by the authenticator add other allowed auth types here
     List<String> otherAllowedAuthMethods = Arrays.asList("oauth2");
