@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.5</version>
+        <version>2.1.6</version>
     </parent>
     <artifactId>psc-statement-data-api</artifactId>
     <version>unversioned</version>
@@ -38,7 +38,7 @@
         <structured-logging.version>3.0.7</structured-logging.version>
         <private-api-sdk-java.version>4.0.154</private-api-sdk-java.version>
         <data-sync-api-sdk-java.version>1.0.5</data-sync-api-sdk-java.version>
-        <api-security-java.version>2.0.4</api-security-java.version>
+        <api-security-java.version>2.0.5</api-security-java.version>
         <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
         <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
 
@@ -111,6 +111,16 @@
                 <exclusion>
                     <groupId>org.junit.jupiter</groupId>
                     <artifactId>junit-jupiter-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-to-slf4j</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
