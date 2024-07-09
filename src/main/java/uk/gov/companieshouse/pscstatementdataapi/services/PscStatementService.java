@@ -23,6 +23,7 @@ import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.api.model.Created;
 import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -76,7 +77,7 @@ public class PscStatementService {
 
   public StatementList retrievePscStatementListFromDbRegisterView(String companyNumber, Optional<MetricsApi> companyMetrics, int startIndex, int itemsPerPage) {
 
-    logger.info(String.format("In register view for company number: %s", companyNumber));
+    logger.info(String.format("In register view for company number: %s", companyNumber), DataMapHolder.getLogMap());
     MetricsApi metricsData;
       try {
         metricsData = companyMetrics.get();
@@ -114,7 +115,8 @@ public class PscStatementService {
     pscStatementRepository.delete(pscStatementDocument);
     apiClientService.invokeChsKafkaApiWithDeleteEvent(contextId, companyNumber, statementId, statement);
 
-    logger.info(String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s", companyNumber, statementId));
+    logger.info(String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
+            companyNumber, statementId), DataMapHolder.getLogMap());
   }
 
   private PscStatementDocument getPscStatementDocument(String companyNumber, String statementId) throws ResourceNotFoundException{
@@ -135,7 +137,7 @@ public class PscStatementService {
       saveToDb(contextId, companyNumber, statementId, document);
       apiClientService.invokeChsKafkaApi(contextId, companyNumber, statementId);
     } else {
-      logger.info("Psc Statement not persisted as the record provided is not the latest record.");
+      logger.info("Psc Statement not persisted as the record provided is not the latest record.", DataMapHolder.getLogMap());
     }
   }
 
@@ -161,7 +163,7 @@ public class PscStatementService {
     try {
       pscStatementRepository.save(document);
       logger.info(String.format("Psc statement is updated in MongoDb for context id: %s, company number: %s, and statement id: %s",
-              contextId, companyNumber, statementId));
+              contextId, companyNumber, statementId), DataMapHolder.getLogMap());
     } catch (IllegalArgumentException illegalArgumentEx) {
       throw new BadRequestException("Saving to MongoDb failed", illegalArgumentEx);
     }
@@ -201,10 +203,12 @@ public class PscStatementService {
           statementList.setTotalResults(metricsApi.getCounts().getPersonsWithSignificantControl().getStatementsCount());
         }
       } catch (NullPointerException exp) {
-        logger.error(String.format("No PSC data in metrics for company number %s", companyNumber));
+        logger.error(String.format("No PSC data in metrics for company number %s",
+                companyNumber), DataMapHolder.getLogMap());
       }
       }, () -> {
-      logger.info(String.format("No company metrics counts data found for company number: %s", companyNumber));
+      logger.info(String.format("No company metrics counts data found for company number: %s",
+              companyNumber), DataMapHolder.getLogMap());
     });
 
     statementList.setItemsPerPage(itemsPerPage);

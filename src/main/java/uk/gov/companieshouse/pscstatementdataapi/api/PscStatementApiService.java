@@ -13,6 +13,7 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 
 @Service
 public class PscStatementApiService {
@@ -66,10 +67,12 @@ public class PscStatementApiService {
         try {
             return changedResourcePost.execute();
         } catch (ApiErrorResponseException exception) {
-            logger.error("Unsuccessful call to /resource-changed endpoint", exception);
+            logger.error("Unsuccessful call to /resource-changed endpoint",
+                    exception, DataMapHolder.getLogMap());
             throw new ServiceUnavailableException(exception.getMessage());
         } catch (RuntimeException exception) {
-            logger.error("Error occurred while calling /resource-changed endpoint", exception);
+            logger.error("Error occurred while calling /resource-changed endpoint",
+                    exception, DataMapHolder.getLogMap());
             throw exception;
         }
     }

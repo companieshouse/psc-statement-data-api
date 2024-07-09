@@ -19,6 +19,7 @@ import uk.gov.companieshouse.api.psc.StatementList;
 
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 
 @RestController
@@ -33,7 +34,8 @@ public class PscStatementController {
     @GetMapping("/{statement_id}")
     public ResponseEntity<Statement> searchPscStatements (@PathVariable("company_number") String companyNumber,
                                                           @PathVariable("statement_id") String statementId) throws JsonProcessingException, ResourceNotFoundException {
-        logger.info(String.format("Retrieving psc statement data for company number %s and statement_id %s", companyNumber, statementId));
+        logger.info(String.format("Retrieving psc statement data for company number %s and statement_id %s",
+                companyNumber, statementId), DataMapHolder.getLogMap());
         Statement statement = pscStatementService.retrievePscStatementFromDb(companyNumber, statementId);
         return new ResponseEntity<>(statement, HttpStatus.OK);
     }
@@ -44,7 +46,8 @@ public class PscStatementController {
                                                     @PathVariable("statement_id") String statementId,
                                                     @RequestBody CompanyPscStatement companyPscStatement
     ) throws JsonProcessingException {
-        logger.info(String.format("Processing psc statement data for company number %s and statement_id %s", companyNumber, statementId));
+        logger.info(String.format("Processing psc statement data for company number %s and statement_id %s",
+                companyNumber, statementId), DataMapHolder.getLogMap());
         pscStatementService.processPscStatement(contextId, companyNumber, statementId, companyPscStatement);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -56,9 +59,8 @@ public class PscStatementController {
             @RequestParam(value = "start_index", required = false, defaultValue = "0") final Integer startIndex,
             @RequestParam(value = "register_view", required = false) boolean registerView) {
         itemsPerPage = Math.min(itemsPerPage, 100);
-        logger.info(String.format("Retrieving psc statement list data for company number %s, start index %d, items per page %d", company_number,
-                startIndex,
-                itemsPerPage));
+        logger.info(String.format("Retrieving psc statement list data for company number %s, start index %d, items per page %d",
+                company_number, startIndex, itemsPerPage), DataMapHolder.getLogMap());
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(company_number,
                 startIndex,
                 registerView,
@@ -78,7 +80,8 @@ public class PscStatementController {
             @PathVariable("company_number") String companyNumber,
             @PathVariable("statement_id") String statementId) {
         logger.info(String.format(
-                "Deleting Psc statement information for statement id %s", statementId));
+                "Deleting Psc statement information for statement id %s", statementId),
+                DataMapHolder.getLogMap());
         pscStatementService.deletePscStatement(contextId, companyNumber, statementId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
