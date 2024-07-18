@@ -115,7 +115,7 @@ public class PscStatementService {
     pscStatementRepository.delete(pscStatementDocument);
     apiClientService.invokeChsKafkaApiWithDeleteEvent(contextId, companyNumber, statementId, statement);
 
-    logger.info(String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
+    logger.infoContext(contextId, String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
             companyNumber, statementId), DataMapHolder.getLogMap());
   }
 
@@ -137,7 +137,7 @@ public class PscStatementService {
       saveToDb(contextId, companyNumber, statementId, document);
       apiClientService.invokeChsKafkaApi(contextId, companyNumber, statementId);
     } else {
-      logger.info("Psc Statement not persisted as the record provided is not the latest record.", DataMapHolder.getLogMap());
+      logger.infoContext(contextId, "Psc Statement not persisted as the record provided is not the latest record.", DataMapHolder.getLogMap());
     }
   }
 
@@ -162,7 +162,8 @@ public class PscStatementService {
 
     try {
       pscStatementRepository.save(document);
-      logger.info(String.format("Psc statement is updated in MongoDb for context id: %s, company number: %s, and statement id: %s",
+      logger.infoContext(contextId, String.format(
+              "Psc statement is updated in MongoDb for context id: %s, company number: %s, and statement id: %s",
               contextId, companyNumber, statementId), DataMapHolder.getLogMap());
     } catch (IllegalArgumentException illegalArgumentEx) {
       throw new BadRequestException("Saving to MongoDb failed", illegalArgumentEx);
