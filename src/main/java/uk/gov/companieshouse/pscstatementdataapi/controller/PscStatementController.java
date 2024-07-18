@@ -52,7 +52,7 @@ public class PscStatementController {
         DataMapHolder.get()
                 .companyNumber(companyNumber)
                 .statementId(statementId);
-        logger.info(String.format("Processing psc statement data for company number %s and statement_id %s",
+        logger.infoContext(contextId, String.format("Processing psc statement data for company number %s and statement_id %s",
                 companyNumber, statementId), DataMapHolder.getLogMap());
         pscStatementService.processPscStatement(contextId, companyNumber, statementId, companyPscStatement);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -95,7 +95,7 @@ public class PscStatementController {
                 .companyNumber(companyNumber)
                 .contextId(contextId)
                 .statementId(statementId);
-        logger.info(String.format(
+        logger.infoContext(contextId, String.format(
                 "Deleting Psc statement information for statement id %s", statementId),
                 DataMapHolder.getLogMap());
         pscStatementService.deletePscStatement(contextId, companyNumber, statementId);
