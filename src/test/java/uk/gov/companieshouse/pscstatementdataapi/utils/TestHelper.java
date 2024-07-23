@@ -22,6 +22,8 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 
+import static uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET;
+import static uk.gov.companieshouse.api.exemptions.PscExemptAsTradingOnEuRegulatedMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_TRADING_ON_EU_REGULATED_MARKET;
 import static uk.gov.companieshouse.api.exemptions.PscExemptAsTradingOnRegulatedMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_TRADING_ON_REGULATED_MARKET;
 import static uk.gov.companieshouse.api.exemptions.PscExemptAsTradingOnUkRegulatedMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_TRADING_ON_UK_REGULATED_MARKET;
 
@@ -184,15 +186,17 @@ public class TestHelper {
         return exemptions;
     }
 
+    //create more and make public
     private Exemptions getExemptions() {
         ExemptionItem exemptionItem = new ExemptionItem();
         exemptionItem.exemptFrom(EXEMPTION_DATE);
-        exemptionItem.exemptTo(EXEMPTION_DATE);
+        exemptionItem.exemptTo(null);
 
         List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
 
 
         PscExemptAsTradingOnRegulatedMarketItem nonUkEeaStateMarket = new PscExemptAsTradingOnRegulatedMarketItem();
+
         nonUkEeaStateMarket.setItems(exemptionItems);
         nonUkEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_TRADING_ON_REGULATED_MARKET);
 
@@ -203,6 +207,79 @@ public class TestHelper {
         Exemptions exemptions = new Exemptions();
         exemptions.setPscExemptAsTradingOnRegulatedMarket(nonUkEeaStateMarket);
         exemptions.setPscExemptAsTradingOnUkRegulatedMarket(ukEeaStateMarket);
+
+        return exemptions;
+    }
+
+    public Exemptions getUkExemptions() {
+        ExemptionItem exemptionItem = new ExemptionItem();
+        exemptionItem.exemptFrom(EXEMPTION_DATE);
+        exemptionItem.exemptTo(null);
+
+        List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
+
+
+        PscExemptAsTradingOnUkRegulatedMarketItem nonUkEeaStateMarket = new PscExemptAsTradingOnUkRegulatedMarketItem();
+
+        nonUkEeaStateMarket.setItems(exemptionItems);
+        nonUkEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_TRADING_ON_UK_REGULATED_MARKET);
+
+        PscExemptAsTradingOnUkRegulatedMarketItem ukEeaStateMarket = new PscExemptAsTradingOnUkRegulatedMarketItem();
+        ukEeaStateMarket.setItems(exemptionItems);
+        ukEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_TRADING_ON_UK_REGULATED_MARKET);
+
+        Exemptions exemptions = new Exemptions();
+        exemptions.setPscExemptAsTradingOnUkRegulatedMarket(nonUkEeaStateMarket);
+        exemptions.setPscExemptAsTradingOnUkRegulatedMarket(ukEeaStateMarket);
+
+        return exemptions;
+    }
+
+    public Exemptions getAdmittedExemptions() {
+        ExemptionItem exemptionItem = new ExemptionItem();
+        exemptionItem.exemptFrom(EXEMPTION_DATE);
+        exemptionItem.exemptTo(null);
+
+        List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
+
+
+        PscExemptAsSharesAdmittedOnMarketItem nonUkEeaStateMarket = new PscExemptAsSharesAdmittedOnMarketItem();
+
+
+        nonUkEeaStateMarket.setItems(exemptionItems);
+        nonUkEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET);
+
+        PscExemptAsSharesAdmittedOnMarketItem ukEeaStateMarket = new PscExemptAsSharesAdmittedOnMarketItem();
+        ukEeaStateMarket.setItems(exemptionItems);
+        ukEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET);
+
+        Exemptions exemptions = new Exemptions();
+        exemptions.setPscExemptAsSharesAdmittedOnMarket(nonUkEeaStateMarket);
+        exemptions.setPscExemptAsSharesAdmittedOnMarket(ukEeaStateMarket);
+
+        return exemptions;
+    }
+
+    public Exemptions getEuExemptions() {
+        ExemptionItem exemptionItem = new ExemptionItem();
+        exemptionItem.exemptFrom(EXEMPTION_DATE);
+        exemptionItem.exemptTo(null);
+
+        List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
+
+
+        PscExemptAsTradingOnEuRegulatedMarketItem nonUkEeaStateMarket = new PscExemptAsTradingOnEuRegulatedMarketItem();
+
+        nonUkEeaStateMarket.setItems(exemptionItems);
+        nonUkEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_TRADING_ON_EU_REGULATED_MARKET);
+
+        PscExemptAsTradingOnEuRegulatedMarketItem ukEeaStateMarket = new PscExemptAsTradingOnEuRegulatedMarketItem();
+        ukEeaStateMarket.setItems(exemptionItems);
+        ukEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_TRADING_ON_EU_REGULATED_MARKET);
+
+        Exemptions exemptions = new Exemptions();
+        exemptions.setPscExemptAsTradingOnEuRegulatedMarket(nonUkEeaStateMarket);
+        exemptions.setPscExemptAsTradingOnEuRegulatedMarket(ukEeaStateMarket);
 
         return exemptions;
     }
