@@ -186,11 +186,35 @@ public class TestHelper {
         return exemptions;
     }
 
-    //create more and make public
+
     private Exemptions getExemptions() {
         ExemptionItem exemptionItem = new ExemptionItem();
         exemptionItem.exemptFrom(EXEMPTION_DATE);
         exemptionItem.exemptTo(null);
+
+        List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
+
+
+        PscExemptAsTradingOnRegulatedMarketItem nonUkEeaStateMarket = new PscExemptAsTradingOnRegulatedMarketItem();
+
+        nonUkEeaStateMarket.setItems(exemptionItems);
+        nonUkEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_TRADING_ON_REGULATED_MARKET);
+
+        PscExemptAsTradingOnUkRegulatedMarketItem ukEeaStateMarket = new PscExemptAsTradingOnUkRegulatedMarketItem();
+        ukEeaStateMarket.setItems(exemptionItems);
+        ukEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_TRADING_ON_UK_REGULATED_MARKET);
+
+        Exemptions exemptions = new Exemptions();
+        exemptions.setPscExemptAsTradingOnRegulatedMarket(nonUkEeaStateMarket);
+        exemptions.setPscExemptAsTradingOnUkRegulatedMarket(ukEeaStateMarket);
+
+        return exemptions;
+    }
+
+    public Exemptions getExemptionsWithExemptTo() {
+        ExemptionItem exemptionItem = new ExemptionItem();
+        exemptionItem.exemptFrom(EXEMPTION_DATE);
+        exemptionItem.exemptTo(EXEMPTION_DATE);
 
         List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
 

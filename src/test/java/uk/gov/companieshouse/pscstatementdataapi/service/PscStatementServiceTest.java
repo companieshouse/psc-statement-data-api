@@ -367,9 +367,9 @@ public class PscStatementServiceTest {
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
         exemptions.setPscExemptAsSharesAdmittedOnMarket(pscExemptAsSharesAdmittedOnMarketItem);
-        companyExemptions.setExemptions(exemptions);
+        companyExemptions.setExemptions(testHelper.getAdmittedExemptions());
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
-        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(Optional.ofNullable(testHelper.createExemptions()));
+        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(optionalExempt);
         
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
@@ -390,7 +390,7 @@ public class PscStatementServiceTest {
         exemptions.setPscExemptAsTradingOnEuRegulatedMarket(pscExemptAsTradingOnEuRegulatedMarketItem);
         companyExemptions.setExemptions(testHelper.getEuExemptions());
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
-        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(Optional.ofNullable(testHelper.createExemptions()));
+        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(optionalExempt);
         
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
@@ -410,7 +410,6 @@ public class PscStatementServiceTest {
         Exemptions exemptions = new Exemptions();
         exemptions.setPscExemptAsTradingOnRegulatedMarket(pscExemptAsTradingOnRegulatedMarketItem);
         companyExemptions.setExemptions(exemptions);
-        Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
         when(companyExemptionsApiService.getCompanyExemptions(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(testHelper.createExemptions()));
         
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
@@ -432,14 +431,15 @@ public class PscStatementServiceTest {
         exemptions.setPscExemptAsTradingOnUkRegulatedMarket(pscExemptAsTradingOnUkRegulatedMarketItem);
         companyExemptions.setExemptions(testHelper.getUkExemptions());
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
-        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(Optional.ofNullable(testHelper.createExemptions()));
-        
+        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(optionalExempt);
+
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
         linksType.setSelf("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements");
         linksType.setExemptions("/company/" + COMPANY_NUMBER + "/exemptions");
 
         assertEquals(list.getLinks(), linksType);
+
     }
 
     @Test
@@ -460,6 +460,28 @@ public class PscStatementServiceTest {
 
         assertEquals(list.getLinks(), linksType);
     }
+
+    @Test
+    void hasPscExemptionsReturnsTrueAndExemptTo() {
+        Statement expectedStatement = new Statement();
+        document.setData(expectedStatement);
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+
+        CompanyExemptions companyExemptions = new CompanyExemptions();
+        Exemptions exemptions = new Exemptions();
+        exemptions.setPscExemptAsTradingOnRegulatedMarket(pscExemptAsTradingOnRegulatedMarketItem);
+        companyExemptions.setExemptions(testHelper.getExemptionsWithExemptTo());
+        Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
+        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(optionalExempt);
+
+        StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
+        StatementLinksType linksType = new StatementLinksType();
+        linksType.setSelf("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements");
+        linksType.setExemptions(null);
+
+        assertEquals(list.getLinks(), linksType);
+    }
+
     @Test
     void processPscStatementCreatesIfDeltaAtIsMissing() {
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.empty());

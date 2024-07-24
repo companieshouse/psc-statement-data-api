@@ -243,8 +243,8 @@ public class PscStatementService {
                  exemptions.getPscExemptAsTradingOnRegulatedMarket() != null
                          && exemptions.getPscExemptAsTradingOnRegulatedMarket().getItems()!= null
                          && exemptions.getPscExemptAsTradingOnRegulatedMarket().getItems().getFirst().getExemptFrom() != null ||
-                 exemptions.getPscExemptAsTradingOnRegulatedMarket() != null
-                         && exemptions.getPscExemptAsTradingOnRegulatedMarket().getItems()!= null
+                 exemptions.getPscExemptAsTradingOnUkRegulatedMarket() != null
+                         && exemptions.getPscExemptAsTradingOnUkRegulatedMarket().getItems()!= null
                          && exemptions.getPscExemptAsTradingOnUkRegulatedMarket().getItems().getFirst().getExemptFrom() != null)
             .orElse(false);
   }
