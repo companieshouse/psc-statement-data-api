@@ -22,7 +22,7 @@
   "ceased_count": 0,
   "total_results": 1,
   "links": {
-    "self": "/company/OC421554/persons-with-significant-control-statements",
-    "exemptions": "/company/OC421554/exemptions"
+    "exemptions": "/company/OC421554/exemptions",
+    "self": "/company/OC421554/persons-with-significant-control-statements"
   }
 }
