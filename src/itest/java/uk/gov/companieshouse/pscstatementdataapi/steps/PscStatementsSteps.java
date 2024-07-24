@@ -22,6 +22,9 @@ import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
+import uk.gov.companieshouse.api.exemptions.ExemptionItem;
+import uk.gov.companieshouse.api.exemptions.Exemptions;
+import uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.api.psc.Statement;
@@ -34,6 +37,7 @@ import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -46,10 +50,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET;
 import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 public class PscStatementsSteps {
     private String contextId;
+
+    private static final LocalDate EXEMPTION_DATE = LocalDate.of(2022, 11, 3);
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -233,6 +240,25 @@ public class PscStatementsSteps {
         String exemptionsFile = FileReaderUtil.readFile("src/itest/resources/json/input/company_exemptions_" + companyNumber + ".json");
 
         CompanyExemptions companyExemptions = objectMapper.readValue(exemptionsFile, CompanyExemptions.class);
+        ExemptionItem exemptionItem = new ExemptionItem();
+        exemptionItem.exemptFrom(EXEMPTION_DATE);
+        exemptionItem.exemptTo(null);
+
+        List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
+        PscExemptAsSharesAdmittedOnMarketItem nonUkEeaStateMarket = new PscExemptAsSharesAdmittedOnMarketItem();
+        nonUkEeaStateMarket.setItems(exemptionItems);
+        nonUkEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET);
+
+        PscExemptAsSharesAdmittedOnMarketItem ukEeaStateMarket = new PscExemptAsSharesAdmittedOnMarketItem();
+        ukEeaStateMarket.setItems(exemptionItems);
+        ukEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET);
+
+        Exemptions exemptions = new Exemptions();
+        exemptions.setPscExemptAsSharesAdmittedOnMarket(nonUkEeaStateMarket);
+        exemptions.setPscExemptAsSharesAdmittedOnMarket(ukEeaStateMarket);
+
+        companyExemptions.setExemptions(exemptions);
+
         Optional<CompanyExemptions> exemptionsApi = Optional.ofNullable(companyExemptions);
 
         when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(exemptionsApi);
