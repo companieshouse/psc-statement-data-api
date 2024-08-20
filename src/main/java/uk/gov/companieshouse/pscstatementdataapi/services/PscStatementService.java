@@ -173,7 +173,7 @@ public class PscStatementService {
 
   private Created getCreatedFromCurrentRecord(String companyNumber,String statementId) {
     Optional<PscStatementDocument> document = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
-    return document.isPresent() ? document.get().getCreated(): null;
+    return document.map(PscStatementDocument::getCreated).orElse(null);
   }
 
   private StatementList createStatementList(List < PscStatementDocument > statementDocuments,
@@ -182,10 +182,8 @@ public class PscStatementService {
     StatementList statementList = new StatementList();
     StatementLinksType links = new StatementLinksType();
     links.setSelf(String.format("/company/%s/persons-with-significant-control-statements", companyNumber));
-    if (hasPscExemptions(companyNumber)) {
-      if(hasExemptFrom(companyNumber) && !hasExemptTo(companyNumber)){
+    if (hasActiveExemptions(companyNumber)) {
         links.setExemptions(String.format("/company/%s/exemptions", companyNumber));
-      }
     }
 
     List < Statement > statements = statementDocuments.stream().map(PscStatementDocument::getData).collect(Collectors.toList());
@@ -227,48 +225,30 @@ public class PscStatementService {
 
     return companyExemptions.filter(x ->
             x.getExemptions() != null &&
-            (x.getExemptions().getPscExemptAsSharesAdmittedOnMarket()!= null ||
-            x.getExemptions().getPscExemptAsTradingOnEuRegulatedMarket() != null ||
-            x.getExemptions().getPscExemptAsTradingOnRegulatedMarket() != null ||
-            x.getExemptions().getPscExemptAsTradingOnUkRegulatedMarket() != null)).isPresent();
+                    (x.getExemptions().getPscExemptAsSharesAdmittedOnMarket()!= null ||
+                            x.getExemptions().getPscExemptAsTradingOnEuRegulatedMarket() != null ||
+                            x.getExemptions().getPscExemptAsTradingOnRegulatedMarket() != null ||
+                            x.getExemptions().getPscExemptAsTradingOnUkRegulatedMarket() != null)).isPresent();
   }
 
-  private boolean hasExemptFrom(String companyNumber) {
+  private boolean hasActiveExemptions(String companyNumber) {
     Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExemptions(companyNumber);
 
-    return companyExemptions
-            .map(exemptions -> exemptions.getExemptions())
-            .filter(exemptions -> exemptions != null)
-            .map(exemptions -> exemptions.getPscExemptAsSharesAdmittedOnMarket() != null
-                    && exemptions.getPscExemptAsSharesAdmittedOnMarket().getItems()!= null
-                    && exemptions.getPscExemptAsSharesAdmittedOnMarket().getItems().getFirst().getExemptFrom() != null ||
-                 exemptions.getPscExemptAsTradingOnEuRegulatedMarket() != null
-                         && exemptions.getPscExemptAsTradingOnEuRegulatedMarket().getItems()!= null
-                         && exemptions.getPscExemptAsTradingOnEuRegulatedMarket().getItems().getFirst().getExemptFrom() != null ||
-                 exemptions.getPscExemptAsTradingOnRegulatedMarket() != null
-                         && exemptions.getPscExemptAsTradingOnRegulatedMarket().getItems()!= null
-                         && exemptions.getPscExemptAsTradingOnRegulatedMarket().getItems().getFirst().getExemptFrom() != null ||
-                 exemptions.getPscExemptAsTradingOnUkRegulatedMarket() != null
-                         && exemptions.getPscExemptAsTradingOnUkRegulatedMarket().getItems()!= null
-                         && exemptions.getPscExemptAsTradingOnUkRegulatedMarket().getItems().getFirst().getExemptFrom() != null)
-            .orElse(false);
-  }
-
-  private boolean hasExemptTo(String companyNumber) {
-    Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExemptions(companyNumber);
-
-    return companyExemptions
-            .map(exemptions -> exemptions.getExemptions())
-            .filter(exemptions -> exemptions != null)
-            .map(exemptions -> exemptions.getPscExemptAsSharesAdmittedOnMarket() != null
-                    && exemptions.getPscExemptAsSharesAdmittedOnMarket().getItems().get(0).getExemptTo() != null ||
-                    exemptions.getPscExemptAsTradingOnEuRegulatedMarket() != null
-                            && exemptions.getPscExemptAsTradingOnEuRegulatedMarket().getItems().get(0).getExemptTo() != null ||
-                    exemptions.getPscExemptAsTradingOnRegulatedMarket() != null
-                            && exemptions.getPscExemptAsTradingOnRegulatedMarket().getItems().get(0).getExemptTo() != null ||
-                    exemptions.getPscExemptAsTradingOnUkRegulatedMarket() != null
-                            && exemptions.getPscExemptAsTradingOnUkRegulatedMarket().getItems().get(0).getExemptTo() != null)
-            .orElse(false);
+    return companyExemptions.filter(x ->
+            x.getExemptions() != null &&
+                    ((x.getExemptions().getPscExemptAsSharesAdmittedOnMarket()!= null &&
+                            x.getExemptions().getPscExemptAsSharesAdmittedOnMarket().getItems().stream()
+                                    .anyMatch(e -> e.getExemptTo()==null && e.getExemptFrom() != null)) ||
+                            (x.getExemptions().getPscExemptAsTradingOnEuRegulatedMarket() != null &&
+                                    x.getExemptions().getPscExemptAsTradingOnEuRegulatedMarket().getItems().stream()
+                                            .anyMatch(e -> e.getExemptTo()==null && e.getExemptFrom() != null)) ||
+                            (x.getExemptions().getPscExemptAsTradingOnRegulatedMarket() != null &&
+                                    x.getExemptions().getPscExemptAsTradingOnRegulatedMarket().getItems().stream()
+                                            .anyMatch(e -> e.getExemptTo()==null && e.getExemptFrom() != null)) ||
+                            (x.getExemptions().getPscExemptAsTradingOnUkRegulatedMarket() != null &&
+                                    x.getExemptions().getPscExemptAsTradingOnUkRegulatedMarket().getItems().stream()
+                                            .anyMatch(e -> e.getExemptTo()==null && e.getExemptFrom() != null
+                                            )))).isPresent();
   }
 
 }
