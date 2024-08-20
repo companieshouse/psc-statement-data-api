@@ -483,6 +483,27 @@ public class PscStatementServiceTest {
     }
 
     @Test
+    void hasPscExemptionsReturnsTrueMultipleExemptions() {
+        Statement expectedStatement = new Statement();
+        document.setData(expectedStatement);
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+
+        CompanyExemptions companyExemptions = new CompanyExemptions();
+        Exemptions exemptions = new Exemptions();
+        exemptions.setPscExemptAsTradingOnUkRegulatedMarket(pscExemptAsTradingOnUkRegulatedMarketItem);
+        companyExemptions.setExemptions(testHelper.getMultipleExemptions());
+        Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
+        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(optionalExempt);
+
+        StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
+        StatementLinksType linksType = new StatementLinksType();
+        linksType.setSelf("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements");
+        linksType.setExemptions("/company/" + COMPANY_NUMBER + "/exemptions");
+
+        assertEquals(list.getLinks(), linksType);
+    }
+
+    @Test
     void processPscStatementCreatesIfDeltaAtIsMissing() {
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.empty());
         ApiResponse<Void> response = new ApiResponse<>(200, null);
