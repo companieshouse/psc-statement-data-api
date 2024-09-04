@@ -59,6 +59,7 @@ variable "max_task_count" {
   default     = 3
 }
 
+
 variable "use_fargate" {
   type        = bool
   description = "If true, sets the required capabilities for all containers in the task definition to use FARGATE, false uses EC2"
