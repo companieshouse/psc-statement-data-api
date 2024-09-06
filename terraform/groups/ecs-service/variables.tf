@@ -40,7 +40,7 @@ variable "max_task_count" {
 variable "min_task_count" {
   type        = number
   description = "The minimum number of tasks for this service."
-  default     = 3
+  default     = 1
 }
 variable "required_cpus" {
   type = number
