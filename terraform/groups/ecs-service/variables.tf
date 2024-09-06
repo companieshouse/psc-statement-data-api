@@ -32,6 +32,16 @@ variable "desired_task_count" {
   description = "The desired ECS task count for this service"
   default = 1 # defaulted low for dev environments, override for production
 }
+variable "max_task_count" {
+  type        = number
+  description = "The maximum number of tasks for this service."
+  default     = 5
+}
+variable "min_task_count" {
+  type        = number
+  description = "The minimum number of tasks for this service."
+  default     = 1
+}
 variable "required_cpus" {
   type = number
   description = "The required cpu resource for this service. 1024 here is 1 vCPU"
@@ -53,12 +63,6 @@ variable "eric_memory" {
   description = "The required memory for eric"
   default = 512
 }
-variable "max_task_count" {
-  type        = number
-  description = "The maximum number of tasks for this service."
-  default     = 3
-}
-
 
 variable "use_fargate" {
   type        = bool
