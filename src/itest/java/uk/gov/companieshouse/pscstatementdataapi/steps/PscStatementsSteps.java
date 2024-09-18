@@ -119,7 +119,6 @@ public class PscStatementsSteps {
         document.setId(statementId);
         document.setCompanyNumber(companyNumber);
         document.setData(pscStatement);
-        //20211008152823383176
         document.setDeltaAt(deltaAt);
         mongoTemplate.save(document);
         assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)).isNotEmpty();
