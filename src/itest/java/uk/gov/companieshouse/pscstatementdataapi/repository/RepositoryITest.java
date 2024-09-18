@@ -66,7 +66,7 @@ public class RepositoryITest extends AbstractMongoConfig {
     }
 
     @Test
-    void find_updated_should_return_correct_statement() {
+    void find_updated_returns_document_if_delta_is_stale() {
         PscStatementDocument newDocument = createPscStatementDocument("1");
 
         pscStatementRepository.save(newDocument);
@@ -75,7 +75,7 @@ public class RepositoryITest extends AbstractMongoConfig {
     }
 
     @Test
-    void find_updated_psc_statement_does_not_return_doc_if_same_delta_at() {
+    void find_updated_returns_empty_if_delta_is_the_same() {
         PscStatementDocument newDocument = createPscStatementDocument("1");
 
         pscStatementRepository.save(newDocument);
@@ -84,7 +84,7 @@ public class RepositoryITest extends AbstractMongoConfig {
     }
 
     @Test
-    void find_updated_psc_statement_does_not_return_doc_if_new_delta_at() {
+    void find_updated_returns_empty_if_delta_is_newer() {
         PscStatementDocument newDocument = createPscStatementDocument("1");
 
         pscStatementRepository.save(newDocument);
