@@ -119,6 +119,7 @@ public class PscStatementsSteps {
         document.setId(statementId);
         document.setCompanyNumber(companyNumber);
         document.setData(pscStatement);
+        //20211008152823383176
         document.setDeltaAt(deltaAt);
         mongoTemplate.save(document);
         assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)).isNotEmpty();
@@ -267,7 +268,7 @@ public class PscStatementsSteps {
     @Then("I should receive {int} status code")
     public void i_should_receive_status_code(Integer statusCode) {
         int expectedStatusCode = CucumberContext.CONTEXT.get("statusCode");
-        Assertions.assertThat(expectedStatusCode).isEqualTo(statusCode);
+        assertThat(expectedStatusCode).isEqualTo(statusCode);
     }
     @Then("the psc statement Get call response body should match {string} file")
     public void the_psc_statement_get_call_response_body_should_match(String dataFile) throws IOException {
@@ -360,7 +361,7 @@ public class PscStatementsSteps {
 
     @When("psc statement id does not exist for {string}")
     public void statement_does_not_exist(String statementId) {
-        Assertions.assertThat(pscStatementRepository.existsById(statementId)).isFalse();
+        assertThat(pscStatementRepository.existsById(statementId)).isFalse();
     }
 
     @When("CHS kafka API service is unavailable")
@@ -383,19 +384,19 @@ public class PscStatementsSteps {
 
     @When("a statement exists with id {string}")
     public void statement_exists(String statementId) {
-        Assertions.assertThat(pscStatementRepository.existsById(statementId)).isTrue();
+        assertThat(pscStatementRepository.existsById(statementId)).isTrue();
     }
 
     @When("a statement exists with id {string} and delta_at {string}")
     public void statement_exists(String statementId, String deltaAt) throws NoSuchElementException {
-        Assertions.assertThat(pscStatementRepository.existsById(statementId)).isTrue();
+        assertThat(pscStatementRepository.existsById(statementId)).isTrue();
         Optional<PscStatementDocument> document = pscStatementRepository.findById(statementId);
-        Assertions.assertThat(pscStatementRepository.findById(statementId).get().getDeltaAt()).isEqualTo(deltaAt);
+        assertThat(pscStatementRepository.findById(statementId).get().getDeltaAt()).isEqualTo(deltaAt);
     }
 
     @Then("no statement exists with id {string}")
     public void no_statement_exists(String statementId) {
-        Assertions.assertThat(pscStatementRepository.existsById(statementId)).isFalse();
+        assertThat(pscStatementRepository.existsById(statementId)).isFalse();
     }
 
     @Then("the CHS Kafka API is invoked for company number {string} with statement id {string}")
@@ -406,7 +407,7 @@ public class PscStatementsSteps {
     @Then("nothing is persisted in the database")
     public void nothing_persisted_to_database() {
         List<PscStatementDocument> pscDocs = pscStatementRepository.findAll();
-        Assertions.assertThat(pscDocs).hasSize(0);
+       assertThat(pscDocs).hasSize(0);
     }
 
     @After

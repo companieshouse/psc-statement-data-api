@@ -50,8 +50,6 @@ public class PscStatementService {
   @Autowired
   CompanyExemptionsApiService companyExemptionsApiService;
   @Autowired
-  InternalApiClient internalApiClient;
-  @Autowired
   PscStatementApiService apiClientService;
 
   public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {
@@ -126,7 +124,6 @@ public class PscStatementService {
                     "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber)));
   }
 
-  @Transactional
   public void processPscStatement(String contextId, String companyNumber, String statementId,
                                   CompanyPscStatement companyPscStatement) throws BadRequestException {
     boolean isLatestRecord = isLatestRecord(companyNumber, statementId, companyPscStatement.getDeltaAt());

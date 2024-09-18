@@ -20,6 +20,8 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +55,7 @@ public class PscStatementApiServiceTest {
 
         ApiResponse<?> apiResponse = pscStatementApiService.invokeChsKafkaApi(
                 TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
-        Assertions.assertThat(apiResponse).isNotNull();
+        assertThat(apiResponse).isNotNull();
 
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
         verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
@@ -67,7 +69,7 @@ public class PscStatementApiServiceTest {
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
-        Assert.assertThrows(ServiceUnavailableException.class, () -> pscStatementApiService.invokeChsKafkaApi(
+        assertThrows(ServiceUnavailableException.class, () -> pscStatementApiService.invokeChsKafkaApi(
                 TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID));
 
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
@@ -82,7 +84,7 @@ public class PscStatementApiServiceTest {
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
-        Assert.assertThrows(RuntimeException.class, () -> pscStatementApiService.invokeChsKafkaApi(
+        assertThrows(RuntimeException.class, () -> pscStatementApiService.invokeChsKafkaApi(
                 TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID));
 
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
@@ -98,7 +100,7 @@ public class PscStatementApiServiceTest {
 
         ApiResponse<?> apiResponse = pscStatementApiService.invokeChsKafkaApiWithDeleteEvent(
                 TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID, testHelper.getStatement());
-        Assertions.assertThat(apiResponse).isNotNull();
+        assertThat(apiResponse).isNotNull();
 
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
         verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
@@ -112,7 +114,7 @@ public class PscStatementApiServiceTest {
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
-        Assert.assertThrows(ServiceUnavailableException.class, () -> pscStatementApiService.invokeChsKafkaApiWithDeleteEvent(
+        assertThrows(ServiceUnavailableException.class, () -> pscStatementApiService.invokeChsKafkaApiWithDeleteEvent(
                 TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID, testHelper.getStatement()));
 
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
@@ -127,7 +129,7 @@ public class PscStatementApiServiceTest {
         when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
-        Assert.assertThrows(RuntimeException.class, () -> pscStatementApiService.invokeChsKafkaApiWithDeleteEvent(
+        assertThrows(RuntimeException.class, () -> pscStatementApiService.invokeChsKafkaApiWithDeleteEvent(
                 TestHelper.X_REQUEST_ID, TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID, testHelper.getStatement()));
 
         verify(internalApiClient, times(1)).privateChangedResourceHandler();
