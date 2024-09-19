@@ -1,14 +1,17 @@
 package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.exemptions.Exemptions;
 import uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem;
@@ -44,9 +47,16 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.mongodb.internal.connection.tlschannel.util.Util.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class PscStatementServiceTest {
@@ -319,6 +329,7 @@ public class PscStatementServiceTest {
 
         verify(repository).save(document);
         verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(apiClientService).invokeChsKafkaApi(any(), any(), any());
         assertNotNull(document.getCreated().getAt());
     }
 
@@ -333,10 +344,32 @@ public class PscStatementServiceTest {
         when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
-        pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
+        pscStatementService.processPscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
         verify(repository).save(document);
         verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(apiClientService).invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID);
+        assertEquals(document.getCreated().getAt(), dateTime);
+    }
+
+    @Test
+    void processPscStatementSavesToDbWhenResourceChangedCallFails() {
+        LocalDateTime dateTime = LocalDateTime.now();
+        Created created = new Created();
+        created.setAt(dateTime);
+        document.setCreated(created);
+
+        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
+        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenThrow(
+                ServiceUnavailableException.class);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
+
+        Executable executable = () -> pscStatementService.processPscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
+
+        assertThrows(ServiceUnavailableException.class, executable);
+        verify(repository).save(document);
+        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(apiClientService).invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID);
         assertEquals(document.getCreated().getAt(), dateTime);
     }
 

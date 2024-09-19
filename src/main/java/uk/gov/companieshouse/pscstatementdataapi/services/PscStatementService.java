@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
@@ -49,8 +48,6 @@ public class PscStatementService {
   CompanyMetricsApiService companyMetricsApiService;
   @Autowired
   CompanyExemptionsApiService companyExemptionsApiService;
-  @Autowired
-  InternalApiClient internalApiClient;
   @Autowired
   PscStatementApiService apiClientService;
 
@@ -126,7 +123,6 @@ public class PscStatementService {
                     "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber)));
   }
 
-  @Transactional
   public void processPscStatement(String contextId, String companyNumber, String statementId,
                                   CompanyPscStatement companyPscStatement) throws BadRequestException {
     boolean isLatestRecord = isLatestRecord(companyNumber, statementId, companyPscStatement.getDeltaAt());

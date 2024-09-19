@@ -1,10 +1,11 @@
 package uk.gov.companieshouse.pscstatementdataapi.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class RepositoryITest extends AbstractMongoConfig {
 
     public static final String DELTA_AT = "20180101093435661593";
 
+    public static final String STALE_DELTA_AT = "20170101093435661593";
+
+    public static final String NEW_DELTA_AT = "20190101093435661593";
 
     @BeforeAll
     static void setup() {
@@ -43,7 +47,7 @@ public class RepositoryITest extends AbstractMongoConfig {
         PscStatementDocument document = createPscStatementDocument("12345");
 
         pscStatementRepository.save(document);
-        Assertions.assertThat(pscStatementRepository.findById("12345")).isNotEmpty();
+        assertThat(pscStatementRepository.findById("12345")).isNotEmpty();
     }
 
     @Test
@@ -54,22 +58,37 @@ public class RepositoryITest extends AbstractMongoConfig {
         pscStatementRepository.save(createPscStatementDocument("4"));
         pscStatementRepository.save(createPscStatementDocument("5"));
 
-        Assertions.assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 5).get().size()).isEqualTo(5);
-        Assertions.assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 2).get().size()).isEqualTo(2);
-        Assertions.assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 4, 5).get().size()).isEqualTo(1);
-        Assertions.assertThat(pscStatementRepository.getStatementList("Bad Company Number", 0, 5).get().size()).isEqualTo(0);
+        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 5).get().size()).isEqualTo(5);
+        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 2).get().size()).isEqualTo(2);
+        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 4, 5).get().size()).isEqualTo(1);
+        assertThat(pscStatementRepository.getStatementList("Bad Company Number", 0, 5).get().size()).isEqualTo(0);
     }
 
     @Test
-    void find_updated_should_return_correct_statement() {
-
+    void find_updated_returns_document_if_delta_is_stale() {
         PscStatementDocument newDocument = createPscStatementDocument("1");
-        newDocument.setDeltaAt(DELTA_AT);
 
         pscStatementRepository.save(newDocument);
 
-        Assertions.assertThat(pscStatementRepository.findUpdatedPscStatement(COMPANY_NUMBER, "1", DELTA_AT)).isNotEmpty();
+        assertThat(pscStatementRepository.findUpdatedPscStatement(COMPANY_NUMBER, "1", STALE_DELTA_AT)).isNotEmpty();
+    }
 
+    @Test
+    void find_updated_returns_empty_if_delta_is_the_same() {
+        PscStatementDocument newDocument = createPscStatementDocument("1");
+
+        pscStatementRepository.save(newDocument);
+
+        assertThat(pscStatementRepository.findUpdatedPscStatement(COMPANY_NUMBER, "1", DELTA_AT)).isEmpty();
+    }
+
+    @Test
+    void find_updated_returns_empty_if_delta_is_newer() {
+        PscStatementDocument newDocument = createPscStatementDocument("1");
+
+        pscStatementRepository.save(newDocument);
+
+        assertThat(pscStatementRepository.findUpdatedPscStatement(COMPANY_NUMBER, "1", NEW_DELTA_AT)).isEmpty();
     }
 
 
