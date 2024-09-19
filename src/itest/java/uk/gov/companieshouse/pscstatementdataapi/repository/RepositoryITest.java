@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

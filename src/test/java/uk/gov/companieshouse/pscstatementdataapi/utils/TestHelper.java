@@ -1,7 +1,13 @@
 package uk.gov.companieshouse.pscstatementdataapi.utils;
 
 import org.springframework.util.FileCopyUtils;
-import uk.gov.companieshouse.api.exemptions.*;
+import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
+import uk.gov.companieshouse.api.exemptions.ExemptionItem;
+import uk.gov.companieshouse.api.exemptions.Exemptions;
+import uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem;
+import uk.gov.companieshouse.api.exemptions.PscExemptAsTradingOnEuRegulatedMarketItem;
+import uk.gov.companieshouse.api.exemptions.PscExemptAsTradingOnRegulatedMarketItem;
+import uk.gov.companieshouse.api.exemptions.PscExemptAsTradingOnUkRegulatedMarketItem;
 import uk.gov.companieshouse.api.metrics.CountsApi;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.PscApi;
