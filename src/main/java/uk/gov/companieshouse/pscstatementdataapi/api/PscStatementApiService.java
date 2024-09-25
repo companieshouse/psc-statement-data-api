@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.pscstatementdataapi.api;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +14,7 @@ import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
+import uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil;
 
 @Service
 public class PscStatementApiService {
@@ -49,7 +50,7 @@ public class PscStatementApiService {
     private ChangedResource mapChangedResource(String contextId, String companyNumber, String statementId, Statement statement) {
         ChangedResourceEvent event = new ChangedResourceEvent();
         ChangedResource changedResource = new ChangedResource();
-        event.setPublishedAt(String.valueOf(OffsetDateTime.now()));
+        event.setPublishedAt(DateTimeUtil.formatPublishedAt(Instant.now()));
         if (statement != null) {
             event.setType(DELETE_EVENT_TYPE);
             changedResource.setDeletedData(statement);
