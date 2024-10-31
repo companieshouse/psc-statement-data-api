@@ -29,7 +29,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -76,12 +75,8 @@ public class PscStatementService {
 
     logger.info(String.format("In register view for company number: %s", companyNumber), DataMapHolder.getLogMap());
     MetricsApi metricsData;
-      try {
-        metricsData = companyMetrics.get();
-      } catch (NoSuchElementException ex) {
-        throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
-                String.format("No company metrics data found for company number: %s", companyNumber));
-      }
+    metricsData = companyMetrics.orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
+            String.format("No company metrics data found for company number: %s", companyNumber)));
 
     String registerMovedTo = Optional.ofNullable(metricsData)
             .map(MetricsApi::getRegisters)
