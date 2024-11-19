@@ -37,6 +37,7 @@ public class PscStatementControllerTest {
     private static final String ERIC_IDENTITY_TYPE = "key";
     private static final String ERIC_PRIVILEGES = "*";
     private static final String X_REQUEST_ID = TestHelper.X_REQUEST_ID;
+    private static final String DELTA_AT = TestHelper.DELTA_AT;
 
 
     @MockBean
@@ -138,11 +139,12 @@ public class PscStatementControllerTest {
     void callPscStatementDeleteRequest() throws Exception {
 
         doNothing()
-                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString());
+                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", X_REQUEST_ID)
+                        .header("X-DELTA-AT", DELTA_AT)
                         .header("ERIC-Identity", ERIC_IDENTITY)
                         .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
                         .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))

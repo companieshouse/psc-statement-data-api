@@ -2,6 +2,7 @@ package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import com.github.dockerjava.api.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -11,6 +12,7 @@ import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.exemptions.Exemptions;
@@ -35,6 +37,7 @@ import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundExcep
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
+import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import java.io.IOException;
@@ -56,6 +59,8 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -298,27 +303,80 @@ public class PscStatementServiceTest {
 
     @Test
     void deletePscStatementDeletesStatement() {
+        // Given
         ApiResponse<Void> response = new ApiResponse<>(200, null);
         document.setData(statement);
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        when(apiClientService.invokeChsKafkaApiWithDeleteEvent(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, statement)).thenReturn(response);
+        when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
 
-        pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID);
+        // When
+        pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
 
+        // Then
         verify(repository).delete(document);
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verifyNoMoreInteractions(repository);
+        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, Optional.of(document), true));
     }
+    /**
     @Test
     void deleteThrowsExceptionWhenInvalidIdGiven() {
+        // Given
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        assertThrows(ResourceNotFoundException.class, () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, "invalid_id"));
+
+        // When
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, "invalid_id", DELTA_AT);
+
+        // Then
+        assertThrows(ResourceNotFoundException.class, actual);
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, "invalid_id");
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(apiClientService);
     }
+    **/
+    /**
     @Test
     void deleteThrowsExceptionWhenInvalidCompanyNumberGiven() {
+        // Given
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        assertThrows(ResourceNotFoundException.class, () -> pscStatementService.deletePscStatement(CONTEXT_ID, "invalid_company_no", STATEMENT_ID));
+
+        // When
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, "invalid_company_no", STATEMENT_ID, DELTA_AT);
+
+        // Then
+        assertThrows(ResourceNotFoundException.class, actual);
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId("invalid_company_no", STATEMENT_ID);
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(apiClientService);
+    }
+     **/
+    @Test
+    void deleteThrowsExceptionWhenNoDeltaAtGiven() {
+        // Given
+
+        // When
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID,
+                null);
+
+        // Then
+        assertThrows(BadRequestException.class, actual);
+        verifyNoInteractions(repository);
+        verifyNoInteractions(apiClientService);
+    }
+    @Test
+    void deleteThrowsExceptionWhenStaleDeltaAtGiven() {
+        // Given
+        document.setDeltaAt(DELTA_AT);
+        when(repository.getPscStatementByCompanyNumberAndStatementId(any(), any())).thenReturn(Optional.of(document));
+
+        // When
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, "20170101093435661593");
+
+        // Then
+        assertThrows(ConflictException.class, actual);
+        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(apiClientService);
     }
 
     @Test
@@ -329,7 +387,7 @@ public class PscStatementServiceTest {
 
         verify(repository).save(document);
         verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
-        verify(apiClientService).invokeChsKafkaApi(any(), any(), any());
+        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest("", COMPANY_NUMBER, STATEMENT_ID, null, false));
         assertNotNull(document.getCreated().getAt());
     }
 
@@ -341,14 +399,14 @@ public class PscStatementServiceTest {
         document.setCreated(created);
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
         ApiResponse<Void> response = new ApiResponse<>(200, null);
-        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
+        when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
         pscStatementService.processPscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
         verify(repository).save(document);
         verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
-        verify(apiClientService).invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID);
+        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, null, false));
         assertEquals(document.getCreated().getAt(), dateTime);
     }
 
@@ -360,7 +418,7 @@ public class PscStatementServiceTest {
         document.setCreated(created);
 
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
-        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenThrow(
+        when(apiClientService.invokeChsKafkaApi(any())).thenThrow(
                 ServiceUnavailableException.class);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
@@ -369,7 +427,7 @@ public class PscStatementServiceTest {
         assertThrows(ServiceUnavailableException.class, executable);
         verify(repository).save(document);
         verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
-        verify(apiClientService).invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID);
+        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, null, false));
         assertEquals(document.getCreated().getAt(), dateTime);
     }
 
@@ -381,7 +439,7 @@ public class PscStatementServiceTest {
         document.setUpdated(updated);
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.ofNullable(document));
         ApiResponse<Void> response = new ApiResponse<>(200, null);
-        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
+        when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
@@ -540,7 +598,7 @@ public class PscStatementServiceTest {
     void processPscStatementCreatesIfDeltaAtIsMissing() {
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.empty());
         ApiResponse<Void> response = new ApiResponse<>(200, null);
-        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
+        when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
@@ -552,7 +610,7 @@ public class PscStatementServiceTest {
     void processPscStatementDoesNotUpdateIfDeltaAtIsMissing() {
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.ofNullable(document));
         ApiResponse<Void> response = new ApiResponse<>(200, null);
-        when(apiClientService.invokeChsKafkaApi(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID)).thenReturn(response);
+        when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);

@@ -88,6 +88,7 @@ public class PscStatementController {
     @DeleteMapping("/{statement_id}/internal")
     public ResponseEntity<Void> deletePscStatement(
             @RequestHeader("x-request-id") String contextId,
+            @RequestHeader("X-DELTA-AT") String deltaAt,
             @PathVariable("company_number") String companyNumber,
             @PathVariable("statement_id") String statementId) {
 
@@ -98,7 +99,7 @@ public class PscStatementController {
         logger.infoContext(contextId, String.format(
                 "Deleting Psc statement information for statement id %s", statementId),
                 DataMapHolder.getLogMap());
-        pscStatementService.deletePscStatement(contextId, companyNumber, statementId);
+        pscStatementService.deletePscStatement(contextId, companyNumber, statementId, deltaAt);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

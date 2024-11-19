@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.dockerjava.api.exception.ConflictException;
 import com.mongodb.MongoException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,12 @@ public class ExceptionHandlerConfig {
     public ResponseEntity<Object> handleMethodNotAllowedException(Exception exception) {
         logger.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(value = {ConflictException.class})
+    public ResponseEntity<Object> handleConflictException(Exception exception){
+        logger.error(exception.getMessage());
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = {Exception.class})

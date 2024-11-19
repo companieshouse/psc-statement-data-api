@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.api;
 
 import java.time.Instant;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,11 +11,13 @@ import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil;
+import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequest;
 
 @Service
 public class PscStatementApiService {
@@ -33,34 +36,32 @@ public class PscStatementApiService {
     @Autowired
     private Logger logger;
 
-    public ApiResponse<Void> invokeChsKafkaApi(String contextId, String companyNumber, String statementId) {
+    public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
         internalApiClient.setBasePath(chsKafkaApiUrl);
         PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
-                .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, null));
+                .postChangedResource(resourceChangedUri, mapChangedResource(resourceChangedRequest));
         return handleApiCall(changedResourcePost);
     }
 
-    public ApiResponse<Void> invokeChsKafkaApiWithDeleteEvent(String contextId, String companyNumber, String statementId, Statement statement) {
-        internalApiClient.setBasePath(chsKafkaApiUrl);
-        PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
-                .postChangedResource(resourceChangedUri, mapChangedResource(contextId, companyNumber, statementId, statement));
-        return handleApiCall(changedResourcePost);
-    }
+    private ChangedResource mapChangedResource(ResourceChangedRequest request) {
+        boolean isDelete = request.isDelete();
 
-    private ChangedResource mapChangedResource(String contextId, String companyNumber, String statementId, Statement statement) {
-        ChangedResourceEvent event = new ChangedResourceEvent();
-        ChangedResource changedResource = new ChangedResource();
-        event.setPublishedAt(DateTimeUtil.formatPublishedAt(Instant.now()));
-        if (statement != null) {
-            event.setType(DELETE_EVENT_TYPE);
+        ChangedResourceEvent event = new ChangedResourceEvent()
+                .publishedAt(DateTimeUtil.formatPublishedAt(Instant.now()))
+                .type(isDelete ? DELETE_EVENT_TYPE : CHANGED_EVENT_TYPE);
+
+        ChangedResource changedResource = new ChangedResource()
+                .resourceUri(String.format(PSC_STATEMENTS_URI, request.companyNumber(), request.statementId()))
+                .resourceKind(resourceKind)
+                .event(event)
+                .contextId(request.contextId());
+
+        Optional<PscStatementDocument> document = request.document();
+        if (isDelete && document.isPresent()){
+            Statement statement = document.get().getData();
             changedResource.setDeletedData(statement);
-        } else {
-            event.setType(CHANGED_EVENT_TYPE);
         }
-        changedResource.setResourceUri(String.format(PSC_STATEMENTS_URI, companyNumber, statementId));
-        changedResource.event(event);
-        changedResource.setResourceKind(resourceKind);
-        changedResource.setContextId(contextId);
+
         return changedResource;
     }
 

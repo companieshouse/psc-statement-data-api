@@ -1,13 +1,17 @@
 package uk.gov.companieshouse.pscstatementdataapi.services;
 
+import com.github.dockerjava.api.exception.ConflictException;
+import java.util.NoSuchElementException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
+import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
@@ -31,8 +35,10 @@ import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransform
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequest;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDeltaStale;
 
 @Service
 public class PscStatementService {
@@ -51,8 +57,13 @@ public class PscStatementService {
   PscStatementApiService apiClientService;
 
   public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {
-    PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
-    return pscStatementDocument.getData();
+    Optional<PscStatementDocument> pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
+    try {
+      return pscStatementDocument.get().getData();
+    } catch (NoSuchElementException ex) {
+      throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
+              "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber));
+    }
   }
 
   public StatementList retrievePscStatementListFromDb(String companyNumber, int startIndex, boolean registerView, int itemsPerPage) {
@@ -99,23 +110,37 @@ public class PscStatementService {
   }
 
   @Transactional
-  public void deletePscStatement(String contextId, String companyNumber, String statementId) throws ResourceNotFoundException{
-    PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
+  public void deletePscStatement(String contextId, String companyNumber, String statementId, String requestDeltaAt) throws ResourceNotFoundException{
+    if (StringUtils.isBlank(requestDeltaAt)){
+      throw new BadRequestException("deltaAt missing from delete request");
+    }
+    try {
+      Optional<PscStatementDocument> pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
+      if (pscStatementDocument.isPresent()){
+        String existingDeltaAt = pscStatementDocument.get().getDeltaAt();
+        if (isDeltaStale(requestDeltaAt, existingDeltaAt)) {
+          throw new ConflictException(
+                  String.format("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]",
+                          requestDeltaAt, existingDeltaAt));
+        }
 
-    Statement statement = pscStatementDocument.getData();
+        pscStatementRepository.delete(pscStatementDocument.get());
+      }
 
-    pscStatementRepository.delete(pscStatementDocument);
-    apiClientService.invokeChsKafkaApiWithDeleteEvent(contextId, companyNumber, statementId, statement);
+      logger.infoContext(contextId,
+              String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
+                      companyNumber, statementId), DataMapHolder.getLogMap());
 
-    logger.infoContext(contextId, String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
-            companyNumber, statementId), DataMapHolder.getLogMap());
+      apiClientService.invokeChsKafkaApi(new ResourceChangedRequest(contextId, companyNumber, statementId, pscStatementDocument, true));
+    } catch (DataAccessException ex) {
+      throw new ServiceUnavailableException("Error connecting to MongoDB");
+    } catch (IllegalArgumentException ex) {
+      throw new BadRequestException("Illegal argument exception caught when processing delete");
+    }
   }
 
-  private PscStatementDocument getPscStatementDocument(String companyNumber, String statementId) throws ResourceNotFoundException{
-    Optional<PscStatementDocument> statementOptional = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
-    return statementOptional.orElseThrow(() ->
-            new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
-                    "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber)));
+  private Optional<PscStatementDocument> getPscStatementDocument(String companyNumber, String statementId) {
+      return pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
   }
 
   public void processPscStatement(String contextId, String companyNumber, String statementId,
@@ -126,7 +151,7 @@ public class PscStatementService {
       PscStatementDocument document = pscStatementTransformer.transformPscStatement(companyNumber, statementId, companyPscStatement);
 
       saveToDb(contextId, companyNumber, statementId, document);
-      apiClientService.invokeChsKafkaApi(contextId, companyNumber, statementId);
+      apiClientService.invokeChsKafkaApi(new ResourceChangedRequest(contextId, companyNumber, statementId, null, false));
     } else {
       logger.infoContext(contextId, "Psc Statement not persisted as the record provided is not the latest record.", DataMapHolder.getLogMap());
     }
