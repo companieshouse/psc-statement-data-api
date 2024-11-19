@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
@@ -56,6 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,6 +72,8 @@ public class PscStatementServiceTest {
     private static final String STATEMENT_ID = TestHelper.PSC_STATEMENT_ID;
     private static final String COMPANY_NUMBER = TestHelper.COMPANY_NUMBER;
     private static final String DELTA_AT = TestHelper.DELTA_AT;
+    private static final String INVALID_STATEMENT_ID = "invalid_id";
+    private static final String INVALID_COMPANY_NUMBER = "invalid_company_no";
 
     @Mock
     private Logger logger;
@@ -318,40 +322,34 @@ public class PscStatementServiceTest {
         verifyNoMoreInteractions(repository);
         verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, Optional.of(document), true));
     }
-    /**
     @Test
-    void deleteThrowsExceptionWhenInvalidIdGiven() {
+    void deleteSucceedsWhenInvalidIdGiven() {
         // Given
-        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
+        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString())).thenReturn(Optional.empty());
 
         // When
-        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, "invalid_id", DELTA_AT);
+        pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, INVALID_STATEMENT_ID, DELTA_AT);
 
         // Then
-        assertThrows(ResourceNotFoundException.class, actual);
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, "invalid_id");
+        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, INVALID_STATEMENT_ID);
         verifyNoMoreInteractions(repository);
-        verifyNoInteractions(apiClientService);
+        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, INVALID_STATEMENT_ID, Optional.empty(), true));
     }
-    **/
-    /**
     @Test
-    void deleteThrowsExceptionWhenInvalidCompanyNumberGiven() {
+    void deleteSucceedsWhenInvalidCompanyNumberGiven() {
         // Given
-        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
+        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString())).thenReturn(Optional.empty());
 
         // When
-        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, "invalid_company_no", STATEMENT_ID, DELTA_AT);
+        pscStatementService.deletePscStatement(CONTEXT_ID, INVALID_COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
 
         // Then
-        assertThrows(ResourceNotFoundException.class, actual);
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId("invalid_company_no", STATEMENT_ID);
+        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(INVALID_COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
-        verifyNoInteractions(apiClientService);
+        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, INVALID_COMPANY_NUMBER, STATEMENT_ID, Optional.empty(), true));
     }
-     **/
     @Test
-    void deleteThrowsExceptionWhenNoDeltaAtGiven() {
+    void deleteThrowsBadRequestExceptionWhenNoDeltaAtGiven() {
         // Given
 
         // When
@@ -364,10 +362,11 @@ public class PscStatementServiceTest {
         verifyNoInteractions(apiClientService);
     }
     @Test
-    void deleteThrowsExceptionWhenStaleDeltaAtGiven() {
+    void deleteThrowsConflictExceptionWhenStaleDeltaAtGiven() {
         // Given
         document.setDeltaAt(DELTA_AT);
-        when(repository.getPscStatementByCompanyNumberAndStatementId(any(), any())).thenReturn(Optional.of(document));
+        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString()))
+                .thenReturn(Optional.of(document));
 
         // When
         Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, "20170101093435661593");
@@ -377,6 +376,53 @@ public class PscStatementServiceTest {
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(apiClientService);
+    }
+    @Test
+    void deleteThrowsServiceUnavailableExceptionWhenMongoNotAvailableInFind(){
+        // Given
+        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString()))
+                .thenThrow(ServiceUnavailableException.class);
+
+        // When
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
+
+        // Then
+        assertThrows(ServiceUnavailableException.class, actual);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(apiClientService);
+    }
+    @Test
+    void deleteThrowsServiceUnavailableExceptionWhenMongoNotAvailableInDelete(){
+        // Given
+        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString()))
+                .thenReturn(Optional.of(document));
+        doThrow(ServiceUnavailableException.class).when(repository).delete(any());
+
+        // When
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
+
+        // Then
+        assertThrows(ServiceUnavailableException.class, actual);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).delete(document);
+        verifyNoInteractions(apiClientService);
+    }
+    @Test
+    void deleteThrowsBadRequestExceptionWhenKafkaThrowsIllegalArgument(){
+        // Given
+        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString()))
+                .thenReturn(Optional.of(document));
+        doThrow(IllegalArgumentException.class).when(apiClientService).invokeChsKafkaApi(any());
+
+        // When
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
+
+        // Then
+        assertThrows(BadRequestException.class, actual);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).delete(document);
+        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, Optional.of(document), true));
     }
 
     @Test

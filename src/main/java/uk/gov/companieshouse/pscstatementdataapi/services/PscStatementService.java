@@ -110,7 +110,7 @@ public class PscStatementService {
   }
 
   @Transactional
-  public void deletePscStatement(String contextId, String companyNumber, String statementId, String requestDeltaAt) throws ResourceNotFoundException{
+  public void deletePscStatement(String contextId, String companyNumber, String statementId, String requestDeltaAt) {
     if (StringUtils.isBlank(requestDeltaAt)){
       throw new BadRequestException("deltaAt missing from delete request");
     }
@@ -132,7 +132,7 @@ public class PscStatementService {
                       companyNumber, statementId), DataMapHolder.getLogMap());
 
       apiClientService.invokeChsKafkaApi(new ResourceChangedRequest(contextId, companyNumber, statementId, pscStatementDocument, true));
-    } catch (DataAccessException ex) {
+    } catch (ServiceUnavailableException ex) {
       throw new ServiceUnavailableException("Error connecting to MongoDB");
     } catch (IllegalArgumentException ex) {
       throw new BadRequestException("Illegal argument exception caught when processing delete");
@@ -234,17 +234,6 @@ public class PscStatementService {
 
     statementList.setItems(statements);
     return statementList;
-  }
-
-  private boolean hasPscExemptions(String companyNumber) {
-    Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExemptions(companyNumber);
-
-    return companyExemptions.filter(x ->
-            x.getExemptions() != null &&
-                    (x.getExemptions().getPscExemptAsSharesAdmittedOnMarket()!= null ||
-                            x.getExemptions().getPscExemptAsTradingOnEuRegulatedMarket() != null ||
-                            x.getExemptions().getPscExemptAsTradingOnRegulatedMarket() != null ||
-                            x.getExemptions().getPscExemptAsTradingOnUkRegulatedMarket() != null)).isPresent();
   }
 
   private boolean hasActiveExemptions(String companyNumber) {
