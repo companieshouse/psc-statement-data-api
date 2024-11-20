@@ -64,7 +64,7 @@ Feature: Delete statement information
       | company_number | id_to_delete                | delta_at             |
       | OC421554       | DHTUrJoAuKdXw7zvkreyAm_SoH0 | 20241023093435661593 |
 
-  Scenario Outline: Delete psc statement with no delta at header
+  Scenario Outline: Delete psc statement with no delta at value in header
 
     Given Psc statements data api service is running
     And a psc statement exists for company number "<company_number>" with statement id "<id_to_delete>"

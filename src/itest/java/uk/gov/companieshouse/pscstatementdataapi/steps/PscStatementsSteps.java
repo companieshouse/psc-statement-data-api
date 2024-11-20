@@ -9,7 +9,6 @@ import io.cucumber.java.en.When;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +33,6 @@ import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementReposito
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;

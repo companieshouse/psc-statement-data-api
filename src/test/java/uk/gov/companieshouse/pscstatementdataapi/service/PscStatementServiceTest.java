@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataAccessException;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
