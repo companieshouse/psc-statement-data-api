@@ -24,11 +24,11 @@ import uk.gov.companieshouse.api.exemptions.ExemptionItem;
 import uk.gov.companieshouse.api.exemptions.Exemptions;
 import uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
+import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
@@ -39,7 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequest;
+import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -380,7 +380,7 @@ public class PscStatementsSteps {
 
     @When("psc statement id does not exist for {string}")
     public void statement_does_not_exist(String statementId) {
-        CucumberContext.CONTEXT.set("pscStatementDocument", null);
+        CucumberContext.CONTEXT.set("pscStatementDocument", new PscStatementDocument());
         assertThat(pscStatementRepository.existsById(statementId)).isFalse();
     }
 
@@ -397,10 +397,10 @@ public class PscStatementsSteps {
 
     @Then("the CHS Kafka API delete is invoked for company number {string} with statement id {string} and the correct statement data")
     public void chs_kafka_api_invoked_delete(String companyNumber, String statementId) throws IOException {
-        Optional<PscStatementDocument> document = Optional.ofNullable(CucumberContext.CONTEXT.get("pscStatementDocument"));
+        PscStatementDocument document = CucumberContext.CONTEXT.get("pscStatementDocument");
         ResourceChangedRequest resourceChangedRequest = new ResourceChangedRequest(
                 CucumberContext.CONTEXT.get("contextId"), companyNumber, statementId, document, true);
-        verify(pscStatementApiService).invokeChsKafkaApi(resourceChangedRequest);
+        verify(pscStatementApiService).invokeChsKafkaApiDelete(resourceChangedRequest);
     }
 
     @When("a statement exists with id {string}")
@@ -428,7 +428,7 @@ public class PscStatementsSteps {
     @Then("nothing is persisted in the database")
     public void nothing_persisted_to_database() {
         List<PscStatementDocument> pscDocs = pscStatementRepository.findAll();
-       assertThat(pscDocs).hasSize(0);
+        assertThat(pscDocs).hasSize(0);
     }
 
     @After

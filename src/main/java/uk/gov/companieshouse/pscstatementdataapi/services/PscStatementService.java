@@ -23,9 +23,9 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.api.model.Created;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
+import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -34,7 +34,7 @@ import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransform
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequest;
+import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDeltaStale;
@@ -115,22 +115,25 @@ public class PscStatementService {
     }
     try {
       Optional<PscStatementDocument> pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
-      if (pscStatementDocument.isPresent()){
-        String existingDeltaAt = pscStatementDocument.get().getDeltaAt();
+
+      pscStatementDocument.ifPresentOrElse(doc -> {
+        String existingDeltaAt = doc.getDeltaAt();
         if (isDeltaStale(requestDeltaAt, existingDeltaAt)) {
           throw new ConflictException(
                   String.format("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]",
                           requestDeltaAt, existingDeltaAt));
         }
 
-        pscStatementRepository.delete(pscStatementDocument.get());
-      }
-
-      logger.infoContext(contextId,
-              String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
-                      companyNumber, statementId), DataMapHolder.getLogMap());
-
-      apiClientService.invokeChsKafkaApi(new ResourceChangedRequest(contextId, companyNumber, statementId, pscStatementDocument, true));
+        pscStatementRepository.delete(doc);
+        logger.infoContext(contextId,
+                String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
+                        companyNumber, statementId), DataMapHolder.getLogMap());
+        apiClientService.invokeChsKafkaApiDelete(new ResourceChangedRequest(contextId, companyNumber, statementId, doc, true));
+      }, () -> {
+        logger.infoContext(contextId,
+                String.format("PSC Statement does not exist for companyNumber %s and statementId %s", companyNumber, statementId), DataMapHolder.getLogMap());
+        apiClientService.invokeChsKafkaApiDelete(new ResourceChangedRequest(contextId, companyNumber, statementId, new PscStatementDocument(), true));
+      });
     } catch (ServiceUnavailableException ex) {
       throw new ServiceUnavailableException("Error connecting to MongoDB");
     } catch (IllegalArgumentException ex) {

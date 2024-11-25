@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
+import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import java.time.LocalDateTime;

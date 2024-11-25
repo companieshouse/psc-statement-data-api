@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.gov.companieshouse.api.psc.Statement;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.api.model.Updated;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
+import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 
 @Testcontainers
 @DataMongoTest

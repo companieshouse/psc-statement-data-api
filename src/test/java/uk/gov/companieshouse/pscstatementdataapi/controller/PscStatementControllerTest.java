@@ -18,6 +18,7 @@ import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
+import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;

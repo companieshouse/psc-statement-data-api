@@ -17,6 +17,7 @@ import uk.gov.companieshouse.api.serialization.LocalDateDeserializer;
 import uk.gov.companieshouse.api.serialization.LocalDateSerializer;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementWriteConverter;
+import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 import java.time.LocalDate;
@@ -38,6 +39,9 @@ public class ApplicationConfig {
     public InternalApiClient internalApiClient() {
         return ApiSdkManager.getPrivateSDK();
     }
+
+    @Bean
+    public ResourceChangedRequestMapper resourceChangedRequestMapper() { return new ResourceChangedRequestMapper(); }
 
     @Bean
     public CompanyExemptionsApiService companyExemptionsApiService(){

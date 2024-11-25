@@ -2,7 +2,6 @@ package uk.gov.companieshouse.pscstatementdataapi.api;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -17,8 +16,8 @@ import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResource
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
-import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequest;
-import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
+import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
+import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,10 +28,16 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PscStatementApiServiceTest {
 
+    @InjectMocks
+    private PscStatementApiService pscStatementApiService;
+
     @Mock
     private Logger logger;
     @Mock
     InternalApiClient internalApiClient;
+    @Mock
+    ResourceChangedRequestMapper resourceChangedRequestMapper;
+
     @Mock
     PrivateChangedResourceHandler privateChangedResourceHandler;
     @Mock
@@ -41,15 +46,6 @@ class PscStatementApiServiceTest {
     private ApiResponse<Void> response;
     @Mock
     private ResourceChangedRequest resourceChangedRequest;
-
-    private TestHelper testHelper;
-    @InjectMocks
-    private PscStatementApiService pscStatementApiService;
-
-    @BeforeEach
-    void setUp() {
-        testHelper = new TestHelper();
-    }
 
     @Test
     void invokeChsKafkaEndpoint() throws ApiErrorResponseException {
@@ -112,7 +108,7 @@ class PscStatementApiServiceTest {
         when(privateChangedResourcePost.execute()).thenReturn(response);
 
         // When
-        ApiResponse<?> apiResponse = pscStatementApiService.invokeChsKafkaApi(resourceChangedRequest);
+        ApiResponse<?> apiResponse = pscStatementApiService.invokeChsKafkaApiDelete(resourceChangedRequest);
 
         // Then
         assertThat(apiResponse).isNotNull();
@@ -130,7 +126,7 @@ class PscStatementApiServiceTest {
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
         // When
-        Executable actual = () -> pscStatementApiService.invokeChsKafkaApi(resourceChangedRequest);
+        Executable actual = () -> pscStatementApiService.invokeChsKafkaApiDelete(resourceChangedRequest);
 
         // Then
         assertThrows(ServiceUnavailableException.class, actual);
@@ -148,7 +144,7 @@ class PscStatementApiServiceTest {
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
         // When
-        Executable actual = () -> pscStatementApiService.invokeChsKafkaApi(resourceChangedRequest);
+        Executable actual = () -> pscStatementApiService.invokeChsKafkaApiDelete(resourceChangedRequest);
 
         // Then
         assertThrows(RuntimeException.class, actual);

@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
@@ -25,7 +26,6 @@ import uk.gov.companieshouse.api.metrics.RegisterApi;
 import uk.gov.companieshouse.api.metrics.RegistersApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.Created;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
@@ -34,10 +34,12 @@ import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
-import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequest;
+import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
+import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapper;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 import java.io.IOException;
@@ -91,6 +93,9 @@ public class PscStatementServiceTest {
     @Spy
     @InjectMocks
     PscStatementService pscStatementService;
+
+    @MockBean
+    private ResourceChangedRequestMapper resourceChangedRequestMapper;
 
     private TestHelper testHelper;
     private Statement statement;
@@ -319,7 +324,7 @@ public class PscStatementServiceTest {
         verify(repository).delete(document);
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
-        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, Optional.of(document), true));
+        verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document, true));
     }
     @Test
     void deleteSucceedsWhenInvalidIdGiven() {
@@ -332,7 +337,7 @@ public class PscStatementServiceTest {
         // Then
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, INVALID_STATEMENT_ID);
         verifyNoMoreInteractions(repository);
-        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, INVALID_STATEMENT_ID, Optional.empty(), true));
+        verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, INVALID_STATEMENT_ID, new PscStatementDocument(), true));
     }
     @Test
     void deleteSucceedsWhenInvalidCompanyNumberGiven() {
@@ -345,7 +350,7 @@ public class PscStatementServiceTest {
         // Then
         verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(INVALID_COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
-        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, INVALID_COMPANY_NUMBER, STATEMENT_ID, Optional.empty(), true));
+        verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID, INVALID_COMPANY_NUMBER, STATEMENT_ID, new PscStatementDocument(), true));
     }
     @Test
     void deleteThrowsBadRequestExceptionWhenNoDeltaAtGiven() {
@@ -412,7 +417,7 @@ public class PscStatementServiceTest {
         // Given
         when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString()))
                 .thenReturn(Optional.of(document));
-        doThrow(IllegalArgumentException.class).when(apiClientService).invokeChsKafkaApi(any());
+        doThrow(IllegalArgumentException.class).when(apiClientService).invokeChsKafkaApiDelete(any());
 
         // When
         Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
@@ -421,7 +426,7 @@ public class PscStatementServiceTest {
         assertThrows(BadRequestException.class, actual);
         verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verify(repository).delete(document);
-        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, Optional.of(document), true));
+        verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document, true));
     }
 
     @Test

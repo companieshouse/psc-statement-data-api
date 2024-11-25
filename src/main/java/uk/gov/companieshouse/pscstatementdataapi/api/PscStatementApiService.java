@@ -1,68 +1,49 @@
 package uk.gov.companieshouse.pscstatementdataapi.api;
 
-import java.time.Instant;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
-import uk.gov.companieshouse.api.chskafka.ChangedResource;
-import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
-import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
-import uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil;
-import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequest;
+import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
+import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapper;
 
 @Service
 public class PscStatementApiService {
 
-    @Autowired
-    InternalApiClient internalApiClient;
+    private final ResourceChangedRequestMapper mapper;
+    private final InternalApiClient internalApiClient;
+    private final Logger logger;
+
     @Value("${chs.api.kafka.url}")
     private String chsKafkaApiUrl;
     @Value("${chs.api.kafka.uri}")
     private String resourceChangedUri;
-    @Value("${chs.api.kafka.kind}")
-    private String resourceKind;
-    private static final String PSC_STATEMENTS_URI = "/company/%s/persons-with-significant-control-statements/%s";
-    private static final String CHANGED_EVENT_TYPE = "changed";
-    private static final String DELETE_EVENT_TYPE = "deleted";
-    @Autowired
-    private Logger logger;
+
+    public PscStatementApiService(ResourceChangedRequestMapper mapper, InternalApiClient internalApiClient,
+            Logger logger) {
+        this.mapper = mapper;
+        this.internalApiClient = internalApiClient;
+        this.logger = logger;
+    }
 
     public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
         internalApiClient.setBasePath(chsKafkaApiUrl);
         PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
-                .postChangedResource(resourceChangedUri, mapChangedResource(resourceChangedRequest));
+                .postChangedResource(resourceChangedUri, mapper.mapChangedEvent(resourceChangedRequest));
         return handleApiCall(changedResourcePost);
     }
 
-    private ChangedResource mapChangedResource(ResourceChangedRequest request) {
-        boolean isDelete = request.isDelete();
-
-        ChangedResourceEvent event = new ChangedResourceEvent()
-                .publishedAt(DateTimeUtil.formatPublishedAt(Instant.now()))
-                .type(isDelete ? DELETE_EVENT_TYPE : CHANGED_EVENT_TYPE);
-
-        ChangedResource changedResource = new ChangedResource()
-                .resourceUri(String.format(PSC_STATEMENTS_URI, request.companyNumber(), request.statementId()))
-                .resourceKind(resourceKind)
-                .event(event)
-                .contextId(request.contextId());
-
-        Optional<PscStatementDocument> document = request.document();
-        if (isDelete && document.isPresent()){
-            Statement statement = document.get().getData();
-            changedResource.setDeletedData(statement);
-        }
-
-        return changedResource;
+    public ApiResponse<Void> invokeChsKafkaApiDelete(ResourceChangedRequest resourceChangedRequest) {
+        internalApiClient.setBasePath(chsKafkaApiUrl);
+        PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
+                .postChangedResource(resourceChangedUri, mapper.mapDeletedEvent(resourceChangedRequest));
+        return handleApiCall(changedResourcePost);
     }
 
     private ApiResponse<Void> handleApiCall(PrivateChangedResourcePost changedResourcePost) {

@@ -44,8 +44,8 @@ Feature: Delete statement information
     And a psc statement exists for company number "<company_number>" with statement id "<id_to_delete>"
     And CHS kafka API service is unavailable
     When I send DELETE request for company number "<company_number>" with statement id "<id_to_delete>"
-    Then I should receive 503 status code
-    And a statement exists with id "<id_to_delete>"
+    Then I should receive 200 status code
+    And no statement exists with id "<id_to_delete>"
 
     Examples:
       | company_number | id_to_delete                |

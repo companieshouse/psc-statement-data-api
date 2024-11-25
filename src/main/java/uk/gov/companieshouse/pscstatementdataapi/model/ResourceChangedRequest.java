@@ -1,10 +1,8 @@
-package uk.gov.companieshouse.pscstatementdataapi.util;
+package uk.gov.companieshouse.pscstatementdataapi.model;
 
 import java.util.Objects;
-import java.util.Optional;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
 
-public record ResourceChangedRequest(String contextId, String companyNumber, String statementId, Optional<PscStatementDocument> document, boolean isDelete) {
+public record ResourceChangedRequest(String contextId, String companyNumber, String statementId, PscStatementDocument document, boolean isDelete) {
 
     @Override
     public boolean equals(Object o) {
