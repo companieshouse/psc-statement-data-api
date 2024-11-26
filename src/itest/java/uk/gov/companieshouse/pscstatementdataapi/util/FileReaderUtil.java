@@ -1,11 +1,10 @@
 package uk.gov.companieshouse.pscstatementdataapi.util;
 
-import org.springframework.util.FileCopyUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import org.springframework.util.FileCopyUtils;
 
 public class FileReaderUtil {
 

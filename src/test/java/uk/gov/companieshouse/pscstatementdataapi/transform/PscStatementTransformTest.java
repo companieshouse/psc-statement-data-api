@@ -1,18 +1,16 @@
 package uk.gov.companieshouse.pscstatementdataapi.transform;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import uk.gov.companieshouse.api.psc.CompanyPscStatement;
-import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
-import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import uk.gov.companieshouse.api.psc.CompanyPscStatement;
+import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
+import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 public class PscStatementTransformTest {
 
