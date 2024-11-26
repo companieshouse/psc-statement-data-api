@@ -1,13 +1,20 @@
 package uk.gov.companieshouse.pscstatementdataapi.services;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDeltaStale;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.dockerjava.api.exception.ConflictException;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
@@ -15,29 +22,19 @@ import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
 import uk.gov.companieshouse.api.metrics.RegistersApi;
+import uk.gov.companieshouse.api.model.Created;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
-import uk.gov.companieshouse.api.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
-import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDeltaStale;
+import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
+import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
 
 @Service
 public class PscStatementService {

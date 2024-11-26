@@ -1,12 +1,12 @@
 package uk.gov.companieshouse.pscstatementdataapi.model;
 
 import java.util.Objects;
+import javax.persistence.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import uk.gov.companieshouse.api.model.Created;
 import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.api.psc.Statement;
-import javax.persistence.Id;
 
 @Document(collection="#{@environment.getProperty('mongodb.pscStatements.collection.name')}")
 public class PscStatementDocument {
