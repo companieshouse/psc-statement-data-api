@@ -26,7 +26,6 @@
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
         <io-cucumber.version>7.15.0</io-cucumber.version>
-        <test-containers.version>1.20.3</test-containers.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
         <assertj-core.version>3.25.3</assertj-core.version>
         <skip.integration.tests>false</skip.integration.tests>
@@ -35,17 +34,12 @@
         <docker-java-api.version>3.3.6</docker-java-api.version>
 
         <!-- Internal -->
-        <ch-kafka.version>1.4.8</ch-kafka.version>
-        <kafka-models.version>1.0.33</kafka-models.version>
-        <spring.boot.version>3.4.0</spring.boot.version>
-        <spring.framework.version>5.3.11</spring.framework.version>
         <structured-logging.version>3.0.9</structured-logging.version>
         <private-api-sdk-java.version>4.0.179</private-api-sdk-java.version>
-        <data-sync-api-sdk-java.version>unversioned</data-sync-api-sdk-java.version>
+        <data-sync-api-sdk-java.version>1.0.9</data-sync-api-sdk-java.version>
         <api-security-java.version>2.0.5</api-security-java.version>
         <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
         <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
-        <wiremock.standalone.version>2.35.0</wiremock.standalone.version>
 
         <!--sonar configuration-->
         <sonar-maven-plugin.version>3.11.0.3922</sonar-maven-plugin.version>
@@ -68,13 +62,6 @@
     </properties>
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${test-containers.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
