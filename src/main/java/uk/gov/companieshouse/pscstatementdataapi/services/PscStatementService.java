@@ -130,7 +130,7 @@ public class PscStatementService {
         apiClientService.invokeChsKafkaApiDelete(new ResourceChangedRequest(contextId, companyNumber, statementId, new PscStatementDocument(), true));
       });
     } catch (DataAccessException ex) {
-      logger.error("Error connecting to MongoDB", ex);
+      logger.error("Error connecting to MongoDB", ex, DataMapHolder.getLogMap());
       throw new ServiceUnavailableException("Error connecting to MongoDB");
     }
   }

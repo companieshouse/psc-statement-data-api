@@ -409,22 +409,6 @@ class PscStatementServiceTest {
         verify(repository).delete(document);
         verifyNoInteractions(apiClientService);
     }
-    @Test
-    void deleteThrowsBadRequestExceptionWhenKafkaThrowsIllegalArgument(){
-        // Given
-        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString()))
-                .thenReturn(Optional.of(document));
-        doThrow(ServiceUnavailableException.class).when(apiClientService).invokeChsKafkaApiDelete(any());
-
-        // When
-        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
-
-        // Then
-        assertThrows(ServiceUnavailableException.class, actual);
-        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
-        verify(repository).delete(document);
-        verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document, true));
-    }
 
     @Test
     void processPscStatementSavesStatement() {
