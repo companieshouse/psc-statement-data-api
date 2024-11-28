@@ -13,6 +13,7 @@ import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConf
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -387,6 +388,12 @@ public class PscStatementsSteps {
     public void chs_kafka_service_unavailable() throws IOException {
         doThrow(ServiceUnavailableException.class)
                 .when(pscStatementApiService).invokeChsKafkaApi(any());
+    }
+
+    @And("CHS kafka API service is unavailable for delete")
+    public void chsKafkaAPIServiceIsUnavailableForDelete() {
+        doThrow(ServiceUnavailableException.class)
+                .when(pscStatementApiService).invokeChsKafkaApiDelete(any());
     }
 
     @Then("the CHS Kafka API is not invoked")

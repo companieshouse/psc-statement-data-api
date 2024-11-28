@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.api;
 
+import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
@@ -8,6 +10,7 @@ import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapper;
@@ -15,21 +18,22 @@ import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapp
 @Service
 public class PscStatementApiService {
 
+    private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
+
     private final ResourceChangedRequestMapper mapper;
     private final InternalApiClient internalApiClient;
-    private final Logger logger;
-
-    @Value("${chs.api.kafka.url}")
-    private String chsKafkaApiUrl;
-    @Value("${chs.api.kafka.uri}")
-    private String resourceChangedUri;
+    private final String chsKafkaApiUrl;
+    private final String resourceChangedUri;
 
     public PscStatementApiService(ResourceChangedRequestMapper mapper, InternalApiClient internalApiClient,
-            Logger logger) {
+            @Value("${chs.api.kafka.url}") String chsKafkaApiUrl,
+            @Value("${chs.api.kafka.uri}") String resourceChangedUri) {
         this.mapper = mapper;
         this.internalApiClient = internalApiClient;
-        this.logger = logger;
+        this.chsKafkaApiUrl = chsKafkaApiUrl;
+        this.resourceChangedUri = resourceChangedUri;
     }
+
 
     public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
         internalApiClient.setBasePath(chsKafkaApiUrl);

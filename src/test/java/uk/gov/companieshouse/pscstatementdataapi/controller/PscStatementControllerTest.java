@@ -157,21 +157,6 @@ class PscStatementControllerTest {
     }
 
     @Test
-    void callPscStatementDeleteRequestResourceNotFound() throws Exception {
-        doThrow(ResourceNotFoundException.class)
-                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
-
-        mockMvc.perform(delete(DELETE_URL)
-                        .contentType(APPLICATION_JSON)
-                        .header("x-request-id", X_REQUEST_ID)
-                        .header("X-DELTA-AT", DELTA_AT)
-                        .header("ERIC-Identity", ERIC_IDENTITY)
-                        .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
-                        .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
     void callPscStatementDeleteRequestServerError() throws Exception {
         doThrow(ServiceUnavailableException.class)
                 .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
@@ -199,51 +184,6 @@ class PscStatementControllerTest {
                         .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
                         .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))
                 .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void callPscStatementDeleteRequestMethodNotAllowed() throws Exception {
-        doThrow(MethodNotAllowedException.class)
-                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
-
-        mockMvc.perform(delete(DELETE_URL)
-                        .contentType(APPLICATION_JSON)
-                        .header("x-request-id", X_REQUEST_ID)
-                        .header("X-DELTA-AT", DELTA_AT)
-                        .header("ERIC-Identity", ERIC_IDENTITY)
-                        .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
-                        .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))
-                .andExpect(status().isMethodNotAllowed());
-    }
-
-    @Test
-    void callPscStatementDeleteRequestConflict() throws Exception {
-        doThrow(ConflictException.class)
-                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
-
-        mockMvc.perform(delete(DELETE_URL)
-                        .contentType(APPLICATION_JSON)
-                        .header("x-request-id", X_REQUEST_ID)
-                        .header("X-DELTA-AT", DELTA_AT)
-                        .header("ERIC-Identity", ERIC_IDENTITY)
-                        .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
-                        .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))
-                .andExpect(status().isConflict());
-    }
-
-    @Test
-    void callPscStatementDeleteRequestGenericException() throws Exception {
-        doThrow(RuntimeException.class)
-                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
-
-        mockMvc.perform(delete(DELETE_URL)
-                        .contentType(APPLICATION_JSON)
-                        .header("x-request-id", X_REQUEST_ID)
-                        .header("X-DELTA-AT", DELTA_AT)
-                        .header("ERIC-Identity", ERIC_IDENTITY)
-                        .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
-                        .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))
-                .andExpect(status().isInternalServerError());
     }
 
 }

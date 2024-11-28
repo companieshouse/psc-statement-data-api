@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @ConditionalOnProperty(name = "mongodb.transactional", havingValue = "true")
 @Configuration
-@EnableTransactionManagement
 public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
 
     @Value("${spring.data.mongodb.name}")
@@ -28,11 +27,6 @@ public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
 
     @Autowired
     MongoCustomConversions mongoCustomConversions;
-
-    @Bean
-    MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
-        return new MongoTransactionManager(dbFactory);
-    }
 
     @Override
     protected String getDatabaseName() {

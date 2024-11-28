@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,13 +54,11 @@ public class PscStatementService {
   PscStatementApiService apiClientService;
 
   public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {
-    Optional<PscStatementDocument> pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
-    try {
-      return pscStatementDocument.get().getData();
-    } catch (NoSuchElementException ex) {
-      throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
-              "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber));
-    }
+    PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId)
+            .orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
+                    String.format("Resource not found for statement ID: %s and company number: %s",
+                            statementId, companyNumber)));
+    return pscStatementDocument.getData();
   }
 
   public StatementList retrievePscStatementListFromDb(String companyNumber, int startIndex, boolean registerView, int itemsPerPage) {
@@ -105,7 +104,6 @@ public class PscStatementService {
       }
   }
 
-  @Transactional
   public void deletePscStatement(String contextId, String companyNumber, String statementId, String requestDeltaAt) {
     if (StringUtils.isBlank(requestDeltaAt)){
       throw new BadRequestException("deltaAt missing from delete request");
@@ -131,10 +129,9 @@ public class PscStatementService {
                 String.format("PSC Statement does not exist for companyNumber %s and statementId %s", companyNumber, statementId), DataMapHolder.getLogMap());
         apiClientService.invokeChsKafkaApiDelete(new ResourceChangedRequest(contextId, companyNumber, statementId, new PscStatementDocument(), true));
       });
-    } catch (ServiceUnavailableException ex) {
+    } catch (DataAccessException ex) {
+      logger.error("Error connecting to MongoDB", ex);
       throw new ServiceUnavailableException("Error connecting to MongoDB");
-    } catch (IllegalArgumentException ex) {
-      throw new BadRequestException("Illegal argument exception caught when processing delete");
     }
   }
 

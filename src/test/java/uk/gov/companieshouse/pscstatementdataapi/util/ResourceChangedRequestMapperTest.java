@@ -106,11 +106,7 @@ class ResourceChangedRequestMapperTest {
         public static ResourceChangedTestArgumentBuilder builder() {
             return new ResourceChangedTestArgumentBuilder();
         }
-
-        @Override
-        public String toString() {
-            return this.request.toString();
-        }
+        
     }
 
     static class ResourceChangedTestArgumentBuilder {
