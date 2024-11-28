@@ -218,12 +218,6 @@
       <!-- Overrides -->
       <!-- CVE-2024-38809 -->
       <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-web</artifactId>
-        <version>6.1.12</version>
-      </dependency>
-      <!-- CVE-2024-38809 -->
-      <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-config</artifactId>
         <version>6.3.3</version>
