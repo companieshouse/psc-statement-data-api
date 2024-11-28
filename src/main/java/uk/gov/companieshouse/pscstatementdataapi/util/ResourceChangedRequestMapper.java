@@ -17,8 +17,6 @@ public class ResourceChangedRequestMapper {
 
     private final Supplier<Instant> instantSupplier;
 
-
-
     public ResourceChangedRequestMapper(Supplier<Instant> instantSupplier) {
         this.instantSupplier = instantSupplier;
     }

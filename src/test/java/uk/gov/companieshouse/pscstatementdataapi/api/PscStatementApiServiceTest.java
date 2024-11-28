@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
@@ -22,6 +23,7 @@ import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapper;
 
@@ -31,8 +33,6 @@ class PscStatementApiServiceTest {
     @InjectMocks
     private PscStatementApiService pscStatementApiService;
 
-    @Mock
-    private Logger logger;
     @Mock
     InternalApiClient internalApiClient;
     @Mock
@@ -59,9 +59,9 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThat(apiResponse).isNotNull();
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
@@ -77,9 +77,9 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThrows(ServiceUnavailableException.class, actual);
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
@@ -95,9 +95,9 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThrows(RuntimeException.class, actual);
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
@@ -112,9 +112,9 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThat(apiResponse).isNotNull();
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
@@ -130,9 +130,9 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThrows(ServiceUnavailableException.class, actual);
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
@@ -148,9 +148,9 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThrows(RuntimeException.class, actual);
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
 }

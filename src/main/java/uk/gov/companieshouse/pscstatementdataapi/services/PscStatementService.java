@@ -1,12 +1,12 @@
 package uk.gov.companieshouse.pscstatementdataapi.services;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDeltaStale;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.dockerjava.api.exception.ConflictException;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
@@ -29,6 +28,7 @@ import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
@@ -40,8 +40,8 @@ import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransform
 @Service
 public class PscStatementService {
 
-  @Autowired
-  private Logger logger;
+  private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
+
   @Autowired
   PscStatementRepository pscStatementRepository;
   @Autowired

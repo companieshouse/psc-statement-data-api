@@ -3,8 +3,8 @@ package uk.gov.companieshouse.pscstatementdataapi.steps;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET;
@@ -398,7 +398,7 @@ public class PscStatementsSteps {
 
     @Then("the CHS Kafka API is not invoked")
     public void chs_kafka_api_not_invoked() throws IOException {
-        verify(pscStatementApiService, times(0)).invokeChsKafkaApi(any());
+        verifyNoInteractions(pscStatementApiService);
     }
 
     @Then("the CHS Kafka API delete is invoked for company number {string} with statement id {string} and the correct statement data")

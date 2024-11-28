@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.controller;
 
+import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 
@@ -25,8 +28,8 @@ import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 @RequestMapping("/company/{company_number}/persons-with-significant-control-statements")
 public class PscStatementController {
 
-    @Autowired
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
+
     @Autowired
     private PscStatementService pscStatementService;
 

@@ -74,9 +74,6 @@ class PscStatementServiceTest {
     private static final String NOT_FOUND_COMPANY_NUMBER = "not_found_company_no";
 
     @Mock
-    private Logger logger;
-
-    @Mock
     private PscStatementRepository repository;
     @Mock
     private PscStatementTransformer statementTransformer;
@@ -121,8 +118,8 @@ class PscStatementServiceTest {
         Statement statement = pscStatementService.retrievePscStatementFromDb(COMPANY_NUMBER,STATEMENT_ID);
 
         assertEquals(expectedStatement, statement);
-        verify(pscStatementService, times(1)).retrievePscStatementFromDb(COMPANY_NUMBER, STATEMENT_ID);
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verify(pscStatementService).retrievePscStatementFromDb(COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
     }
 
     @Test
@@ -138,8 +135,8 @@ class PscStatementServiceTest {
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false,25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
-        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
+        verify(repository).getStatementList(COMPANY_NUMBER, 0, 25);
     }
 
     @Test
@@ -155,8 +152,8 @@ class PscStatementServiceTest {
 
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false,25);
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
-        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
+        verify(repository).getStatementList(COMPANY_NUMBER, 0, 25);
     }
 
     @Test
@@ -179,8 +176,8 @@ class PscStatementServiceTest {
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
-        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
+        verify(repository).getStatementList(COMPANY_NUMBER, 0, 25);
     }
 
     @Test
@@ -196,8 +193,8 @@ class PscStatementServiceTest {
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verify(repository).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
     }
 
     @Test
@@ -216,24 +213,27 @@ class PscStatementServiceTest {
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verify(repository).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
     }
 
     @Test
     void whenNoMetricsDataFoundForCompanyInRegisterViewShouldThrow() throws ResourceNotFoundException, IOException {
+        // given
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
 
+        // when
         Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
             pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
         });
 
+        // then
         String expectedMessage = "No company metrics data found for company number: companyNumber";
         String actualMessage = ex.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(0)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verifyNoInteractions(repository);
     }
 
     @Test
@@ -252,8 +252,8 @@ class PscStatementServiceTest {
         String expectedMessage = "company companyNumber not on public register";
         String actualMessage = ex.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(0)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verifyNoInteractions(repository);
     }
 
     @Test
@@ -277,8 +277,8 @@ class PscStatementServiceTest {
         String expectedMessage = "Resource not found for company number: companyNumber";
         String actualMessage = ex.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2022-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verify(repository).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2022-12-20T06:00Z"), 25);
     }
 
     @Test
@@ -299,8 +299,8 @@ class PscStatementServiceTest {
         assertEquals(expectedStatementList, statementList);
         assertEquals(statementList.getActiveCount(), null);
         assertEquals(statementList.getTotalResults(), null);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        verify(repository).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
     }
 
     @Test
@@ -316,7 +316,7 @@ class PscStatementServiceTest {
 
         // Then
         verify(repository).delete(document);
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document, true));
     }
@@ -329,7 +329,7 @@ class PscStatementServiceTest {
         pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, NOT_FOUND_STATEMENT_ID, DELTA_AT);
 
         // Then
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER,
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER,
                 NOT_FOUND_STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER,
@@ -344,7 +344,7 @@ class PscStatementServiceTest {
         pscStatementService.deletePscStatement(CONTEXT_ID, NOT_FOUND_COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
 
         // Then
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(NOT_FOUND_COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(NOT_FOUND_COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID,
                 NOT_FOUND_COMPANY_NUMBER, STATEMENT_ID, new PscStatementDocument(), true));
@@ -374,7 +374,7 @@ class PscStatementServiceTest {
 
         // Then
         assertThrows(ConflictException.class, actual);
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(apiClientService);
     }
@@ -417,7 +417,7 @@ class PscStatementServiceTest {
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
         verify(repository).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
         verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest("", COMPANY_NUMBER, STATEMENT_ID, null, false));
         assertNotNull(document.getCreated().getAt());
     }
@@ -436,7 +436,7 @@ class PscStatementServiceTest {
         pscStatementService.processPscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
         verify(repository).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
         verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, null, false));
         assertEquals(document.getCreated().getAt(), dateTime);
     }
@@ -457,7 +457,7 @@ class PscStatementServiceTest {
 
         assertThrows(ServiceUnavailableException.class, executable);
         verify(repository).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
         verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, null, false));
         assertEquals(document.getCreated().getAt(), dateTime);
     }
@@ -475,8 +475,8 @@ class PscStatementServiceTest {
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
-        verify(repository, times(0)).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verifyNoMoreInteractions(repository);
         assertEquals(document.getUpdated().getAt(), dateTime);
     }
 
@@ -633,19 +633,23 @@ class PscStatementServiceTest {
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
-        verify(repository, times(1)).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(repository).save(document);
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
     }
 
     @Test
     void processPscStatementDoesNotUpdateIfDeltaAtIsMissing() {
+        // given
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.ofNullable(document));
         ApiResponse<Void> response = new ApiResponse<>(200, null);
         when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
 
+        // when
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
-        verify(repository, times(0)).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+
+        // then
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verifyNoMoreInteractions(repository);
     }
 }
