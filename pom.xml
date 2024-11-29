@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.6</version>
+        <version>2.1.10</version>
     </parent>
     <artifactId>psc-statement-data-api</artifactId>
     <version>unversioned</version>
@@ -16,9 +16,9 @@
         <java.version>21</java.version>
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
-        <maven-build-helper-plugin.version>3.5.0</maven-build-helper-plugin.version>
-        <spring-boot-dependencies.version>3.3.2</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.3.2</spring-boot-maven-plugin.version>
+        <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
+        <spring-boot-dependencies.version>3.3.5</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>3.3.5</spring-boot-maven-plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
@@ -26,7 +26,6 @@
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
         <io-cucumber.version>7.15.0</io-cucumber.version>
-        <test-containers.version>1.19.7</test-containers.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
         <assertj-core.version>3.25.3</assertj-core.version>
         <skip.integration.tests>false</skip.integration.tests>
@@ -35,17 +34,12 @@
         <docker-java-api.version>3.3.6</docker-java-api.version>
 
         <!-- Internal -->
-        <ch-kafka.version>1.4.8</ch-kafka.version>
-        <kafka-models.version>1.0.33</kafka-models.version>
-        <spring.boot.version>2.7.13</spring.boot.version>
-        <spring.framework.version>5.3.11</spring.framework.version>
         <structured-logging.version>3.0.9</structured-logging.version>
         <private-api-sdk-java.version>4.0.179</private-api-sdk-java.version>
-        <data-sync-api-sdk-java.version>1.0.8</data-sync-api-sdk-java.version>
+        <data-sync-api-sdk-java.version>1.0.9</data-sync-api-sdk-java.version>
         <api-security-java.version>2.0.5</api-security-java.version>
         <api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
         <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
-        <wiremock.standalone.version>2.35.0</wiremock.standalone.version>
 
         <!--sonar configuration-->
         <sonar-maven-plugin.version>3.11.0.3922</sonar-maven-plugin.version>
@@ -69,13 +63,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${test-containers.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot-dependencies.version}</version>
@@ -91,6 +78,14 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <!--		Transitive deps start here-->
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-core</artifactId>
+            <version>2.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!--		Transitive deps end here-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -195,6 +190,13 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>mongodb</artifactId>
+            <exclusions>
+                <!--excluded to remove vulnerability-->
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -214,12 +216,6 @@
             <version>${docker-java-api.version}</version>
         </dependency>
       <!-- Overrides -->
-      <!-- CVE-2024-38809 -->
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-web</artifactId>
-        <version>6.1.12</version>
-      </dependency>
       <!-- CVE-2024-38809 -->
       <dependency>
         <groupId>org.springframework.security</groupId>

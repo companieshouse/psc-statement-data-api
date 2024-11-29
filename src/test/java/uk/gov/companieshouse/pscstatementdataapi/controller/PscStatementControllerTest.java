@@ -1,5 +1,18 @@
 package uk.gov.companieshouse.pscstatementdataapi.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.github.dockerjava.api.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,26 +22,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.server.MethodNotAllowedException;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.api.exception.BadRequestException;
+import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
-public class PscStatementControllerTest {
+class PscStatementControllerTest {
     private static final String GET_URL = String.format("/company/%s/persons-with-significant-control-statements/%s", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
     private static final String PUT_URL = String.format("/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
     private static final String DELETE_URL = String.format("/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
@@ -37,6 +43,7 @@ public class PscStatementControllerTest {
     private static final String ERIC_IDENTITY_TYPE = "key";
     private static final String ERIC_PRIVILEGES = "*";
     private static final String X_REQUEST_ID = TestHelper.X_REQUEST_ID;
+    private static final String DELTA_AT = TestHelper.DELTA_AT;
 
 
     @MockBean
@@ -136,17 +143,47 @@ public class PscStatementControllerTest {
 
     @Test
     void callPscStatementDeleteRequest() throws Exception {
-
         doNothing()
-                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString());
+                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)
                         .header("x-request-id", X_REQUEST_ID)
+                        .header("X-DELTA-AT", DELTA_AT)
                         .header("ERIC-Identity", ERIC_IDENTITY)
                         .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
                         .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void callPscStatementDeleteRequestServerError() throws Exception {
+        doThrow(ServiceUnavailableException.class)
+                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
+
+        mockMvc.perform(delete(DELETE_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", X_REQUEST_ID)
+                        .header("X-DELTA-AT", DELTA_AT)
+                        .header("ERIC-Identity", ERIC_IDENTITY)
+                        .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
+                        .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))
+                .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    void callPscStatementDeleteRequestBadRequest() throws Exception {
+        doThrow(BadRequestException.class)
+                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
+
+        mockMvc.perform(delete(DELETE_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", X_REQUEST_ID)
+                        .header("X-DELTA-AT", DELTA_AT)
+                        .header("ERIC-Identity", ERIC_IDENTITY)
+                        .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
+                        .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES))
+                .andExpect(status().isBadRequest());
     }
 
 }

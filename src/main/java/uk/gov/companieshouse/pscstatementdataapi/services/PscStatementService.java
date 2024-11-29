@@ -1,38 +1,41 @@
 package uk.gov.companieshouse.pscstatementdataapi.services;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDeltaStale;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.dockerjava.api.exception.ConflictException;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
+import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
 import uk.gov.companieshouse.api.metrics.RegistersApi;
+import uk.gov.companieshouse.api.model.Created;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
-import uk.gov.companieshouse.api.model.Created;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
+import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
+import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class PscStatementService {
@@ -51,7 +54,10 @@ public class PscStatementService {
   PscStatementApiService apiClientService;
 
   public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {
-    PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
+    PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId)
+            .orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
+                    String.format("Resource not found for statement ID: %s and company number: %s",
+                            statementId, companyNumber)));
     return pscStatementDocument.getData();
   }
 
@@ -98,24 +104,39 @@ public class PscStatementService {
       }
   }
 
-  @Transactional
-  public void deletePscStatement(String contextId, String companyNumber, String statementId) throws ResourceNotFoundException{
-    PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
+  public void deletePscStatement(String contextId, String companyNumber, String statementId, String requestDeltaAt) {
+    if (StringUtils.isBlank(requestDeltaAt)){
+      throw new BadRequestException("deltaAt missing from delete request");
+    }
+    try {
+      Optional<PscStatementDocument> pscStatementDocument = getPscStatementDocument(companyNumber, statementId);
 
-    Statement statement = pscStatementDocument.getData();
+      pscStatementDocument.ifPresentOrElse(doc -> {
+        String existingDeltaAt = doc.getDeltaAt();
+        if (isDeltaStale(requestDeltaAt, existingDeltaAt)) {
+          throw new ConflictException(
+                  String.format("Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]",
+                          requestDeltaAt, existingDeltaAt));
+        }
 
-    pscStatementRepository.delete(pscStatementDocument);
-    apiClientService.invokeChsKafkaApiWithDeleteEvent(contextId, companyNumber, statementId, statement);
-
-    logger.infoContext(contextId, String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
-            companyNumber, statementId), DataMapHolder.getLogMap());
+        pscStatementRepository.delete(doc);
+        logger.infoContext(contextId,
+                String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
+                        companyNumber, statementId), DataMapHolder.getLogMap());
+        apiClientService.invokeChsKafkaApiDelete(new ResourceChangedRequest(contextId, companyNumber, statementId, doc, true));
+      }, () -> {
+        logger.infoContext(contextId,
+                String.format("PSC Statement does not exist for companyNumber %s and statementId %s", companyNumber, statementId), DataMapHolder.getLogMap());
+        apiClientService.invokeChsKafkaApiDelete(new ResourceChangedRequest(contextId, companyNumber, statementId, new PscStatementDocument(), true));
+      });
+    } catch (DataAccessException ex) {
+      logger.error("Error connecting to MongoDB", ex, DataMapHolder.getLogMap());
+      throw new ServiceUnavailableException("Error connecting to MongoDB");
+    }
   }
 
-  private PscStatementDocument getPscStatementDocument(String companyNumber, String statementId) throws ResourceNotFoundException{
-    Optional<PscStatementDocument> statementOptional = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
-    return statementOptional.orElseThrow(() ->
-            new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
-                    "Resource not found for statement ID: %s, and company number: %s", statementId, companyNumber)));
+  private Optional<PscStatementDocument> getPscStatementDocument(String companyNumber, String statementId) {
+      return pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
   }
 
   public void processPscStatement(String contextId, String companyNumber, String statementId,
@@ -126,7 +147,7 @@ public class PscStatementService {
       PscStatementDocument document = pscStatementTransformer.transformPscStatement(companyNumber, statementId, companyPscStatement);
 
       saveToDb(contextId, companyNumber, statementId, document);
-      apiClientService.invokeChsKafkaApi(contextId, companyNumber, statementId);
+      apiClientService.invokeChsKafkaApi(new ResourceChangedRequest(contextId, companyNumber, statementId, null, false));
     } else {
       logger.infoContext(contextId, "Psc Statement not persisted as the record provided is not the latest record.", DataMapHolder.getLogMap());
     }
@@ -209,17 +230,6 @@ public class PscStatementService {
 
     statementList.setItems(statements);
     return statementList;
-  }
-
-  private boolean hasPscExemptions(String companyNumber) {
-    Optional<CompanyExemptions> companyExemptions = companyExemptionsApiService.getCompanyExemptions(companyNumber);
-
-    return companyExemptions.filter(x ->
-            x.getExemptions() != null &&
-                    (x.getExemptions().getPscExemptAsSharesAdmittedOnMarket()!= null ||
-                            x.getExemptions().getPscExemptAsTradingOnEuRegulatedMarket() != null ||
-                            x.getExemptions().getPscExemptAsTradingOnRegulatedMarket() != null ||
-                            x.getExemptions().getPscExemptAsTradingOnUkRegulatedMarket() != null)).isPresent();
   }
 
   private boolean hasActiveExemptions(String companyNumber) {

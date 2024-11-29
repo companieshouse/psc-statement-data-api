@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.companieshouse.api.psc.Statement;
-import uk.gov.companieshouse.api.psc.CompanyPscStatement;
-import uk.gov.companieshouse.api.psc.StatementList;
-
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.api.psc.CompanyPscStatement;
+import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.api.psc.StatementList;
+import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 
@@ -88,6 +87,7 @@ public class PscStatementController {
     @DeleteMapping("/{statement_id}/internal")
     public ResponseEntity<Void> deletePscStatement(
             @RequestHeader("x-request-id") String contextId,
+            @RequestHeader("X-DELTA-AT") String deltaAt,
             @PathVariable("company_number") String companyNumber,
             @PathVariable("statement_id") String statementId) {
 
@@ -98,7 +98,7 @@ public class PscStatementController {
         logger.infoContext(contextId, String.format(
                 "Deleting Psc statement information for statement id %s", statementId),
                 DataMapHolder.getLogMap());
-        pscStatementService.deletePscStatement(contextId, companyNumber, statementId);
+        pscStatementService.deletePscStatement(contextId, companyNumber, statementId, deltaAt);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

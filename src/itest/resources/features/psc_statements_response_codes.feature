@@ -19,15 +19,14 @@ Feature: Response codes for psc statements
     When I send a PUT request with no ERIC headers
     Then I should receive 401 status code
 
-  Scenario Outline: Put psc statement when kafka-api is not available (Should be 503 and nothing saved to db)
 
+  Scenario Outline: Put psc statement when kafka-api is not available (Should be 503 and resource saved to db)
 
     Given Psc statements data api service is running
     And CHS kafka API service is unavailable
     When I send a PUT request with payload "<data>" file for company number "<companyNumber>" with statement id "<statementId>"
-    Then I should receive 200 status code
+    Then I should receive 503 status code
     And the CHS Kafka API is invoked for company number "<companyNumber>" with statement id "<statementId>"
-
 
     Examples:
       | companyNumber | statementId                 | data                  |

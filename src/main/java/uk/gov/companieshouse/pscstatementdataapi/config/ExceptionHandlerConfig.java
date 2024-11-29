@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.dockerjava.api.exception.ConflictException;
 import com.mongodb.MongoException;
-
+import java.time.format.DateTimeParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -12,12 +13,10 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.MethodNotAllowedException;
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
+import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
-
-import java.time.format.DateTimeParseException;
 
 @ControllerAdvice
 public class ExceptionHandlerConfig {
@@ -48,6 +47,12 @@ public class ExceptionHandlerConfig {
     public ResponseEntity<Object> handleMethodNotAllowedException(Exception exception) {
         logger.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(value = {ConflictException.class})
+    public ResponseEntity<Object> handleConflictException(Exception exception){
+        logger.error(exception.getMessage());
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = {Exception.class})

@@ -1,15 +1,31 @@
 package uk.gov.companieshouse.pscstatementdataapi.steps;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET;
+import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -25,32 +41,15 @@ import uk.gov.companieshouse.api.exemptions.ExemptionItem;
 import uk.gov.companieshouse.api.exemptions.Exemptions;
 import uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
-import uk.gov.companieshouse.api.model.PscStatementDocument;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
+import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
+import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
-
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET;
-import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
 public class PscStatementsSteps {
     private String contextId;
@@ -107,6 +106,8 @@ public class PscStatementsSteps {
         document.setData(pscStatement);
         mongoTemplate.save(document);
         assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)).isNotEmpty();
+
+        CucumberContext.CONTEXT.set("pscStatementDocument", document);
     }
 
     @Given("a psc statement exists for company number {string} with statement id {string} and delta_at {string}")
@@ -171,7 +172,7 @@ public class PscStatementsSteps {
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "key");
         headers.set("ERIC-Authorised-Key-Roles", "*");
-        HttpEntity<String> request = new HttpEntity<String>(null, headers);
+        HttpEntity<String> request = new HttpEntity<>(null, headers);
 
         ResponseEntity<MetricsApi> response = restTemplate.exchange(uri, HttpMethod.GET, request,
                 MetricsApi.class, companyNumber);
@@ -346,6 +347,26 @@ public class PscStatementsSteps {
         HttpHeaders headers = new HttpHeaders();
         CucumberContext.CONTEXT.set("contextId", "5234234234");
         headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
+        headers.set("X-DELTA-AT", "20240723093435661593");
+        headers.set("ERIC-Identity", "TEST-IDENTITY");
+        headers.set("ERIC-Identity-Type", "key");
+        headers.set("ERIC-Authorised-Key-Roles", "*");
+
+        HttpEntity<String> request = new HttpEntity<String>(null, headers);
+
+        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, request, Void.class, companyNumber, statementId);
+
+        CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
+    }
+
+    @When("I send DELETE request for company number {string} with statement id {string} without delta at")
+    public void send_delete_request_for_statement_without_delta_at(String companyNumber, String statementId) {
+        String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal";
+
+        HttpHeaders headers = new HttpHeaders();
+        CucumberContext.CONTEXT.set("contextId", "5234234234");
+        headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
+        headers.set("X-DELTA-AT", null);
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "key");
         headers.set("ERIC-Authorised-Key-Roles", "*");
@@ -359,25 +380,33 @@ public class PscStatementsSteps {
 
     @When("psc statement id does not exist for {string}")
     public void statement_does_not_exist(String statementId) {
+        CucumberContext.CONTEXT.set("pscStatementDocument", new PscStatementDocument());
         assertThat(pscStatementRepository.existsById(statementId)).isFalse();
     }
 
     @When("CHS kafka API service is unavailable")
     public void chs_kafka_service_unavailable() throws IOException {
         doThrow(ServiceUnavailableException.class)
-                .when(pscStatementApiService).invokeChsKafkaApiWithDeleteEvent(any(), any(), any(), any());
+                .when(pscStatementApiService).invokeChsKafkaApi(any());
+    }
+
+    @And("CHS kafka API service is unavailable for delete")
+    public void chsKafkaAPIServiceIsUnavailableForDelete() {
+        doThrow(ServiceUnavailableException.class)
+                .when(pscStatementApiService).invokeChsKafkaApiDelete(any());
     }
 
     @Then("the CHS Kafka API is not invoked")
     public void chs_kafka_api_not_invoked() throws IOException {
-        verify(pscStatementApiService, times(0)).invokeChsKafkaApi(any(), any(), any());
+        verify(pscStatementApiService, times(0)).invokeChsKafkaApi(any());
     }
 
     @Then("the CHS Kafka API delete is invoked for company number {string} with statement id {string} and the correct statement data")
     public void chs_kafka_api_invoked_delete(String companyNumber, String statementId) throws IOException {
-        File statementFile = new ClassPathResource("/json/output/psc_statement.json").getFile();
-        Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
-        verify(pscStatementApiService).invokeChsKafkaApiWithDeleteEvent("5234234234", companyNumber, statementId, pscStatement);
+        PscStatementDocument document = CucumberContext.CONTEXT.get("pscStatementDocument");
+        ResourceChangedRequest resourceChangedRequest = new ResourceChangedRequest(
+                CucumberContext.CONTEXT.get("contextId"), companyNumber, statementId, document, true);
+        verify(pscStatementApiService).invokeChsKafkaApiDelete(resourceChangedRequest);
     }
 
     @When("a statement exists with id {string}")
@@ -399,17 +428,18 @@ public class PscStatementsSteps {
 
     @Then("the CHS Kafka API is invoked for company number {string} with statement id {string}")
     public void chs_kafka_api_invoked(String companyNumber, String statementId) {
-        verify(pscStatementApiService).invokeChsKafkaApi("5234234234", companyNumber, statementId);
+        verify(pscStatementApiService).invokeChsKafkaApi(new ResourceChangedRequest("5234234234", companyNumber, statementId, null, false));
     }
 
     @Then("nothing is persisted in the database")
     public void nothing_persisted_to_database() {
         List<PscStatementDocument> pscDocs = pscStatementRepository.findAll();
-       assertThat(pscDocs).hasSize(0);
+        assertThat(pscDocs).hasSize(0);
     }
 
     @After
     public void dbStop(){
         mongoDBContainer.stop();
     }
+
 }

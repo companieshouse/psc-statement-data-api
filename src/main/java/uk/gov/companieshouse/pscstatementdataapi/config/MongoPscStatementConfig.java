@@ -4,7 +4,6 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @ConditionalOnProperty(name = "mongodb.transactional", havingValue = "true")
 @Configuration
-@EnableTransactionManagement
 public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
 
     @Value("${spring.data.mongodb.name}")
@@ -29,11 +27,6 @@ public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
 
     @Autowired
     MongoCustomConversions mongoCustomConversions;
-
-    @Bean
-    MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
-        return new MongoTransactionManager(dbFactory);
-    }
 
     @Override
     protected String getDatabaseName() {

@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.function.Supplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
@@ -18,9 +22,6 @@ import uk.gov.companieshouse.api.serialization.LocalDateSerializer;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementWriteConverter;
 import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
-
-import java.time.LocalDate;
-import java.util.Arrays;
 
 @Configuration
 public class ApplicationConfig {
@@ -37,6 +38,11 @@ public class ApplicationConfig {
     @Bean
     public InternalApiClient internalApiClient() {
         return ApiSdkManager.getPrivateSDK();
+    }
+
+    @Bean
+    public Supplier<Instant> instantSupplier() {
+        return Instant::now;
     }
 
     @Bean
