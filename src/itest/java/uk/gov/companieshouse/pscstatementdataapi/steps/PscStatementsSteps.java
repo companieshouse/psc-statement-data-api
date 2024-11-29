@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
@@ -48,38 +47,33 @@ import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
-import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
 
 public class PscStatementsSteps {
 
-    private String contextId;
-
     private static final LocalDate EXEMPTION_DATE = LocalDate.of(2022, 11, 3);
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+    private final TestRestTemplate restTemplate;
+    private final PscStatementRepository pscStatementRepository;
+    private final MongoTemplate mongoTemplate;
+    private final CompanyMetricsApiService companyMetricsApiService;
+    private final PscStatementApiService pscStatementApiService;
+    private final CompanyExemptionsApiService companyExemptionsApiService;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    public PscStatementsSteps(ObjectMapper objectMapper, TestRestTemplate restTemplate,
+            PscStatementRepository pscStatementRepository, MongoTemplate mongoTemplate,
+            CompanyMetricsApiService companyMetricsApiService, PscStatementApiService pscStatementApiService,
+            CompanyExemptionsApiService companyExemptionsApiService) {
+        this.objectMapper = objectMapper;
+        this.restTemplate = restTemplate;
+        this.pscStatementRepository = pscStatementRepository;
+        this.mongoTemplate = mongoTemplate;
+        this.companyMetricsApiService = companyMetricsApiService;
+        this.pscStatementApiService = pscStatementApiService;
+        this.companyExemptionsApiService = companyExemptionsApiService;
+    }
 
-    @Autowired
-    private PscStatementRepository pscStatementRepository;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private CompanyMetricsApiService companyMetricsApiService;
-
-    @Autowired
-    public PscStatementApiService pscStatementApiService;
-
-    @Autowired
-    private PscStatementService pscStatementService;
-
-    @Autowired
-    private CompanyExemptionsApiService companyExemptionsApiService;
 
     @Before
     public void dbCleanUp() {
@@ -316,9 +310,8 @@ public class PscStatementsSteps {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        this.contextId = "5234234234";
-        CucumberContext.CONTEXT.set("contextId", this.contextId);
-        headers.set("x-request-id", this.contextId);
+        CucumberContext.CONTEXT.set("contextId", "5234234234");
+        headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "key");
         headers.set("ERIC-Authorised-Key-Roles", "*");
@@ -339,9 +332,8 @@ public class PscStatementsSteps {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        this.contextId = "5234234234";
-        CucumberContext.CONTEXT.set("contextId", this.contextId);
-        headers.set("x-request-id", this.contextId);
+        CucumberContext.CONTEXT.set("contextId", "5234234234");
+        headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
 
         HttpEntity request = new HttpEntity(data, headers);
         String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal";
@@ -430,7 +422,6 @@ public class PscStatementsSteps {
     @When("a statement exists with id {string} and delta_at {string}")
     public void statement_exists(String statementId, String deltaAt) throws NoSuchElementException {
         assertThat(pscStatementRepository.existsById(statementId)).isTrue();
-        Optional<PscStatementDocument> document = pscStatementRepository.findById(statementId);
         assertThat(pscStatementRepository.findById(statementId).get().getDeltaAt()).isEqualTo(deltaAt);
     }
 
@@ -442,13 +433,13 @@ public class PscStatementsSteps {
     @Then("the CHS Kafka API is invoked for company number {string} with statement id {string}")
     public void chs_kafka_api_invoked(String companyNumber, String statementId) {
         verify(pscStatementApiService).invokeChsKafkaApi(
-                new ResourceChangedRequest("5234234234", companyNumber, statementId, null, false));
+                new ResourceChangedRequest(CucumberContext.CONTEXT.get("contextId"), companyNumber, statementId, null, false));
     }
 
     @Then("nothing is persisted in the database")
     public void nothing_persisted_to_database() {
         List<PscStatementDocument> pscDocs = pscStatementRepository.findAll();
-        assertThat(pscDocs).hasSize(0);
+        assertThat(pscDocs).isEmpty();
     }
 
     @After
