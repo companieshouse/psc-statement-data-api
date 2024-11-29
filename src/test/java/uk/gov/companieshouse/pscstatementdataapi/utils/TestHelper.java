@@ -94,9 +94,8 @@ public class TestHelper {
     }
 
     public StatementList createStatementList() {
-        Statement statement = new Statement();
         StatementList statementList = new StatementList();
-        statementList.setItems(Collections.singletonList(statement));
+        statementList.setItems(Collections.singletonList(new Statement()));
         statementList.setActiveCount(1);
         statementList.setCeasedCount(1);
         statementList.setTotalResults(2);
@@ -107,9 +106,8 @@ public class TestHelper {
     }
 
     public StatementList createStatementListWithExemptions() {
-        Statement statement = new Statement();
         StatementList statementList = new StatementList();
-        statementList.setItems(Collections.singletonList(statement));
+        statementList.setItems(Collections.singletonList(new Statement()));
         statementList.setActiveCount(1);
         statementList.setCeasedCount(1);
         statementList.setTotalResults(2);
@@ -121,9 +119,8 @@ public class TestHelper {
 
 
     public StatementList createStatementListRegisterView() {
-        Statement statement = new Statement();
         StatementList statementList = new StatementList();
-        statementList.setItems(Collections.singletonList(statement));
+        statementList.setItems(Collections.singletonList(new Statement()));
         statementList.setActiveCount(1);
         statementList.setCeasedCount(0);
         statementList.setTotalResults(1);
@@ -134,9 +131,8 @@ public class TestHelper {
     }
 
     public StatementList createStatementListNoMetrics() {
-        Statement statement = new Statement();
         StatementList statementList = new StatementList();
-        statementList.setItems(Collections.singletonList(statement));
+        statementList.setItems(Collections.singletonList(new Statement()));
         statementList.setStartIndex(0);
         statementList.setItemsPerPage(25);
         statementList.setLinks(createLinks());

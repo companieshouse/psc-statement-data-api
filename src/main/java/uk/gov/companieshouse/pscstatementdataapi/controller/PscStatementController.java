@@ -66,20 +66,20 @@ public class PscStatementController {
 
     @GetMapping("")
     public ResponseEntity<StatementList> searchPscStatementsList(
-            @PathVariable String company_number,
+            @PathVariable String companyNumber,
             @RequestParam(value = "items_per_page", required = false, defaultValue = "25") Integer itemsPerPage,
             @RequestParam(value = "start_index", required = false, defaultValue = "0") final Integer startIndex,
-            @RequestParam(value = "register_view", required = false) boolean registerView) {
+            @RequestParam(value = "register_view", required = false) Boolean registerView) {
         itemsPerPage = Math.min(itemsPerPage, 100);
         DataMapHolder.get()
-                .companyNumber(company_number)
+                .companyNumber(companyNumber)
                 .itemsPerPage(itemsPerPage.toString())
                 .startIndex(startIndex.toString())
                 .registerView(String.valueOf(registerView));
         logger.info(String.format(
                 "Retrieving psc statement list data for company number %s, start index %d, items per page %d",
-                company_number, startIndex, itemsPerPage), DataMapHolder.getLogMap());
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(company_number,
+                companyNumber, startIndex, itemsPerPage), DataMapHolder.getLogMap());
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(companyNumber,
                 startIndex,
                 registerView,
                 itemsPerPage);

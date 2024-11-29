@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import static com.mongodb.internal.connection.tlschannel.util.Util.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -88,7 +88,6 @@ class PscStatementServiceTest {
     private PscStatementService pscStatementService;
 
     private TestHelper testHelper;
-    private Statement statement;
     private CompanyPscStatement companyPscStatement;
     private PscStatementDocument document;
     private PscExemptAsSharesAdmittedOnMarketItem pscExemptAsSharesAdmittedOnMarketItem;
@@ -99,7 +98,6 @@ class PscStatementServiceTest {
     @BeforeEach
     void setUp() {
         testHelper = new TestHelper();
-        statement = testHelper.createStatement();
         document = testHelper.createEmptyPscStatementDocument();
         companyPscStatement = testHelper.createCompanyPscStatement();
         pscExemptAsSharesAdmittedOnMarketItem = new PscExemptAsSharesAdmittedOnMarketItem();
@@ -329,7 +327,7 @@ class PscStatementServiceTest {
     void deletePscStatementDeletesStatement() {
         // Given
         ApiResponse<Void> response = new ApiResponse<>(200, null);
-        document.setData(statement);
+        document.setData(testHelper.createStatement());
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(
                 Optional.of(document));
         when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);

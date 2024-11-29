@@ -7,7 +7,6 @@ import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDelt
 import com.github.dockerjava.api.exception.ConflictException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
@@ -224,8 +223,7 @@ public class PscStatementService {
             links.setExemptions(String.format("/company/%s/exemptions", companyNumber));
         }
 
-        List<Statement> statements = statementDocuments.stream().map(PscStatementDocument::getData)
-                .collect(Collectors.toList());
+        List<Statement> statements = statementDocuments.stream().map(PscStatementDocument::getData).toList();
 
         companyMetrics.ifPresentOrElse(metricsApi -> {
             try {

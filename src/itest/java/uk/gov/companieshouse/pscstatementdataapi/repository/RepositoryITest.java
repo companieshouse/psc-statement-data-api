@@ -17,18 +17,15 @@ import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 
 @Testcontainers
 @DataMongoTest
-public class RepositoryITest extends AbstractMongoConfig {
+class RepositoryITest extends AbstractMongoConfig {
 
     @Autowired
     private PscStatementRepository pscStatementRepository;
 
-    private final String COMPANY_NUMBER = "companyNumber";
-
-    public static final String DELTA_AT = "20180101093435661593";
-
-    public static final String STALE_DELTA_AT = "20170101093435661593";
-
-    public static final String NEW_DELTA_AT = "20190101093435661593";
+    private static final String COMPANY_NUMBER = "companyNumber";
+    private static final String DELTA_AT = "20180101093435661593";
+    private static final String STALE_DELTA_AT = "20170101093435661593";
+    private static final String NEW_DELTA_AT = "20190101093435661593";
 
     @BeforeAll
     static void setup() {
@@ -56,10 +53,10 @@ public class RepositoryITest extends AbstractMongoConfig {
         pscStatementRepository.save(createPscStatementDocument("4"));
         pscStatementRepository.save(createPscStatementDocument("5"));
 
-        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 5).get().size()).isEqualTo(5);
-        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 2).get().size()).isEqualTo(2);
-        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 4, 5).get().size()).isEqualTo(1);
-        assertThat(pscStatementRepository.getStatementList("Bad Company Number", 0, 5).get().size()).isEqualTo(0);
+        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 5).get()).hasSize(5);
+        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 2).get()).hasSize(2);
+        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 4, 5).get()).hasSize(1);
+        assertThat(pscStatementRepository.getStatementList("Bad Company Number", 0, 5).get()).isEmpty();
     }
 
     @Test
