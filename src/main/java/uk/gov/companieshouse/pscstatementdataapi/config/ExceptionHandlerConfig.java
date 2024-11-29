@@ -1,10 +1,11 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
+import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.dockerjava.api.exception.ConflictException;
 import com.mongodb.MongoException;
 import java.time.format.DateTimeParseException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +17,13 @@ import org.springframework.web.server.MethodNotAllowedException;
 import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 
 @ControllerAdvice
 public class ExceptionHandlerConfig {
 
-    @Autowired
-    Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
 
     @ExceptionHandler(value = ResourceNotFoundException.class)
     public ResponseEntity<String> handleNotFoundException(ResourceNotFoundException exception) {

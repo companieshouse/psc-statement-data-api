@@ -4,30 +4,26 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.MongoDatabaseFactory;
-import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @ConditionalOnProperty(name = "mongodb.transactional", havingValue = "true")
 @Configuration
 public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
 
-    @Value("${spring.data.mongodb.name}")
-    private String databaseName;
 
-    @Value("${spring.data.mongodb.uri}")
-    private String databaseUri;
-
+    private final String databaseName;
+    private final String databaseUri;
     private final MongoCustomConversions mongoCustomConversions;
 
-    public MongoPscStatementConfig(MongoCustomConversions mongoCustomConversions) {
+    public MongoPscStatementConfig(@Value("${spring.data.mongodb.name}") String databaseName,
+            @Value("${spring.data.mongodb.uri}") String databaseUri,
+            MongoCustomConversions mongoCustomConversions) {
+        this.databaseName = databaseName;
+        this.databaseUri = databaseUri;
         this.mongoCustomConversions = mongoCustomConversions;
     }
 

@@ -1,15 +1,15 @@
 package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import static com.mongodb.internal.connection.tlschannel.util.Util.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -53,7 +53,6 @@ import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
@@ -319,8 +318,8 @@ class PscStatementServiceTest {
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
 
         assertEquals(expectedStatementList, statementList);
-        assertEquals(statementList.getActiveCount(), null);
-        assertEquals(statementList.getTotalResults(), null);
+        assertNull(statementList.getActiveCount());
+        assertNull(statementList.getTotalResults());
         verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
         verify(repository).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"),
                 25);
