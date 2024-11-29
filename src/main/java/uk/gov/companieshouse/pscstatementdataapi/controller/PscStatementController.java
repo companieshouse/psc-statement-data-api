@@ -66,10 +66,10 @@ public class PscStatementController {
 
     @GetMapping("")
     public ResponseEntity<StatementList> searchPscStatementsList(
-            @PathVariable String companyNumber,
+            @PathVariable("company_number") String companyNumber,
             @RequestParam(value = "items_per_page", required = false, defaultValue = "25") Integer itemsPerPage,
             @RequestParam(value = "start_index", required = false, defaultValue = "0") final Integer startIndex,
-            @RequestParam(value = "register_view", required = false) Boolean registerView) {
+            @RequestParam(value = "register_view", required = false) boolean registerView) {
         itemsPerPage = Math.min(itemsPerPage, 100);
         DataMapHolder.get()
                 .companyNumber(companyNumber)
