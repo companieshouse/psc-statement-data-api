@@ -31,7 +31,8 @@ class ResourceChangedRequestMapperTest {
     private static final String COMPANY_NUMBER = "companyNumber";
     private static final String STATEMENT_ID = "statementId";
     private static final String RESOURCE_KIND = "persons-with-significant-control-statement";
-    private static final String RESOURCE_URI = String.format("/company/%s/persons-with-significant-control-statements/%s/internal",
+    private static final String RESOURCE_URI = String.format(
+            "/company/%s/persons-with-significant-control-statements/%s/internal",
             COMPANY_NUMBER, STATEMENT_ID);
     private static final String ETAG = "etag";
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
@@ -106,10 +107,11 @@ class ResourceChangedRequestMapperTest {
         public static ResourceChangedTestArgumentBuilder builder() {
             return new ResourceChangedTestArgumentBuilder();
         }
-        
+
     }
 
     static class ResourceChangedTestArgumentBuilder {
+
         private ResourceChangedRequest request;
         private String resourceUri;
         private String resourceKind;

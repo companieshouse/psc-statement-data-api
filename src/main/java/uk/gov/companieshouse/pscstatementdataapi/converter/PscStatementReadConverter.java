@@ -7,6 +7,7 @@ import uk.gov.companieshouse.api.psc.Statement;
 
 @ReadingConverter
 public class PscStatementReadConverter extends ReadConverter<Statement> {
+
     public PscStatementReadConverter(ObjectMapper objectMapper, Class<Statement> objectClass) {
         super(objectMapper, objectClass);
     }

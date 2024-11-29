@@ -13,7 +13,8 @@ import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 public interface PscStatementRepository extends MongoRepository<PscStatementDocument, String> {
 
     @Query("{'company_number' : ?0, '_id' : ?1}")
-    Optional<PscStatementDocument> getPscStatementByCompanyNumberAndStatementId(String companyNumber, String statementId);
+    Optional<PscStatementDocument> getPscStatementByCompanyNumberAndStatementId(String companyNumber,
+            String statementId);
 
 
     @Query(("{'company_number': ?0, '_id': ?1, 'delta_at': {$gt: '?2' }}"))
@@ -24,7 +25,7 @@ public interface PscStatementRepository extends MongoRepository<PscStatementDocu
             "{'$sort': {'data.notified_on': -1, 'data.ceased_on': -1 } }",
             "{'$skip': ?1}",
             "{'$limit': ?2}",
-        })
+    })
     Optional<List<PscStatementDocument>> getStatementList(String companyNumber, int startIndex, int itemsPerPage);
 
     @Aggregation(pipeline = {
@@ -33,5 +34,6 @@ public interface PscStatementRepository extends MongoRepository<PscStatementDocu
             "{'$skip': ?1}",
             "{'$limit': ?3}",
     })
-    Optional<List<PscStatementDocument>> getStatementListRegisterView(String companyNumber, int startIndex, OffsetDateTime movedOn, int itemsPerPage);
+    Optional<List<PscStatementDocument>> getStatementListRegisterView(String companyNumber, int startIndex,
+            OffsetDateTime movedOn, int itemsPerPage);
 }

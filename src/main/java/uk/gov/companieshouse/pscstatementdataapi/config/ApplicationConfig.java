@@ -27,7 +27,7 @@ import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 public class ApplicationConfig {
 
     @Bean
-    public MongoCustomConversions mongoCustomConversions(){
+    public MongoCustomConversions mongoCustomConversions() {
         ObjectMapper objectMapper = mongoDbObjectMapper();
         return new MongoCustomConversions(Arrays.asList(
                 new PscStatementReadConverter(objectMapper, Statement.class),
@@ -46,7 +46,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public CompanyExemptionsApiService companyExemptionsApiService(){
+    public CompanyExemptionsApiService companyExemptionsApiService() {
         return new CompanyExemptionsApiService();
     }
 
@@ -55,7 +55,7 @@ public class ApplicationConfig {
         return new CompanyMetricsApiService();
     }
 
-    private ObjectMapper mongoDbObjectMapper(){
+    private ObjectMapper mongoDbObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

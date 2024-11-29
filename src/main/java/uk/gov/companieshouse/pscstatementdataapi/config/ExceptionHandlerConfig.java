@@ -24,8 +24,8 @@ public class ExceptionHandlerConfig {
     @Autowired
     Logger logger;
 
-    @ExceptionHandler(value= ResourceNotFoundException.class)
-    public ResponseEntity<String> handleNotFoundException(ResourceNotFoundException exception){
+    @ExceptionHandler(value = ResourceNotFoundException.class)
+    public ResponseEntity<String> handleNotFoundException(ResourceNotFoundException exception) {
         logger.error(exception.getMessage());
         return ResponseEntity.notFound().build();
     }
@@ -50,7 +50,7 @@ public class ExceptionHandlerConfig {
     }
 
     @ExceptionHandler(value = {ConflictException.class})
-    public ResponseEntity<Object> handleConflictException(Exception exception){
+    public ResponseEntity<Object> handleConflictException(Exception exception) {
         logger.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }

@@ -25,8 +25,11 @@ public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
     @Value("${spring.data.mongodb.uri}")
     private String databaseUri;
 
-    @Autowired
-    MongoCustomConversions mongoCustomConversions;
+    private final MongoCustomConversions mongoCustomConversions;
+
+    public MongoPscStatementConfig(MongoCustomConversions mongoCustomConversions) {
+        this.mongoCustomConversions = mongoCustomConversions;
+    }
 
     @Override
     protected String getDatabaseName() {

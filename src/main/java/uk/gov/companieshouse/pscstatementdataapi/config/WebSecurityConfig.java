@@ -23,8 +23,8 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(AbstractHttpConfigurer::disable)
-            .csrf(AbstractHttpConfigurer::disable)
-            .addFilterBefore(new CustomCorsFilter(externalMethods()), CsrfFilter.class);
+                .csrf(AbstractHttpConfigurer::disable)
+                .addFilterBefore(new CustomCorsFilter(externalMethods()), CsrfFilter.class);
 
         return http.build();
     }
@@ -33,6 +33,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public List<String> externalMethods() {
         return Arrays.asList(HttpMethod.GET.name());
     }
+
     //Key type is automatically checked by the authenticator add other allowed auth types here
     List<String> otherAllowedAuthMethods = Arrays.asList("oauth2");
 

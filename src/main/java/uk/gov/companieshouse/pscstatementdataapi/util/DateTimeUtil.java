@@ -9,11 +9,13 @@ import org.apache.commons.lang.StringUtils;
 
 public class DateTimeUtil {
 
-    private static final DateTimeFormatter publishedAtDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private static final DateTimeFormatter publishedAtDateTimeFormatter = DateTimeFormatter.ofPattern(
+            "yyyy-MM-dd'T'HH:mm:ss");
     private static final DateTimeFormatter deltaAtFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")
             .withZone(UTC);
 
-    private DateTimeUtil() {}
+    private DateTimeUtil() {
+    }
 
     public static String formatPublishedAt(Instant now) {
         return publishedAtDateTimeFormatter.format(now.atZone(UTC));

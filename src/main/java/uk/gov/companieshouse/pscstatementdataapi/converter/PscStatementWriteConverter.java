@@ -7,6 +7,7 @@ import uk.gov.companieshouse.api.psc.Statement;
 
 @WritingConverter
 public class PscStatementWriteConverter extends WriteConverter<Statement> {
+
     public PscStatementWriteConverter(ObjectMapper objectMapper) {
         super(objectMapper);
     }
