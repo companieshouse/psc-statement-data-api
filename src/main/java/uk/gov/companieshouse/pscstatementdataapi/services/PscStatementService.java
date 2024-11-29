@@ -4,13 +4,11 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDeltaStale;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.dockerjava.api.exception.ConflictException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -42,18 +40,23 @@ public class PscStatementService {
 
   private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
 
-  @Autowired
-  PscStatementRepository pscStatementRepository;
-  @Autowired
-  PscStatementTransformer pscStatementTransformer;
-  @Autowired
-  CompanyMetricsApiService companyMetricsApiService;
-  @Autowired
-  CompanyExemptionsApiService companyExemptionsApiService;
-  @Autowired
-  PscStatementApiService apiClientService;
+  private final PscStatementRepository pscStatementRepository;
+  private final PscStatementTransformer pscStatementTransformer;
+  private final CompanyMetricsApiService companyMetricsApiService;
+  private final CompanyExemptionsApiService companyExemptionsApiService;
+  private final PscStatementApiService apiClientService;
 
-  public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws JsonProcessingException, ResourceNotFoundException {
+    public PscStatementService(PscStatementRepository pscStatementRepository,
+            PscStatementTransformer pscStatementTransformer, CompanyMetricsApiService companyMetricsApiService,
+            CompanyExemptionsApiService companyExemptionsApiService, PscStatementApiService apiClientService) {
+        this.pscStatementRepository = pscStatementRepository;
+        this.pscStatementTransformer = pscStatementTransformer;
+        this.companyMetricsApiService = companyMetricsApiService;
+        this.companyExemptionsApiService = companyExemptionsApiService;
+        this.apiClientService = apiClientService;
+    }
+
+    public Statement retrievePscStatementFromDb(String companyNumber, String statementId) throws ResourceNotFoundException {
     PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId)
             .orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
                     String.format("Resource not found for statement ID: %s and company number: %s",

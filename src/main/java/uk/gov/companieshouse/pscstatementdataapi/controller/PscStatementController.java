@@ -3,7 +3,6 @@ package uk.gov.companieshouse.pscstatementdataapi.controller;
 import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,8 +29,11 @@ public class PscStatementController {
 
     private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
 
-    @Autowired
-    private PscStatementService pscStatementService;
+    private final PscStatementService pscStatementService;
+
+    public PscStatementController(PscStatementService pscStatementService) {
+        this.pscStatementService = pscStatementService;
+    }
 
     @GetMapping("/{statement_id}")
     public ResponseEntity<Statement> searchPscStatements (@PathVariable("company_number") String companyNumber,
