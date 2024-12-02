@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.github.dockerjava.api.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,34 +21,35 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.server.MethodNotAllowedException;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class PscStatementControllerTest {
-    private static final String GET_URL = String.format("/company/%s/persons-with-significant-control-statements/%s", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
-    private static final String PUT_URL = String.format("/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
-    private static final String DELETE_URL = String.format("/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
-    private static final String GET_STATEMENT_LIST_URL = String.format("/company/%s/persons-with-significant-control-statements", TestHelper.COMPANY_NUMBER);
+
+    private static final String GET_URL = String.format("/company/%s/persons-with-significant-control-statements/%s",
+            TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
+    private static final String PUT_URL = String.format(
+            "/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER,
+            TestHelper.PSC_STATEMENT_ID);
+    private static final String DELETE_URL = String.format(
+            "/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER,
+            TestHelper.PSC_STATEMENT_ID);
+    private static final String GET_STATEMENT_LIST_URL = String.format(
+            "/company/%s/persons-with-significant-control-statements", TestHelper.COMPANY_NUMBER);
     private static final String ERIC_IDENTITY = "Test-Identity";
     private static final String ERIC_IDENTITY_TYPE = "key";
     private static final String ERIC_PRIVILEGES = "*";
     private static final String X_REQUEST_ID = TestHelper.X_REQUEST_ID;
     private static final String DELTA_AT = TestHelper.DELTA_AT;
 
-
     @MockBean
     private PscStatementService pscStatementService;
-    @MockBean
-    private Logger logger;
     @MockBean
     private CompanyMetricsApiService companyMetricsApiService;
     @Autowired
@@ -60,18 +60,18 @@ class PscStatementControllerTest {
     private TestHelper testHelper;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         testHelper = new TestHelper();
     }
 
     @Test
-    void contextLoads(){
+    void contextLoads() {
         assertThat(pscStatementController).isNotNull();
     }
 
     @Test
     void statementResponseReturnedWhenGetRequestInvoked() throws Exception {
-        when(pscStatementService.retrievePscStatementFromDb(TestHelper.COMPANY_NUMBER,TestHelper.PSC_STATEMENT_ID))
+        when(pscStatementService.retrievePscStatementFromDb(TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID))
                 .thenReturn(testHelper.createStatement());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -98,6 +98,7 @@ class PscStatementControllerTest {
                         .content(testHelper.createJsonCompanyPscStatementPayload()))
                 .andExpect(status().isOk());
     }
+
     @Test
     void callPscStatementListGetRequestWithParams() throws Exception {
         when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 2, false, 5))

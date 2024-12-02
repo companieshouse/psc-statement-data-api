@@ -2,7 +2,6 @@ package uk.gov.companieshouse.pscstatementdataapi.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,7 +20,6 @@ import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.handler.chskafka.PrivateChangedResourceHandler;
 import uk.gov.companieshouse.api.handler.chskafka.request.PrivateChangedResourcePost;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapper;
 
@@ -32,14 +30,12 @@ class PscStatementApiServiceTest {
     private PscStatementApiService pscStatementApiService;
 
     @Mock
-    private Logger logger;
+    private InternalApiClient internalApiClient;
     @Mock
-    InternalApiClient internalApiClient;
-    @Mock
-    ResourceChangedRequestMapper resourceChangedRequestMapper;
+    private ResourceChangedRequestMapper resourceChangedRequestMapper;
 
     @Mock
-    PrivateChangedResourceHandler privateChangedResourceHandler;
+    private PrivateChangedResourceHandler privateChangedResourceHandler;
     @Mock
     private PrivateChangedResourcePost privateChangedResourcePost;
     @Mock
@@ -51,7 +47,8 @@ class PscStatementApiServiceTest {
     void invokeChsKafkaEndpoint() throws ApiErrorResponseException {
         // Given
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(
+                privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenReturn(response);
 
         // When
@@ -59,17 +56,19 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThat(apiResponse).isNotNull();
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
     void invokeChsKafkaEndpointThrowsApiErrorException() throws ApiErrorResponseException {
         // Given
-        ApiErrorResponseException exception = new ApiErrorResponseException(new HttpResponseException.Builder(408, "Test Request timeout", new HttpHeaders()));
+        ApiErrorResponseException exception = new ApiErrorResponseException(
+                new HttpResponseException.Builder(408, "Test Request timeout", new HttpHeaders()));
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(
+                privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
         // When
@@ -77,9 +76,9 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThrows(ServiceUnavailableException.class, actual);
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
@@ -87,7 +86,8 @@ class PscStatementApiServiceTest {
         // Given
         RuntimeException exception = new RuntimeException("Test Runtime exception");
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(
+                privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
         // When
@@ -95,16 +95,17 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThrows(RuntimeException.class, actual);
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
     void invokeChsKafkaEndpointWithDelete() throws ApiErrorResponseException {
         // Given
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(
+                privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenReturn(response);
 
         // When
@@ -112,17 +113,19 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThat(apiResponse).isNotNull();
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
     void invokeChsKafkaEndpointWithDeleteThrowsApiErrorException() throws ApiErrorResponseException {
         // Given
-        ApiErrorResponseException exception = new ApiErrorResponseException(new HttpResponseException.Builder(408, "Test Request timeout", new HttpHeaders()));
+        ApiErrorResponseException exception = new ApiErrorResponseException(
+                new HttpResponseException.Builder(408, "Test Request timeout", new HttpHeaders()));
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(
+                privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
         // When
@@ -130,9 +133,9 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThrows(ServiceUnavailableException.class, actual);
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
     @Test
@@ -140,7 +143,8 @@ class PscStatementApiServiceTest {
         // Given
         RuntimeException exception = new RuntimeException("Test Runtime exception");
         when(internalApiClient.privateChangedResourceHandler()).thenReturn(privateChangedResourceHandler);
-        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(privateChangedResourcePost);
+        when(privateChangedResourceHandler.postChangedResource(Mockito.any(), Mockito.any())).thenReturn(
+                privateChangedResourcePost);
         when(privateChangedResourcePost.execute()).thenThrow(exception);
 
         // When
@@ -148,9 +152,9 @@ class PscStatementApiServiceTest {
 
         // Then
         assertThrows(RuntimeException.class, actual);
-        verify(internalApiClient, times(1)).privateChangedResourceHandler();
-        verify(privateChangedResourceHandler, times(1)).postChangedResource(Mockito.any(), Mockito.any());
-        verify(privateChangedResourcePost, times(1)).execute();
+        verify(internalApiClient).privateChangedResourceHandler();
+        verify(privateChangedResourceHandler).postChangedResource(Mockito.any(), Mockito.any());
+        verify(privateChangedResourcePost).execute();
     }
 
 }

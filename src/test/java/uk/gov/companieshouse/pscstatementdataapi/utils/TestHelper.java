@@ -49,17 +49,19 @@ public class TestHelper {
     private CompanyPscStatement companyPscStatement;
     private PscStatementDocument pscStatementDocument;
 
-    public Statement getStatement(){
+    public Statement getStatement() {
         return statement;
     }
-    public CompanyPscStatement getCompanyPscStatement(){
+
+    public CompanyPscStatement getCompanyPscStatement() {
         return companyPscStatement;
     }
-    public PscStatementDocument pscStatementDocument(){
+
+    public PscStatementDocument pscStatementDocument() {
         return pscStatementDocument;
     }
 
-    public Statement createStatement(){
+    public Statement createStatement() {
         statement = new Statement();
         statement.setEtag(ETAG);
         statement.setNotifiedOn(LocalDate.now());
@@ -68,7 +70,7 @@ public class TestHelper {
         return statement;
     }
 
-    public CompanyPscStatement createCompanyPscStatement(){
+    public CompanyPscStatement createCompanyPscStatement() {
         companyPscStatement = new CompanyPscStatement();
         statement = this.createStatement();
         companyPscStatement.setStatement(statement);
@@ -78,13 +80,13 @@ public class TestHelper {
         return companyPscStatement;
     }
 
-    public PscStatementDocument createEmptyPscStatementDocument(){
+    public PscStatementDocument createEmptyPscStatementDocument() {
         pscStatementDocument = new PscStatementDocument();
         pscStatementDocument.setUpdated(new Updated().setAt(LocalDateTime.now()));
         return pscStatementDocument;
     }
 
-    public String createJsonCompanyPscStatementPayload() throws IOException{
+    public String createJsonCompanyPscStatementPayload() throws IOException {
         InputStreamReader exampleJsonPayload = new InputStreamReader(
                 ClassLoader.getSystemClassLoader().getResourceAsStream("psc-statement-example.json"));
 
@@ -92,9 +94,8 @@ public class TestHelper {
     }
 
     public StatementList createStatementList() {
-        Statement statement = new Statement();
         StatementList statementList = new StatementList();
-        statementList.setItems(Collections.singletonList(statement));
+        statementList.setItems(Collections.singletonList(new Statement()));
         statementList.setActiveCount(1);
         statementList.setCeasedCount(1);
         statementList.setTotalResults(2);
@@ -103,10 +104,10 @@ public class TestHelper {
         statementList.setLinks(createLinks());
         return statementList;
     }
+
     public StatementList createStatementListWithExemptions() {
-        Statement statement = new Statement();
         StatementList statementList = new StatementList();
-        statementList.setItems(Collections.singletonList(statement));
+        statementList.setItems(Collections.singletonList(new Statement()));
         statementList.setActiveCount(1);
         statementList.setCeasedCount(1);
         statementList.setTotalResults(2);
@@ -118,9 +119,8 @@ public class TestHelper {
 
 
     public StatementList createStatementListRegisterView() {
-        Statement statement = new Statement();
         StatementList statementList = new StatementList();
-        statementList.setItems(Collections.singletonList(statement));
+        statementList.setItems(Collections.singletonList(new Statement()));
         statementList.setActiveCount(1);
         statementList.setCeasedCount(0);
         statementList.setTotalResults(1);
@@ -131,9 +131,8 @@ public class TestHelper {
     }
 
     public StatementList createStatementListNoMetrics() {
-        Statement statement = new Statement();
         StatementList statementList = new StatementList();
-        statementList.setItems(Collections.singletonList(statement));
+        statementList.setItems(Collections.singletonList(new Statement()));
         statementList.setStartIndex(0);
         statementList.setItemsPerPage(25);
         statementList.setLinks(createLinks());
@@ -186,7 +185,7 @@ public class TestHelper {
         return metrics;
     }
 
-    public CompanyExemptions createExemptions () {
+    public CompanyExemptions createExemptions() {
         CompanyExemptions exemptions = new CompanyExemptions();
         exemptions.setExemptions(getExemptions());
         return exemptions;
@@ -199,7 +198,6 @@ public class TestHelper {
         exemptionItem.exemptTo(null);
 
         List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
-
 
         PscExemptAsTradingOnRegulatedMarketItem nonUkEeaStateMarket = new PscExemptAsTradingOnRegulatedMarketItem();
 
@@ -223,7 +221,6 @@ public class TestHelper {
         exemptionItem.exemptTo(EXEMPTION_DATE);
 
         List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
-
 
         PscExemptAsTradingOnRegulatedMarketItem nonUkEeaStateMarket = new PscExemptAsTradingOnRegulatedMarketItem();
 
@@ -274,7 +271,6 @@ public class TestHelper {
 
         List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
 
-
         PscExemptAsTradingOnUkRegulatedMarketItem nonUkEeaStateMarket = new PscExemptAsTradingOnUkRegulatedMarketItem();
 
         nonUkEeaStateMarket.setItems(exemptionItems);
@@ -298,9 +294,7 @@ public class TestHelper {
 
         List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
 
-
         PscExemptAsSharesAdmittedOnMarketItem nonUkEeaStateMarket = new PscExemptAsSharesAdmittedOnMarketItem();
-
 
         nonUkEeaStateMarket.setItems(exemptionItems);
         nonUkEeaStateMarket.setExemptionType(PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET);
@@ -322,7 +316,6 @@ public class TestHelper {
         exemptionItem.exemptTo(null);
 
         List<ExemptionItem> exemptionItems = Collections.singletonList(exemptionItem);
-
 
         PscExemptAsTradingOnEuRegulatedMarketItem nonUkEeaStateMarket = new PscExemptAsTradingOnEuRegulatedMarketItem();
 

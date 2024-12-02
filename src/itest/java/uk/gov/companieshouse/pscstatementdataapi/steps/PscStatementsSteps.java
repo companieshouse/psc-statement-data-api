@@ -3,8 +3,8 @@ package uk.gov.companieshouse.pscstatementdataapi.steps;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET;
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
@@ -48,40 +47,36 @@ import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
-import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
 
 public class PscStatementsSteps {
-    private String contextId;
 
     private static final LocalDate EXEMPTION_DATE = LocalDate.of(2022, 11, 3);
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+    private final TestRestTemplate restTemplate;
+    private final PscStatementRepository pscStatementRepository;
+    private final MongoTemplate mongoTemplate;
+    private final CompanyMetricsApiService companyMetricsApiService;
+    private final PscStatementApiService pscStatementApiService;
+    private final CompanyExemptionsApiService companyExemptionsApiService;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    public PscStatementsSteps(ObjectMapper objectMapper, TestRestTemplate restTemplate,
+            PscStatementRepository pscStatementRepository, MongoTemplate mongoTemplate,
+            CompanyMetricsApiService companyMetricsApiService, PscStatementApiService pscStatementApiService,
+            CompanyExemptionsApiService companyExemptionsApiService) {
+        this.objectMapper = objectMapper;
+        this.restTemplate = restTemplate;
+        this.pscStatementRepository = pscStatementRepository;
+        this.mongoTemplate = mongoTemplate;
+        this.companyMetricsApiService = companyMetricsApiService;
+        this.pscStatementApiService = pscStatementApiService;
+        this.companyExemptionsApiService = companyExemptionsApiService;
+    }
 
-    @Autowired
-    private PscStatementRepository pscStatementRepository;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private CompanyMetricsApiService companyMetricsApiService;
-
-    @Autowired
-    public PscStatementApiService pscStatementApiService;
-
-    @Autowired
-    private PscStatementService pscStatementService;
-
-    @Autowired
-    private CompanyExemptionsApiService companyExemptionsApiService;
 
     @Before
-    public void dbCleanUp(){
+    public void dbCleanUp() {
         if (!mongoDBContainer.isRunning()) {
             mongoDBContainer.start();
         }
@@ -105,13 +100,15 @@ public class PscStatementsSteps {
         document.setCompanyNumber(companyNumber);
         document.setData(pscStatement);
         mongoTemplate.save(document);
-        assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)).isNotEmpty();
+        assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber,
+                statementId)).isNotEmpty();
 
         CucumberContext.CONTEXT.set("pscStatementDocument", document);
     }
 
     @Given("a psc statement exists for company number {string} with statement id {string} and delta_at {string}")
-    public void psc_statement_exists_for_company_and_id_with_delta_at(String companyNumber, String statementId, String deltaAt) throws IOException {
+    public void psc_statement_exists_for_company_and_id_with_delta_at(String companyNumber, String statementId,
+            String deltaAt) throws IOException {
         String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/psc_statement.json");
         Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
 
@@ -121,7 +118,8 @@ public class PscStatementsSteps {
         document.setData(pscStatement);
         document.setDeltaAt(deltaAt);
         mongoTemplate.save(document);
-        assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)).isNotEmpty();
+        assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber,
+                statementId)).isNotEmpty();
     }
 
     @Given("Psc statements exist for company number {string}")
@@ -148,7 +146,8 @@ public class PscStatementsSteps {
 
 
     @When("I send an GET request for company number {string} with statement id {string}")
-    public void i_send_psc_statement_get_request_with_statement_id(String companyNumber, String statementId) throws IOException {
+    public void i_send_psc_statement_get_request_with_statement_id(String companyNumber, String statementId)
+            throws IOException {
         String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}";
 
         HttpHeaders headers = new HttpHeaders();
@@ -210,19 +209,20 @@ public class PscStatementsSteps {
         headers.set("ERIC-Authorised-Key-Roles", "*");
         HttpEntity<String> request = new HttpEntity<String>(null, headers);
         ResponseEntity<StatementList> response;
-    try {
-        response = restTemplate.exchange(uri, HttpMethod.GET, request,
-                StatementList.class, companyNumber);
-    } catch (Exception ex) {
-        response = new ResponseEntity<>(HttpStatusCode.valueOf(NOT_FOUND.value()));
-    }
+        try {
+            response = restTemplate.exchange(uri, HttpMethod.GET, request,
+                    StatementList.class, companyNumber);
+        } catch (Exception ex) {
+            response = new ResponseEntity<>(HttpStatusCode.valueOf(NOT_FOUND.value()));
+        }
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
         CucumberContext.CONTEXT.set("getResponseBody", response.getBody());
     }
 
     @When("Company Metrics API is available for company number {string}")
     public void company_metrics_api_service_available(String companyNumber) throws IOException {
-        String metricsFile = FileReaderUtil.readFile("src/itest/resources/json/input/company_metrics_" + companyNumber + ".json");
+        String metricsFile = FileReaderUtil.readFile(
+                "src/itest/resources/json/input/company_metrics_" + companyNumber + ".json");
 
         MetricsApi metrics = objectMapper.readValue(metricsFile, MetricsApi.class);
         Optional<MetricsApi> metricsApi = Optional.ofNullable(metrics);
@@ -237,7 +237,8 @@ public class PscStatementsSteps {
 
     @When("Company Exemptions API is available for company number {string}")
     public void company_exemptions_api_service_available(String companyNumber) throws IOException {
-        String exemptionsFile = FileReaderUtil.readFile("src/itest/resources/json/input/company_exemptions_" + companyNumber + ".json");
+        String exemptionsFile = FileReaderUtil.readFile(
+                "src/itest/resources/json/input/company_exemptions_" + companyNumber + ".json");
 
         CompanyExemptions companyExemptions = objectMapper.readValue(exemptionsFile, CompanyExemptions.class);
         ExemptionItem exemptionItem = new ExemptionItem();
@@ -269,6 +270,7 @@ public class PscStatementsSteps {
         int expectedStatusCode = CucumberContext.CONTEXT.get("statusCode");
         assertThat(expectedStatusCode).isEqualTo(statusCode);
     }
+
     @Then("the psc statement Get call response body should match {string} file")
     public void the_psc_statement_get_call_response_body_should_match(String dataFile) throws IOException {
         String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/" + dataFile + ".json");
@@ -300,23 +302,24 @@ public class PscStatementsSteps {
 
 
     @When("I send a PUT request with payload {string} file for company number {string} with statement id {string}")
-    public void i_send_psc_statement_put_request_with_payload(String dataFile, String companyNumber, String statementId) throws IOException {
+    public void i_send_psc_statement_put_request_with_payload(String dataFile, String companyNumber, String statementId)
+            throws IOException {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/" + dataFile + ".json");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        this.contextId = "5234234234";
-        CucumberContext.CONTEXT.set("contextId", this.contextId);
-        headers.set("x-request-id", this.contextId);
+        CucumberContext.CONTEXT.set("contextId", "5234234234");
+        headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "key");
         headers.set("ERIC-Authorised-Key-Roles", "*");
 
         HttpEntity request = new HttpEntity(data, headers);
         String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal";
-        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, companyNumber, statementId);
+        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, companyNumber,
+                statementId);
 
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
@@ -329,13 +332,13 @@ public class PscStatementsSteps {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        this.contextId = "5234234234";
-        CucumberContext.CONTEXT.set("contextId", this.contextId);
-        headers.set("x-request-id", this.contextId);
+        CucumberContext.CONTEXT.set("contextId", "5234234234");
+        headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
 
         HttpEntity request = new HttpEntity(data, headers);
         String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal";
-        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, "12345", "abcde");
+        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.PUT, request, Void.class, "12345",
+                "abcde");
 
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
@@ -354,7 +357,8 @@ public class PscStatementsSteps {
 
         HttpEntity<String> request = new HttpEntity<String>(null, headers);
 
-        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, request, Void.class, companyNumber, statementId);
+        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, request, Void.class,
+                companyNumber, statementId);
 
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
@@ -373,7 +377,8 @@ public class PscStatementsSteps {
 
         HttpEntity<String> request = new HttpEntity<String>(null, headers);
 
-        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, request, Void.class, companyNumber, statementId);
+        ResponseEntity<Void> response = restTemplate.exchange(uri, HttpMethod.DELETE, request, Void.class,
+                companyNumber, statementId);
 
         CucumberContext.CONTEXT.set("statusCode", response.getStatusCode().value());
     }
@@ -398,7 +403,7 @@ public class PscStatementsSteps {
 
     @Then("the CHS Kafka API is not invoked")
     public void chs_kafka_api_not_invoked() throws IOException {
-        verify(pscStatementApiService, times(0)).invokeChsKafkaApi(any());
+        verifyNoInteractions(pscStatementApiService);
     }
 
     @Then("the CHS Kafka API delete is invoked for company number {string} with statement id {string} and the correct statement data")
@@ -417,7 +422,6 @@ public class PscStatementsSteps {
     @When("a statement exists with id {string} and delta_at {string}")
     public void statement_exists(String statementId, String deltaAt) throws NoSuchElementException {
         assertThat(pscStatementRepository.existsById(statementId)).isTrue();
-        Optional<PscStatementDocument> document = pscStatementRepository.findById(statementId);
         assertThat(pscStatementRepository.findById(statementId).get().getDeltaAt()).isEqualTo(deltaAt);
     }
 
@@ -428,17 +432,18 @@ public class PscStatementsSteps {
 
     @Then("the CHS Kafka API is invoked for company number {string} with statement id {string}")
     public void chs_kafka_api_invoked(String companyNumber, String statementId) {
-        verify(pscStatementApiService).invokeChsKafkaApi(new ResourceChangedRequest("5234234234", companyNumber, statementId, null, false));
+        verify(pscStatementApiService).invokeChsKafkaApi(
+                new ResourceChangedRequest(CucumberContext.CONTEXT.get("contextId"), companyNumber, statementId, null, false));
     }
 
     @Then("nothing is persisted in the database")
     public void nothing_persisted_to_database() {
         List<PscStatementDocument> pscDocs = pscStatementRepository.findAll();
-        assertThat(pscDocs).hasSize(0);
+        assertThat(pscDocs).isEmpty();
     }
 
     @After
-    public void dbStop(){
+    public void dbStop() {
         mongoDBContainer.stop();
     }
 

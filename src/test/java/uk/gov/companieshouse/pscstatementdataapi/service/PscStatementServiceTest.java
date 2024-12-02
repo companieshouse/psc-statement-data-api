@@ -1,15 +1,15 @@
 package uk.gov.companieshouse.pscstatementdataapi.service;
 
 import static com.mongodb.internal.connection.tlschannel.util.Util.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -53,7 +53,6 @@ import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
@@ -74,9 +73,6 @@ class PscStatementServiceTest {
     private static final String NOT_FOUND_COMPANY_NUMBER = "not_found_company_no";
 
     @Mock
-    private Logger logger;
-
-    @Mock
     private PscStatementRepository repository;
     @Mock
     private PscStatementTransformer statementTransformer;
@@ -92,7 +88,6 @@ class PscStatementServiceTest {
     private PscStatementService pscStatementService;
 
     private TestHelper testHelper;
-    private Statement statement;
     private CompanyPscStatement companyPscStatement;
     private PscStatementDocument document;
     private PscExemptAsSharesAdmittedOnMarketItem pscExemptAsSharesAdmittedOnMarketItem;
@@ -103,7 +98,6 @@ class PscStatementServiceTest {
     @BeforeEach
     void setUp() {
         testHelper = new TestHelper();
-        statement = testHelper.createStatement();
         document = testHelper.createEmptyPscStatementDocument();
         companyPscStatement = testHelper.createCompanyPscStatement();
         pscExemptAsSharesAdmittedOnMarketItem = new PscExemptAsSharesAdmittedOnMarketItem();
@@ -111,18 +105,21 @@ class PscStatementServiceTest {
         pscExemptAsTradingOnRegulatedMarketItem = new PscExemptAsTradingOnRegulatedMarketItem();
         pscExemptAsTradingOnUkRegulatedMarketItem = new PscExemptAsTradingOnUkRegulatedMarketItem();
     }
+
     @Test
-    void statementReturnedByCompanyNumberAndStatementIdFromRepository() throws JsonProcessingException, ResourceNotFoundException {
+    void statementReturnedByCompanyNumberAndStatementIdFromRepository()
+            throws JsonProcessingException, ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         Optional<PscStatementDocument> pscStatementOptional = Optional.of(document);
-        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(),anyString())).thenReturn(pscStatementOptional);
+        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString())).thenReturn(
+                pscStatementOptional);
 
-        Statement statement = pscStatementService.retrievePscStatementFromDb(COMPANY_NUMBER,STATEMENT_ID);
+        Statement statement = pscStatementService.retrievePscStatementFromDb(COMPANY_NUMBER, STATEMENT_ID);
 
         assertEquals(expectedStatement, statement);
-        verify(pscStatementService, times(1)).retrievePscStatementFromDb(COMPANY_NUMBER, STATEMENT_ID);
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verify(pscStatementService).retrievePscStatementFromDb(COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
     }
 
     @Test
@@ -133,75 +130,87 @@ class PscStatementServiceTest {
 
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false,25);
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
-        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
+        verify(repository).getStatementList(COMPANY_NUMBER, 0, 25);
     }
 
     @Test
-    void statementListReturnedByCompanyNumberFromRepositoryWithExemptions() throws ResourceNotFoundException, IOException {
+    void statementListReturnedByCompanyNumberFromRepositoryWithExemptions()
+            throws ResourceNotFoundException, IOException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = testHelper.createStatementListWithExemptions();
         document.setData(expectedStatement);
 
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
-        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(Optional.ofNullable(testHelper.createExemptions()));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
+        when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(
+                Optional.ofNullable(testHelper.createExemptions()));
 
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false,25);
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
-        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
+        verify(repository).getStatementList(COMPANY_NUMBER, 0, 25);
     }
 
     @Test
-    void whenNoStatementsExistGetStatementListShouldThrow() throws JsonProcessingException{
+    void whenNoStatementsExistGetStatementListShouldThrow() throws JsonProcessingException {
 
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(new ArrayList<PscStatementDocument>()));
-        assertThrows(ResourceNotFoundException.class, ()-> pscStatementService.retrievePscStatementListFromDb( COMPANY_NUMBER, 0, false,25));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(new ArrayList<PscStatementDocument>()));
+        assertThrows(ResourceNotFoundException.class,
+                () -> pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25));
     }
 
     @Test
-    void statementListReturnedForCompanyNumberButNoMetricsFound_ShouldReturnList() throws ResourceNotFoundException, IOException {
+    void statementListReturnedForCompanyNumberButNoMetricsFound_ShouldReturnList()
+            throws ResourceNotFoundException, IOException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = testHelper.createStatementListNoMetrics();
         document.setData(expectedStatement);
 
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
 
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, false, 25);
-        verify(repository, times(1)).getStatementList(COMPANY_NUMBER, 0, 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
+        verify(repository).getStatementList(COMPANY_NUMBER, 0, 25);
     }
 
     @Test
-    void statementListReturnedByCompanyNumberFromRepositoryRegisterView() throws ResourceNotFoundException, IOException {
+    void statementListReturnedByCompanyNumberFromRepositoryRegisterView()
+            throws ResourceNotFoundException, IOException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = testHelper.createStatementListRegisterView();
         document.setData(expectedStatement);
 
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView()));
-        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
+        verify(repository).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"),
+                25);
     }
 
     @Test
-    void statementListIncWithdrawnCountOneReturnedByCompanyNumberFromRepositoryRegisterView() throws ResourceNotFoundException, IOException {
+    void statementListIncWithdrawnCountOneReturnedByCompanyNumberFromRepositoryRegisterView()
+            throws ResourceNotFoundException, IOException {
         Statement expectedStatement = new Statement();
         expectedStatement.setCeasedOn(LocalDate.parse("2022-12-20"));
         StatementList expectedStatementList = testHelper.createStatementList();
@@ -211,29 +220,34 @@ class PscStatementServiceTest {
 
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView()));
-        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
 
         assertEquals(expectedStatementList, statementList);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
+        verify(repository).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"),
+                25);
     }
 
     @Test
     void whenNoMetricsDataFoundForCompanyInRegisterViewShouldThrow() throws ResourceNotFoundException, IOException {
+        // given
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
 
+        // when
         Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
-            pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
+            pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
         });
 
+        // then
         String expectedMessage = "No company metrics data found for company number: companyNumber";
         String actualMessage = ex.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(0)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
+        verifyNoInteractions(repository);
     }
 
     @Test
@@ -246,18 +260,19 @@ class PscStatementServiceTest {
                 .thenReturn(Optional.ofNullable(metricsApi));
 
         Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
-            pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
+            pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
         });
 
         String expectedMessage = "company companyNumber not on public register";
         String actualMessage = ex.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(0)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
+        verifyNoInteractions(repository);
     }
 
     @Test
-    void whenNoStatementsExistInPublicRegisterGetStatementListRegisterViewShouldThrow() throws ResourceNotFoundException, IOException {
+    void whenNoStatementsExistInPublicRegisterGetStatementListRegisterViewShouldThrow()
+            throws ResourceNotFoundException, IOException {
         MetricsApi metricsApi = testHelper.createMetrics();
         RegistersApi registersApi = new RegistersApi();
         RegisterApi api = new RegisterApi();
@@ -268,21 +283,24 @@ class PscStatementServiceTest {
 
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(metricsApi));
-        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(Optional.of(new ArrayList<PscStatementDocument>()));
+        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
+                Optional.of(new ArrayList<PscStatementDocument>()));
 
         Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
-            pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true,25);
+            pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
         });
 
         String expectedMessage = "Resource not found for company number: companyNumber";
         String actualMessage = ex.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2022-12-20T06:00Z"), 25);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
+        verify(repository).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2022-12-20T06:00Z"),
+                25);
     }
 
     @Test
-    void whenNoCountsDataInCompanyMetricsGetStatementListRegisterViewShouldReturnList() throws ResourceNotFoundException, IOException {
+    void whenNoCountsDataInCompanyMetricsGetStatementListRegisterViewShouldReturnList()
+            throws ResourceNotFoundException, IOException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = testHelper.createStatementListNoMetrics();
         expectedStatementList.setCeasedCount(0);
@@ -290,25 +308,28 @@ class PscStatementServiceTest {
         MetricsApi metricsApi = testHelper.createMetricsRegisterView();
         metricsApi.setCounts(null);
 
-        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(metricsApi));
 
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
 
         assertEquals(expectedStatementList, statementList);
-        assertEquals(statementList.getActiveCount(), null);
-        assertEquals(statementList.getTotalResults(), null);
-        verify(pscStatementService, times(1)).retrievePscStatementListFromDb(COMPANY_NUMBER,0, true, 25);
-        verify(repository, times(1)).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"), 25);
+        assertNull(statementList.getActiveCount());
+        assertNull(statementList.getTotalResults());
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
+        verify(repository).getStatementListRegisterView(COMPANY_NUMBER, 0, OffsetDateTime.parse("2020-12-20T06:00Z"),
+                25);
     }
 
     @Test
     void deletePscStatementDeletesStatement() {
         // Given
         ApiResponse<Void> response = new ApiResponse<>(200, null);
-        document.setData(statement);
-        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
+        document.setData(testHelper.createStatement());
+        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(
+                Optional.of(document));
         when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
 
         // When
@@ -316,39 +337,45 @@ class PscStatementServiceTest {
 
         // Then
         verify(repository).delete(document);
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
-        verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document, true));
+        verify(apiClientService).invokeChsKafkaApiDelete(
+                new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, document, true));
     }
+
     @Test
     void deleteSucceedsWhenStatementIdNotInMongo() {
         // Given
-        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString())).thenReturn(Optional.empty());
+        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString())).thenReturn(
+                Optional.empty());
 
         // When
         pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, NOT_FOUND_STATEMENT_ID, DELTA_AT);
 
         // Then
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER,
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER,
                 NOT_FOUND_STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER,
                 NOT_FOUND_STATEMENT_ID, new PscStatementDocument(), true));
     }
+
     @Test
     void deleteSucceedsWhenCompanyNumberNotInMongo() {
         // Given
-        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString())).thenReturn(Optional.empty());
+        when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString())).thenReturn(
+                Optional.empty());
 
         // When
         pscStatementService.deletePscStatement(CONTEXT_ID, NOT_FOUND_COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
 
         // Then
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(NOT_FOUND_COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(NOT_FOUND_COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verify(apiClientService).invokeChsKafkaApiDelete(new ResourceChangedRequest(CONTEXT_ID,
                 NOT_FOUND_COMPANY_NUMBER, STATEMENT_ID, new PscStatementDocument(), true));
     }
+
     @Test
     void deleteThrowsBadRequestExceptionWhenNoDeltaAtGiven() {
         // Given
@@ -362,6 +389,7 @@ class PscStatementServiceTest {
         verifyNoInteractions(repository);
         verifyNoInteractions(apiClientService);
     }
+
     @Test
     void deleteThrowsConflictExceptionWhenStaleDeltaAtGiven() {
         // Given
@@ -370,22 +398,25 @@ class PscStatementServiceTest {
                 .thenReturn(Optional.of(document));
 
         // When
-        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, "20170101093435661593");
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID,
+                "20170101093435661593");
 
         // Then
         assertThrows(ConflictException.class, actual);
-        verify(repository, times(1)).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(apiClientService);
     }
+
     @Test
-    void deleteThrowsServiceUnavailableExceptionWhenMongoNotAvailableInFind(){
+    void deleteThrowsServiceUnavailableExceptionWhenMongoNotAvailableInFind() {
         // Given
         when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString()))
                 .thenThrow(TransientDataAccessResourceException.class);
 
         // When
-        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID,
+                DELTA_AT);
 
         // Then
         assertThrows(ServiceUnavailableException.class, actual);
@@ -393,15 +424,17 @@ class PscStatementServiceTest {
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(apiClientService);
     }
+
     @Test
-    void deleteThrowsServiceUnavailableExceptionWhenMongoNotAvailableInDelete(){
+    void deleteThrowsServiceUnavailableExceptionWhenMongoNotAvailableInDelete() {
         // Given
         when(repository.getPscStatementByCompanyNumberAndStatementId(anyString(), anyString()))
                 .thenReturn(Optional.of(document));
         doThrow(TransientDataAccessResourceException.class).when(repository).delete(any());
 
         // When
-        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
+        Executable actual = () -> pscStatementService.deletePscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID,
+                DELTA_AT);
 
         // Then
         assertThrows(ServiceUnavailableException.class, actual);
@@ -412,13 +445,15 @@ class PscStatementServiceTest {
 
     @Test
     void processPscStatementSavesStatement() {
-        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
+                document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
         verify(repository).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
-        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest("", COMPANY_NUMBER, STATEMENT_ID, null, false));
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
+        verify(apiClientService).invokeChsKafkaApi(
+                new ResourceChangedRequest("", COMPANY_NUMBER, STATEMENT_ID, null, false));
         assertNotNull(document.getCreated().getAt());
     }
 
@@ -428,16 +463,19 @@ class PscStatementServiceTest {
         Created created = new Created();
         created.setAt(dateTime);
         document.setCreated(created);
-        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
+        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(
+                Optional.of(document));
         ApiResponse<Void> response = new ApiResponse<>(200, null);
         when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
-        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
+                document);
 
         pscStatementService.processPscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
         verify(repository).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
-        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, null, false));
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
+        verify(apiClientService).invokeChsKafkaApi(
+                new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, null, false));
         assertEquals(document.getCreated().getAt(), dateTime);
     }
 
@@ -448,17 +486,21 @@ class PscStatementServiceTest {
         created.setAt(dateTime);
         document.setCreated(created);
 
-        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(Optional.of(document));
+        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(
+                Optional.of(document));
         when(apiClientService.invokeChsKafkaApi(any())).thenThrow(
                 ServiceUnavailableException.class);
-        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
+                document);
 
-        Executable executable = () -> pscStatementService.processPscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
+        Executable executable = () -> pscStatementService.processPscStatement(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID,
+                companyPscStatement);
 
         assertThrows(ServiceUnavailableException.class, executable);
         verify(repository).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
-        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, null, false));
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
+        verify(apiClientService).invokeChsKafkaApi(
+                new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID, null, false));
         assertEquals(document.getCreated().getAt(), dateTime);
     }
 
@@ -468,15 +510,17 @@ class PscStatementServiceTest {
         Updated updated = new Updated();
         updated.setAt(dateTime);
         document.setUpdated(updated);
-        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.ofNullable(document));
+        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(
+                Optional.ofNullable(document));
         ApiResponse<Void> response = new ApiResponse<>(200, null);
         when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
-        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
+                document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
-        verify(repository, times(0)).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
+        verifyNoMoreInteractions(repository);
         assertEquals(document.getUpdated().getAt(), dateTime);
     }
 
@@ -484,7 +528,8 @@ class PscStatementServiceTest {
     void hasPscExemptionsReturnsTrueWhenSharesAdmittedOnMarket() {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -492,7 +537,7 @@ class PscStatementServiceTest {
         companyExemptions.setExemptions(testHelper.getAdmittedExemptions());
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
         when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(optionalExempt);
-        
+
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
         linksType.setSelf("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements");
@@ -505,7 +550,8 @@ class PscStatementServiceTest {
     void hasPscExemptionsReturnsTrueWhenTradingOnEuRegulatedMarket() {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -513,7 +559,7 @@ class PscStatementServiceTest {
         companyExemptions.setExemptions(testHelper.getEuExemptions());
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
         when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(optionalExempt);
-        
+
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
         linksType.setSelf("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements");
@@ -526,14 +572,16 @@ class PscStatementServiceTest {
     void hasPscExemptionsReturnsTrueWhenTradingOnRegulatedMarket() {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
         exemptions.setPscExemptAsTradingOnRegulatedMarket(pscExemptAsTradingOnRegulatedMarketItem);
         companyExemptions.setExemptions(exemptions);
-        when(companyExemptionsApiService.getCompanyExemptions(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(testHelper.createExemptions()));
-        
+        when(companyExemptionsApiService.getCompanyExemptions(COMPANY_NUMBER)).thenReturn(
+                Optional.ofNullable(testHelper.createExemptions()));
+
         StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
         StatementLinksType linksType = new StatementLinksType();
         linksType.setSelf("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements");
@@ -546,7 +594,8 @@ class PscStatementServiceTest {
     void hasPscExemptionsReturnsTrueWhenTradingOnUkRegulatedMarket() {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -568,7 +617,8 @@ class PscStatementServiceTest {
     void hasPscExemptionsReturnsFalseWhenNoPscExemption() {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -587,7 +637,8 @@ class PscStatementServiceTest {
     void hasPscExemptionsReturnsTrueAndExemptTo() {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -608,7 +659,8 @@ class PscStatementServiceTest {
     void hasPscExemptionsReturnsTrueMultipleExemptions() {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(Optional.of(Collections.singletonList(document)));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
+                Optional.of(Collections.singletonList(document)));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -630,22 +682,29 @@ class PscStatementServiceTest {
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.empty());
         ApiResponse<Void> response = new ApiResponse<>(200, null);
         when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
-        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
+                document);
 
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
-        verify(repository, times(1)).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+        verify(repository).save(document);
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
     }
 
     @Test
     void processPscStatementDoesNotUpdateIfDeltaAtIsMissing() {
-        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(Optional.ofNullable(document));
+        // given
+        when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(
+                Optional.ofNullable(document));
         ApiResponse<Void> response = new ApiResponse<>(200, null);
         when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
-        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(document);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
+                document);
 
+        // when
         pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
-        verify(repository, times(0)).save(document);
-        verify(repository, times(1)).findUpdatedPscStatement(eq(COMPANY_NUMBER),eq(STATEMENT_ID), any());
+
+        // then
+        verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
+        verifyNoMoreInteractions(repository);
     }
 }

@@ -9,7 +9,8 @@ import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 @Component
 public class PscStatementTransformer {
 
-    public PscStatementDocument transformPscStatement(String companyNumber, String statementId, CompanyPscStatement companyPscStatement) {
+    public PscStatementDocument transformPscStatement(String companyNumber, String statementId,
+            CompanyPscStatement companyPscStatement) {
 
         PscStatementDocument document = new PscStatementDocument();
 

@@ -12,7 +12,7 @@ import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
-public class PscStatementTransformTest {
+class PscStatementTransformTest {
 
     private PscStatementTransformer transformer;
 
@@ -26,9 +26,10 @@ public class PscStatementTransformTest {
 
     @Test
     void shouldTransformCompanyPscStatement() {
-        CompanyPscStatement request =  testHelper.createCompanyPscStatement();
+        CompanyPscStatement request = testHelper.createCompanyPscStatement();
 
-        PscStatementDocument document = transformer.transformPscStatement(TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID, request);
+        PscStatementDocument document = transformer.transformPscStatement(TestHelper.COMPANY_NUMBER,
+                TestHelper.PSC_STATEMENT_ID, request);
 
         assertEquals(TestHelper.COMPANY_NUMBER, document.getCompanyNumber());
         assertEquals(TestHelper.PSC_STATEMENT_ID, document.getPscStatementId());

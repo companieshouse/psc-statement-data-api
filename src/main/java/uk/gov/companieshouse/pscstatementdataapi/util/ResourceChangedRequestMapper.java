@@ -17,8 +17,6 @@ public class ResourceChangedRequestMapper {
 
     private final Supplier<Instant> instantSupplier;
 
-
-
     public ResourceChangedRequestMapper(Supplier<Instant> instantSupplier) {
         this.instantSupplier = instantSupplier;
     }
@@ -33,7 +31,7 @@ public class ResourceChangedRequestMapper {
         return changedResource;
     }
 
-    private ChangedResource buildChangedResource(final String type, ResourceChangedRequest request){
+    private ChangedResource buildChangedResource(final String type, ResourceChangedRequest request) {
         ChangedResourceEvent event = new ChangedResourceEvent()
                 .publishedAt(DateTimeUtil.formatPublishedAt(instantSupplier.get()))
                 .type(type);
