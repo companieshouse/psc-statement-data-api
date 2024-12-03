@@ -32,7 +32,7 @@ class ResourceChangedRequestMapperTest {
     private static final String STATEMENT_ID = "statementId";
     private static final String RESOURCE_KIND = "persons-with-significant-control-statement";
     private static final String RESOURCE_URI = String.format(
-            "/company/%s/persons-with-significant-control-statements/%s/internal",
+            "/company/%s/persons-with-significant-control-statements/%s",
             COMPANY_NUMBER, STATEMENT_ID);
     private static final String ETAG = "etag";
     private static final Instant UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
