@@ -10,7 +10,7 @@ import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 @Component
 public class ResourceChangedRequestMapper {
 
-    private static final String PSC_STATEMENTS_URI = "/company/%s/persons-with-significant-control-statements/%s/internal";
+    private static final String PSC_STATEMENTS_URI = "/company/%s/persons-with-significant-control-statements/%s";
     private static final String CHANGED = "changed";
     private static final String DELETED = "deleted";
     private static final String RESOURCE_KIND = "persons-with-significant-control-statement";
