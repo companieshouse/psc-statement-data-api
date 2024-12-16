@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.MethodNotAllowedException;
@@ -39,8 +38,7 @@ public class ExceptionHandlerConfig {
     }
 
     @ExceptionHandler(value = {BadRequestException.class, DateTimeParseException.class,
-            HttpMessageNotReadableException.class, JsonProcessingException.class, IllegalArgumentException.class,
-            MissingRequestHeaderException.class})
+            HttpMessageNotReadableException.class, JsonProcessingException.class, IllegalArgumentException.class})
     public ResponseEntity<Object> handleBadRequestException(Exception exception) {
         logger.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);

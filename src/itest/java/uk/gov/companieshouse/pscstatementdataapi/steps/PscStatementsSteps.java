@@ -370,6 +370,7 @@ public class PscStatementsSteps {
         HttpHeaders headers = new HttpHeaders();
         CucumberContext.CONTEXT.set("contextId", "5234234234");
         headers.set("x-request-id", CucumberContext.CONTEXT.get("contextId"));
+        headers.set("X-DELTA-AT", null);
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "key");
         headers.set("ERIC-Authorised-Key-Roles", "*");
