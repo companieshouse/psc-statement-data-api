@@ -17,8 +17,8 @@ public class PscStatementDocument {
     @Field("company_number")
     private String companyNumber;
     private Updated updated;
-    @Field("psc_statement_id")
-    private String pscStatementId;
+    @Field("psc_statement_id_raw")
+    private String pscStatementIdRaw;
     private Statement data;
     @Field("delta_at")
     private String deltaAt;
@@ -39,8 +39,8 @@ public class PscStatementDocument {
         return updated;
     }
 
-    public String getPscStatementId() {
-        return pscStatementId;
+    public String getPscStatementIdRaw() {
+        return pscStatementIdRaw;
     }
 
     public Statement getData() {
@@ -67,8 +67,8 @@ public class PscStatementDocument {
         this.updated = updated;
     }
 
-    public void setPscStatementId(String pscStatementId) {
-        this.pscStatementId = pscStatementId;
+    public void setPscStatementIdRaw(String pscStatementIdRaw) {
+        this.pscStatementIdRaw = pscStatementIdRaw;
     }
 
     public void setData(Statement data) {
@@ -90,14 +90,14 @@ public class PscStatementDocument {
         PscStatementDocument that = (PscStatementDocument) o;
         return Objects.equals(getId(), that.getId()) && Objects.equals(getCreated(), that.getCreated())
                 && Objects.equals(getCompanyNumber(), that.getCompanyNumber()) && Objects.equals(
-                getUpdated(), that.getUpdated()) && Objects.equals(getPscStatementId(), that.getPscStatementId())
+                getUpdated(), that.getUpdated()) && Objects.equals(getPscStatementIdRaw(), that.getPscStatementIdRaw())
                 && Objects.equals(getData(), that.getData()) && Objects.equals(getDeltaAt(),
                 that.getDeltaAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getCreated(), getCompanyNumber(), getUpdated(), getPscStatementId(), getData(),
+        return Objects.hash(getId(), getCreated(), getCompanyNumber(), getUpdated(), getPscStatementIdRaw(), getData(),
                 getDeltaAt());
     }
 }
