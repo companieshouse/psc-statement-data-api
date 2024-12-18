@@ -30,3 +30,9 @@ Application specific attributes | Value                                | Descrip
 ### Useful Links
 - [ECS service config dev repository](https://github.com/companieshouse/ecs-service-configs-dev)
 - [ECS service config production repository](https://github.com/companieshouse/ecs-service-configs-production)
+
+### Building the docker image with local changes, requires access to AWS ECR
+
+```bash
+  mvn package -Dskip.unit.tests=true -Dskip.integration.tests=true jib:dockerBuild
+```
