@@ -29,5 +29,5 @@ Feature: Response codes for psc statements
     And the CHS Kafka API is invoked for company number "<companyNumber>" with statement id "<statementId>"
 
     Examples:
-      | companyNumber | statementId                 | data                  |
-      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | company_psc_statement |
+      | companyNumber | statementId                 | data                      |
+      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | company_psc_statement_put |
