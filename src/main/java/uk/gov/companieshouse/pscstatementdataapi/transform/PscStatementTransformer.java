@@ -17,7 +17,7 @@ public class PscStatementTransformer {
         document.setId(statementId);
         document.setCompanyNumber(companyNumber);
         document.setUpdated(new Updated().setAt(LocalDateTime.now()));
-        document.setPscStatementId(statementId);
+        document.setPscStatementIdRaw(companyPscStatement.getPscStatementIdRaw());
         document.setData(companyPscStatement.getStatement());
         document.setDeltaAt(companyPscStatement.getDeltaAt());
 
