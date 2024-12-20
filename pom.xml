@@ -85,6 +85,17 @@
             <version>2.10.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.5.13</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.13</version>
+            <scope>test</scope>
+        </dependency>
         <!--		Transitive deps end here-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
