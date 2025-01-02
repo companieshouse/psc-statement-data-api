@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -10,6 +11,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET;
 import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -460,6 +462,23 @@ public class PscStatementsSteps {
     public void nothing_persisted_to_database() {
         List<PscStatementDocument> pscDocs = pscStatementRepository.findAll();
         assertThat(pscDocs).isEmpty();
+    }
+
+    @And("the data matches {string} for company number {string} and statement id {string}")
+    public void theDataMatchesForCompanyNumberAndStatementId(String resultFile, String companyNumber, String statementId)
+            throws JsonProcessingException {
+        Optional<PscStatementDocument> pscDoc = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
+        assertThat(pscDoc).isPresent();
+
+        String file = FileReaderUtil.readFile("src/itest/resources/json/output/" + resultFile + ".json")
+                .replaceAll("<id>", statementId)
+                .replaceAll("<company_number>", companyNumber);
+        PscStatementDocument expected = objectMapper.readValue(file, PscStatementDocument.class);
+
+        assertEquals(expected.getData(), pscDoc.get().getData());
+        assertEquals(expected.getCompanyNumber(), pscDoc.get().getCompanyNumber());
+        assertEquals(expected.getPscStatementIdRaw(), pscDoc.get().getPscStatementIdRaw());
+        assertEquals(expected.getId(), pscDoc.get().getId());
     }
 
     @After

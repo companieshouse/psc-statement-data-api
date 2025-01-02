@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.pscstatementdataapi.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,15 +13,19 @@ import uk.gov.companieshouse.api.psc.Statement;
 public class PscStatementDocument {
 
     @Id
+    @JsonProperty("_id")
     private String id;
     private Created created;
     @Field("company_number")
+    @JsonProperty("company_number")
     private String companyNumber;
     private Updated updated;
     @Field("psc_statement_id_raw")
+    @JsonProperty("psc_statement_id_raw")
     private String pscStatementIdRaw;
     private Statement data;
     @Field("delta_at")
+    @JsonProperty("delta_at")
     private String deltaAt;
 
     public String getId() {

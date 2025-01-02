@@ -1,18 +1,18 @@
 {
   "_id" : "<id>",
   "created" : {
-    "at" : ISODate("2014-08-29T00:00:00.000Z"),
+    "at" : "2014-08-29T00:00:00.000Z"
   },
   "company_number" : "<company_number>",
   "updated" : {
-    "at" : ISODate("2014-08-29T00:00:00.000Z"),
+    "at" : "2014-08-29T00:00:00.000Z"
   },
-  "psc_statement_id" : "3000000002",
+  "psc_statement_id_raw" : "3000000002",
   "data" : {
-    "etag" : "1348e95014c699cebf7494546a5b0d47de8105e5",
+    "etag" : "1fe0f033e49e55943f70da5a1fb46cc5c9fea46e",
     "kind" : "persons-with-significant-control-statement",
-    "notified_on" : ISODate("2014-08-29T00:00:00.000Z"),
-    "statement" : "all-beneficial-owners-identified",
+    "notified_on" : "2016-07-01T00:00:00.000Z",
+    "statement" : "no-individual-or-entity-with-signficant-control",
     "links" : {
       "self" : "/company/<company_number>/persons-with-significant-control-statements/<id>"
     }
