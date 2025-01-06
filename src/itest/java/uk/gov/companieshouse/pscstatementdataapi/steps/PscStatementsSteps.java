@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -10,6 +11,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET;
 import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -18,11 +20,13 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import org.bson.Document;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -32,6 +36,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
@@ -52,6 +57,7 @@ import uk.gov.companieshouse.pscstatementdataapi.util.FileReaderUtil;
 public class PscStatementsSteps {
 
     private static final LocalDate EXEMPTION_DATE = LocalDate.of(2022, 11, 3);
+    private static final String PSC_STATEMENT_COLLECTION = "company_psc_statements";
 
     private final ObjectMapper objectMapper;
     private final TestRestTemplate restTemplate;
@@ -120,6 +126,22 @@ public class PscStatementsSteps {
         mongoTemplate.save(document);
         assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber,
                 statementId)).isNotEmpty();
+    }
+
+    @And("a psc statement exists with legacy data for company number {string} with statement id {string}")
+    public void aPscStatementExistsWithLegacyDataForCompanyNumberWithStatementId(String companyNumber, String statementId)
+            throws IOException {
+        String jsonToInsert = IOUtils.resourceToString("/json/input/psc_statement_legacy.json",
+                        StandardCharsets.UTF_8)
+                .replaceAll("<id>", statementId)
+                .replaceAll("<company_number>", companyNumber);
+        Document document = Document.parse(jsonToInsert);
+        mongoTemplate.insert(document, PSC_STATEMENT_COLLECTION);
+
+        assertThat(pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber,
+                statementId)).isNotEmpty();
+
+        CucumberContext.CONTEXT.set("pscStatementDocument", document);
     }
 
     @Given("Psc statements exist for company number {string}")
@@ -326,7 +348,7 @@ public class PscStatementsSteps {
 
     @When("I send a PUT request with no ERIC headers")
     public void i_send_psc_statement_put_request_no_eric_headers() throws IOException {
-        String data = FileReaderUtil.readFile("src/itest/resources/json/input/company_psc_statement.json");
+        String data = FileReaderUtil.readFile("src/itest/resources/json/input/company_psc_statement_put.json");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -440,6 +462,23 @@ public class PscStatementsSteps {
     public void nothing_persisted_to_database() {
         List<PscStatementDocument> pscDocs = pscStatementRepository.findAll();
         assertThat(pscDocs).isEmpty();
+    }
+
+    @And("the data matches {string} for company number {string} and statement id {string}")
+    public void theDataMatchesForCompanyNumberAndStatementId(String resultFile, String companyNumber, String statementId)
+            throws JsonProcessingException {
+        Optional<PscStatementDocument> pscDoc = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
+        assertThat(pscDoc).isPresent();
+
+        String file = FileReaderUtil.readFile("src/itest/resources/json/output/" + resultFile + ".json")
+                .replaceAll("<id>", statementId)
+                .replaceAll("<company_number>", companyNumber);
+        PscStatementDocument expected = objectMapper.readValue(file, PscStatementDocument.class);
+
+        assertEquals(expected.getData(), pscDoc.get().getData());
+        assertEquals(expected.getCompanyNumber(), pscDoc.get().getCompanyNumber());
+        assertEquals(expected.getPscStatementIdRaw(), pscDoc.get().getPscStatementIdRaw());
+        assertEquals(expected.getId(), pscDoc.get().getId());
     }
 
     @After

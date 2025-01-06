@@ -1,6 +1,6 @@
 {
   "company_number" : "12388814",
-  "psc_statement_id" : "xyzZGWm42-hTgP-LBAQTjWQnVzM",
+  "psc_statement_id_raw" : "3000000002",
   "statement" : {
     "notified_on" : "2017-01-14",
     "kind" : "persons-with-significant-control-statement",

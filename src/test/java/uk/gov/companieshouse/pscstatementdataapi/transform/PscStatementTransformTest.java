@@ -29,10 +29,10 @@ class PscStatementTransformTest {
         CompanyPscStatement request = testHelper.createCompanyPscStatement();
 
         PscStatementDocument document = transformer.transformPscStatement(TestHelper.COMPANY_NUMBER,
-                TestHelper.PSC_STATEMENT_ID, request);
+                TestHelper.PSC_STATEMENT_ID_RAW, request);
 
         assertEquals(TestHelper.COMPANY_NUMBER, document.getCompanyNumber());
-        assertEquals(TestHelper.PSC_STATEMENT_ID, document.getPscStatementId());
+        assertEquals(TestHelper.PSC_STATEMENT_ID_RAW, document.getPscStatementIdRaw());
         assertEquals(TestHelper.DELTA_AT, document.getDeltaAt());
         assertEquals(testHelper.getStatement(), document.getData());
         assertNotNull(document.getData().getEtag());

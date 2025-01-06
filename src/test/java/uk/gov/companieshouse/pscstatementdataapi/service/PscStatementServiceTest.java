@@ -66,7 +66,7 @@ import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 class PscStatementServiceTest {
 
     private static final String CONTEXT_ID = TestHelper.X_REQUEST_ID;
-    private static final String STATEMENT_ID = TestHelper.PSC_STATEMENT_ID;
+    private static final String STATEMENT_ID = TestHelper.PSC_STATEMENT_ID_RAW;
     private static final String COMPANY_NUMBER = TestHelper.COMPANY_NUMBER;
     private static final String DELTA_AT = TestHelper.DELTA_AT;
     private static final String NOT_FOUND_STATEMENT_ID = "not_found_id";

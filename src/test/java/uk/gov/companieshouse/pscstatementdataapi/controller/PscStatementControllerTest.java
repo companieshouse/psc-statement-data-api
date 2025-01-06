@@ -33,13 +33,13 @@ import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 class PscStatementControllerTest {
 
     private static final String GET_URL = String.format("/company/%s/persons-with-significant-control-statements/%s",
-            TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID);
+            TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID_RAW);
     private static final String PUT_URL = String.format(
             "/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER,
-            TestHelper.PSC_STATEMENT_ID);
+            TestHelper.PSC_STATEMENT_ID_RAW);
     private static final String DELETE_URL = String.format(
             "/company/%s/persons-with-significant-control-statements/%s/internal", TestHelper.COMPANY_NUMBER,
-            TestHelper.PSC_STATEMENT_ID);
+            TestHelper.PSC_STATEMENT_ID_RAW);
     private static final String GET_STATEMENT_LIST_URL = String.format(
             "/company/%s/persons-with-significant-control-statements", TestHelper.COMPANY_NUMBER);
     private static final String ERIC_IDENTITY = "Test-Identity";
@@ -71,7 +71,7 @@ class PscStatementControllerTest {
 
     @Test
     void statementResponseReturnedWhenGetRequestInvoked() throws Exception {
-        when(pscStatementService.retrievePscStatementFromDb(TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID))
+        when(pscStatementService.retrievePscStatementFromDb(TestHelper.COMPANY_NUMBER, TestHelper.PSC_STATEMENT_ID_RAW))
                 .thenReturn(testHelper.createStatement());
 
         mockMvc.perform(MockMvcRequestBuilders

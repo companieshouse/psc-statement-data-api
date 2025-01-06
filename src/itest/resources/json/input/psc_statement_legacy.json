@@ -1,0 +1,21 @@
+{
+  "_id" : "<id>",
+  "created" : {
+    "at" : ISODate("2014-08-29T00:00:00.000Z"),
+  },
+  "company_number" : "<company_number>",
+  "updated" : {
+    "at" : ISODate("2014-08-29T00:00:00.000Z"),
+  },
+  "psc_statement_id" : "3000000002",
+  "data" : {
+    "etag" : "1348e95014c699cebf7494546a5b0d47de8105e5",
+    "kind" : "persons-with-significant-control-statement",
+    "notified_on" : ISODate("2014-08-29T00:00:00.000Z"),
+    "statement" : "all-beneficial-owners-identified",
+    "links" : {
+      "self" : "/company/<company_number>/persons-with-significant-control-statements/<id>"
+    }
+  },
+  "delta_at" : "20200723093435661593"
+}

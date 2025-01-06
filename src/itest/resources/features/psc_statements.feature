@@ -23,20 +23,20 @@ Feature: Process Psc Statement Requests
 
     Examples:
       | companyNumber | statementId                 | data                  |
-      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | company_psc_statement |
+      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | company_psc_statement_put |
 
-  Scenario Outline: Processing old psc statement information
+  Scenario Outline: Processing stale psc statement information
 
     Given Psc statements data api service is running
     And a psc statement exists for company number "<companyNumber>" with statement id "<statementId>" and delta_at "<deltaAt>"
-    When I send a PUT request with payload "<oldData>" file for company number "<companyNumber>" with statement id "<statementId>"
+    When I send a PUT request with payload "<staleData>" file for company number "<companyNumber>" with statement id "<statementId>"
     Then I should receive 200 status code
     And the CHS Kafka API is not invoked
     And a statement exists with id "<statementId>" and delta_at "<deltaAt>"
 
     Examples:
-      | companyNumber | statementId                 | deltaAt              | oldData                      |
-      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | 20211008152823383176 | company_psc_statement_old    |
+      | companyNumber | statementId                 | deltaAt              | staleData                         |
+      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | 20211008152823383176 | company_psc_statement_stale_put |
 
 
   Scenario Outline: Processing Psc Statement List GET request successfully
@@ -90,3 +90,29 @@ Feature: Process Psc Statement Requests
     Examples:
       | companyNumber |
       | OC421554      |
+
+  Scenario Outline: Update an existing Psc Statement successfully
+
+    Given Psc statements data api service is running
+    And a psc statement exists for company number "<companyNumber>" with statement id "<statementId>"
+    When I send a PUT request with payload "<data>" file for company number "<companyNumber>" with statement id "<statementId>"
+    Then I should receive 200 status code
+    And the CHS Kafka API is invoked for company number "<companyNumber>" with statement id "<statementId>"
+    And the data matches "<result>" for company number "<companyNumber>" and statement id "<statementId>"
+
+    Examples:
+      | companyNumber | statementId                 | data                      | result                           |
+      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | company_psc_statement_put | company_psc_statement_put_result |
+
+  Scenario Outline: Update and existing Psc Statement with legacy psc_statement_id successfully
+
+    Given Psc statements data api service is running
+    And a psc statement exists with legacy data for company number "<companyNumber>" with statement id "<statementId>"
+    When I send a PUT request with payload "<data>" file for company number "<companyNumber>" with statement id "<statementId>"
+    Then I should receive 200 status code
+    And the CHS Kafka API is invoked for company number "<companyNumber>" with statement id "<statementId>"
+    And the data matches "<result>" for company number "<companyNumber>" and statement id "<statementId>"
+
+    Examples:
+      | companyNumber | statementId                 | data                      | result                           |
+      | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | company_psc_statement_put | company_psc_statement_put_result |
