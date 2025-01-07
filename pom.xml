@@ -24,7 +24,7 @@
 
         <!-- tests -->
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
-        <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
+        <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
         <io-cucumber.version>7.15.0</io-cucumber.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
         <assertj-core.version>3.25.3</assertj-core.version>
