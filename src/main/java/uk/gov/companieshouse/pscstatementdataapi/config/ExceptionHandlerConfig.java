@@ -3,7 +3,6 @@ package uk.gov.companieshouse.pscstatementdataapi.config;
 import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.dockerjava.api.exception.ConflictException;
 import com.mongodb.MongoException;
 import java.time.format.DateTimeParseException;
 import org.springframework.dao.DataAccessException;
@@ -18,6 +17,7 @@ import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 
 @ControllerAdvice

@@ -16,7 +16,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.dockerjava.api.exception.ConflictException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,6 +53,7 @@ import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
@@ -505,7 +505,8 @@ class PscStatementServiceTest {
     }
 
     @Test
-    void processPscStatementDoesntUpdateStatementWhenDeltaAtInPast() {
+    void processPscStatementThrowsConflictErrorWhenDeltaAtInPast() {
+        // given
         LocalDateTime dateTime = LocalDateTime.now();
         Updated updated = new Updated();
         updated.setAt(dateTime);
@@ -517,8 +518,11 @@ class PscStatementServiceTest {
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
                 document);
 
-        pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
+        // when
+        Executable actual = () -> pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
+        // then
+        assertThrows(ConflictException.class, actual);
         verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
         verifyNoMoreInteractions(repository);
         assertEquals(document.getUpdated().getAt(), dateTime);
@@ -701,9 +705,10 @@ class PscStatementServiceTest {
                 document);
 
         // when
-        pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
+        Executable actual = () -> pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
         // then
+        assertThrows(ConflictException.class, actual);
         verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
         verifyNoMoreInteractions(repository);
     }
