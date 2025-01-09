@@ -27,10 +27,12 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.TransientDataAccessResourceException;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
@@ -62,7 +64,7 @@ import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class PscStatementServiceTest {
     private static final String STATEMENT_ID = TestHelper.PSC_STATEMENT_ID_RAW;
     private static final String COMPANY_NUMBER = TestHelper.COMPANY_NUMBER;
@@ -324,11 +326,9 @@ class PscStatementServiceTest {
     @Test
     void deletePscStatementDeletesStatement() {
         // Given
-        ApiResponse<Void> response = new ApiResponse<>(200, null);
         document.setData(testHelper.createStatement());
         when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(
                 Optional.of(document));
-        when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
 
         // When
         pscStatementService.deletePscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT);
@@ -510,15 +510,12 @@ class PscStatementServiceTest {
         document.setUpdated(updated);
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(
                 Optional.ofNullable(document));
-        ApiResponse<Void> response = new ApiResponse<>(200, null);
-        when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
-        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
-                document);
 
         pscStatementService.processPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
         verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
         verifyNoMoreInteractions(repository);
+        verifyNoInteractions(apiClientService);
         assertEquals(document.getUpdated().getAt(), dateTime);
     }
 
@@ -693,10 +690,6 @@ class PscStatementServiceTest {
         // given
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(
                 Optional.ofNullable(document));
-        ApiResponse<Void> response = new ApiResponse<>(200, null);
-        when(apiClientService.invokeChsKafkaApi(any())).thenReturn(response);
-        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
-                document);
 
         // when
         pscStatementService.processPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
@@ -704,5 +697,6 @@ class PscStatementServiceTest {
         // then
         verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
         verifyNoMoreInteractions(repository);
+        verifyNoInteractions(apiClientService);
     }
 }
