@@ -241,7 +241,7 @@ class PscStatementServiceTest {
         });
 
         // then
-        String expectedMessage = "No company metrics data found for company number: companyNumber";
+        String expectedMessage = "Metrics does not exist for company number: companyNumber";
         String actualMessage = ex.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
         verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
@@ -261,7 +261,7 @@ class PscStatementServiceTest {
             pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
         });
 
-        String expectedMessage = "company companyNumber not on public register";
+        String expectedMessage = "Company companyNumber is not on the public register";
         String actualMessage = ex.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
         verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
@@ -288,7 +288,7 @@ class PscStatementServiceTest {
             pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
         });
 
-        String expectedMessage = "Resource not found for company number: companyNumber";
+        String expectedMessage = "No PSC statements exists for company: companyNumber";
         String actualMessage = ex.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
         verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);

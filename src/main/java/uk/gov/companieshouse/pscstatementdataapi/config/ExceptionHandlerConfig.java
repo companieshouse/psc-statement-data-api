@@ -23,42 +23,42 @@ import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundExcep
 @ControllerAdvice
 public class ExceptionHandlerConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     @ExceptionHandler(value = ResourceNotFoundException.class)
     public ResponseEntity<String> handleNotFoundException(ResourceNotFoundException exception) {
-        logger.error(exception.getMessage());
+        LOGGER.error(exception.getMessage());
         return ResponseEntity.notFound().build();
     }
 
     @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class, MongoException.class})
     public ResponseEntity<Object> handleServiceUnavailableException(Exception exception) {
-        logger.error(exception.getMessage());
+        LOGGER.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(value = {BadRequestException.class, DateTimeParseException.class,
             HttpMessageNotReadableException.class, JsonProcessingException.class, IllegalArgumentException.class})
     public ResponseEntity<Object> handleBadRequestException(Exception exception) {
-        logger.error(exception.getMessage());
+        LOGGER.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {MethodNotAllowedException.class, HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<Object> handleMethodNotAllowedException(Exception exception) {
-        logger.error(exception.getMessage());
+        LOGGER.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(value = {ConflictException.class})
     public ResponseEntity<Object> handleConflictException(Exception exception) {
-        logger.error(exception.getMessage());
+        LOGGER.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = {Exception.class})
     public ResponseEntity<String> handleException(Exception exception) {
-        logger.error(exception.getMessage());
+        LOGGER.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

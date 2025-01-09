@@ -2,7 +2,6 @@ package uk.gov.companieshouse.pscstatementdataapi.controller;
 
 import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.companieshouse.api.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
@@ -27,7 +25,7 @@ import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 @RequestMapping("/company/{company_number}/persons-with-significant-control-statements")
 public class PscStatementController {
 
-    private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private final PscStatementService pscStatementService;
 
@@ -37,26 +35,20 @@ public class PscStatementController {
 
     @GetMapping("/{statement_id}")
     public ResponseEntity<Statement> searchPscStatements(@PathVariable("company_number") String companyNumber,
-            @PathVariable("statement_id") String statementId)
-            throws JsonProcessingException, ResourceNotFoundException {
+            @PathVariable("statement_id") String statementId) {
         DataMapHolder.get()
                 .companyNumber(companyNumber)
                 .pscStatementId(statementId);
-        logger.info(String.format("Retrieving psc statement data for company number %s and statement_id %s",
-                companyNumber, statementId), DataMapHolder.getLogMap());
+        LOGGER.info("Processing GET single transaction", DataMapHolder.getLogMap());
         Statement statement = pscStatementService.retrievePscStatementFromDb(companyNumber, statementId);
         return new ResponseEntity<>(statement, HttpStatus.OK);
     }
 
     @PutMapping("/{statement_id}/internal")
     public ResponseEntity<Void> processPcsStatement(@PathVariable("company_number") String companyNumber,
-            @PathVariable("statement_id") String statementId, @RequestBody CompanyPscStatement companyPscStatement
-    ) throws JsonProcessingException {
-        DataMapHolder.get()
-                .companyNumber(companyNumber)
-                .pscStatementId(statementId);
-        logger.info(String.format("Processing psc statement data for company number %s and statement_id %s",
-                        companyNumber, statementId), DataMapHolder.getLogMap());
+            @PathVariable("statement_id") String statementId, @RequestBody CompanyPscStatement companyPscStatement) {
+        DataMapHolder.get().companyNumber(companyNumber).pscStatementId(statementId);
+        LOGGER.info("Processing transaction upsert", DataMapHolder.getLogMap());
         pscStatementService.processPscStatement(companyNumber, statementId, companyPscStatement);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -73,13 +65,9 @@ public class PscStatementController {
                 .itemsPerPage(itemsPerPage.toString())
                 .startIndex(startIndex.toString())
                 .registerView(String.valueOf(registerView));
-        logger.info(String.format(
-                "Retrieving psc statement list data for company number %s, start index %d, items per page %d",
-                companyNumber, startIndex, itemsPerPage), DataMapHolder.getLogMap());
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(companyNumber,
-                startIndex,
-                registerView,
-                itemsPerPage);
+        LOGGER.info("Processing GET PSC statements list", DataMapHolder.getLogMap());
+        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(companyNumber, startIndex,
+                registerView, itemsPerPage);
         return new ResponseEntity<>(statementList, HttpStatus.OK);
     }
 
@@ -95,11 +83,8 @@ public class PscStatementController {
             @PathVariable("company_number") String companyNumber,
             @PathVariable("statement_id") String statementId) {
 
-        DataMapHolder.get()
-                .companyNumber(companyNumber)
-                .pscStatementId(statementId);
-        logger.info(String.format("Deleting Psc statement information for statement id %s", statementId),
-                DataMapHolder.getLogMap());
+        DataMapHolder.get().companyNumber(companyNumber).pscStatementId(statementId);
+        LOGGER.info("Processing transaction delete", DataMapHolder.getLogMap());
         pscStatementService.deletePscStatement(companyNumber, statementId, deltaAt);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

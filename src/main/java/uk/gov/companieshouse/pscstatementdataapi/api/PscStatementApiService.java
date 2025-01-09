@@ -17,8 +17,7 @@ import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapp
 
 @Service
 public class PscStatementApiService {
-
-    private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private final ResourceChangedRequestMapper mapper;
     private final InternalApiClient internalApiClient;
@@ -53,11 +52,11 @@ public class PscStatementApiService {
         try {
             return changedResourcePost.execute();
         } catch (ApiErrorResponseException exception) {
-            logger.error("Unsuccessful call to /resource-changed endpoint",
+            LOGGER.error("Unsuccessful call to /resource-changed endpoint",
                     exception, DataMapHolder.getLogMap());
             throw new ServiceUnavailableException(exception.getMessage());
         } catch (RuntimeException exception) {
-            logger.error("Error occurred while calling /resource-changed endpoint",
+            LOGGER.error("Error occurred while calling /resource-changed endpoint",
                     exception, DataMapHolder.getLogMap());
             throw exception;
         }
