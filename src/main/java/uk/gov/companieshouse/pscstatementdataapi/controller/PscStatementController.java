@@ -39,7 +39,7 @@ public class PscStatementController {
         DataMapHolder.get()
                 .companyNumber(companyNumber)
                 .pscStatementId(statementId);
-        LOGGER.info("Processing GET single transaction", DataMapHolder.getLogMap());
+        LOGGER.info("Processing GET single PSC statement", DataMapHolder.getLogMap());
         Statement statement = pscStatementService.retrievePscStatementFromDb(companyNumber, statementId);
         return new ResponseEntity<>(statement, HttpStatus.OK);
     }
@@ -48,7 +48,7 @@ public class PscStatementController {
     public ResponseEntity<Void> processPcsStatement(@PathVariable("company_number") String companyNumber,
             @PathVariable("statement_id") String statementId, @RequestBody CompanyPscStatement companyPscStatement) {
         DataMapHolder.get().companyNumber(companyNumber).pscStatementId(statementId);
-        LOGGER.info("Processing transaction upsert", DataMapHolder.getLogMap());
+        LOGGER.info("Processing PSC statement upsert", DataMapHolder.getLogMap());
         pscStatementService.processPscStatement(companyNumber, statementId, companyPscStatement);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -84,7 +84,7 @@ public class PscStatementController {
             @PathVariable("statement_id") String statementId) {
 
         DataMapHolder.get().companyNumber(companyNumber).pscStatementId(statementId);
-        LOGGER.info("Processing transaction delete", DataMapHolder.getLogMap());
+        LOGGER.info("Processing PSC statement delete", DataMapHolder.getLogMap());
         pscStatementService.deletePscStatement(companyNumber, statementId, deltaAt);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
