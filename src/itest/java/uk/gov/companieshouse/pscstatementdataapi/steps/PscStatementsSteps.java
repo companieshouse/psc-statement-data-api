@@ -432,7 +432,7 @@ public class PscStatementsSteps {
     public void chs_kafka_api_invoked_delete(String companyNumber, String statementId) throws IOException {
         PscStatementDocument document = CucumberContext.CONTEXT.get("pscStatementDocument");
         ResourceChangedRequest resourceChangedRequest = new ResourceChangedRequest(
-                CucumberContext.CONTEXT.get("contextId"), companyNumber, statementId, document, true);
+                companyNumber, statementId, document, true);
         verify(pscStatementApiService).invokeChsKafkaApiDelete(resourceChangedRequest);
     }
 
@@ -455,7 +455,7 @@ public class PscStatementsSteps {
     @Then("the CHS Kafka API is invoked for company number {string} with statement id {string}")
     public void chs_kafka_api_invoked(String companyNumber, String statementId) {
         verify(pscStatementApiService).invokeChsKafkaApi(
-                new ResourceChangedRequest(CucumberContext.CONTEXT.get("contextId"), companyNumber, statementId, null, false));
+                new ResourceChangedRequest(companyNumber, statementId, null, false));
     }
 
     @Then("nothing is persisted in the database")

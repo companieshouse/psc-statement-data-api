@@ -117,7 +117,7 @@ public class PscStatementService {
         }
     }
 
-    public void deletePscStatement(String contextId, String companyNumber, String statementId, String requestDeltaAt) {
+    public void deletePscStatement(String companyNumber, String statementId, String requestDeltaAt) {
         if (StringUtils.isBlank(requestDeltaAt)) {
             throw new BadRequestException("deltaAt missing from delete request");
         }
@@ -134,18 +134,15 @@ public class PscStatementService {
                 }
 
                 pscStatementRepository.delete(doc);
-                logger.infoContext(contextId,
-                        String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
+                logger.info(String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
                                 companyNumber, statementId), DataMapHolder.getLogMap());
                 apiClientService.invokeChsKafkaApiDelete(
-                        new ResourceChangedRequest(contextId, companyNumber, statementId, doc, true));
+                        new ResourceChangedRequest(companyNumber, statementId, doc, true));
             }, () -> {
-                logger.infoContext(contextId,
-                        String.format("PSC Statement does not exist for companyNumber %s and statementId %s",
+                logger.info(String.format("PSC Statement does not exist for companyNumber %s and statementId %s",
                                 companyNumber, statementId), DataMapHolder.getLogMap());
                 apiClientService.invokeChsKafkaApiDelete(
-                        new ResourceChangedRequest(contextId, companyNumber, statementId, new PscStatementDocument(),
-                                true));
+                        new ResourceChangedRequest(companyNumber, statementId, new PscStatementDocument(), true));
             });
         } catch (DataAccessException ex) {
             logger.error("Error connecting to MongoDB", ex, DataMapHolder.getLogMap());
@@ -157,7 +154,7 @@ public class PscStatementService {
         return pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
     }
 
-    public void processPscStatement(String contextId, String companyNumber, String statementId,
+    public void processPscStatement(String companyNumber, String statementId,
             CompanyPscStatement companyPscStatement) throws BadRequestException {
         boolean isLatestRecord = isLatestRecord(companyNumber, statementId, companyPscStatement.getDeltaAt());
 
@@ -165,12 +162,11 @@ public class PscStatementService {
             PscStatementDocument document = pscStatementTransformer.transformPscStatement(companyNumber, statementId,
                     companyPscStatement);
 
-            saveToDb(contextId, companyNumber, statementId, document);
+            saveToDb(companyNumber, statementId, document);
             apiClientService.invokeChsKafkaApi(
-                    new ResourceChangedRequest(contextId, companyNumber, statementId, null, false));
+                    new ResourceChangedRequest(companyNumber, statementId, null, false));
         } else {
-            logger.infoContext(contextId,
-                    "Psc Statement not persisted as the record provided is not the latest record.",
+            logger.info("Psc Statement not persisted as the record provided is not the latest record.",
                     DataMapHolder.getLogMap());
         }
     }
@@ -186,7 +182,7 @@ public class PscStatementService {
         return statement.isEmpty();
     }
 
-    private void saveToDb(String contextId, String companyNumber, String statementId, PscStatementDocument document) {
+    private void saveToDb(String companyNumber, String statementId, PscStatementDocument document) {
 
         Created created = getCreatedFromCurrentRecord(companyNumber, statementId);
         if (created == null) {
@@ -197,9 +193,8 @@ public class PscStatementService {
 
         try {
             pscStatementRepository.save(document);
-            logger.infoContext(contextId, String.format(
-                    "Psc statement is updated in MongoDb for context id: %s, company number: %s, and statement id: %s",
-                    contextId, companyNumber, statementId), DataMapHolder.getLogMap());
+            logger.info(String.format("Psc statement is updated in MongoDb for company number: %s and "
+                    + "statement id: %s", companyNumber, statementId), DataMapHolder.getLogMap());
         } catch (IllegalArgumentException illegalArgumentEx) {
             throw new BadRequestException("Saving to MongoDb failed", illegalArgumentEx);
         }

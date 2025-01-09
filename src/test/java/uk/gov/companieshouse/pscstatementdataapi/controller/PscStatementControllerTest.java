@@ -85,9 +85,8 @@ class PscStatementControllerTest {
 
     @Test
     void callPscStatementPutRequest() throws Exception {
-        doNothing()
-                .when(pscStatementService).processPscStatement(anyString(), anyString(), anyString(),
-                        isA(CompanyPscStatement.class));
+        doNothing().when(pscStatementService).processPscStatement(
+                anyString(), anyString(), isA(CompanyPscStatement.class));
 
         mockMvc.perform(put(PUT_URL)
                         .contentType(APPLICATION_JSON)
@@ -101,7 +100,8 @@ class PscStatementControllerTest {
 
     @Test
     void callPscStatementListGetRequestWithParams() throws Exception {
-        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 2, false, 5))
+        when(pscStatementService.retrievePscStatementListFromDb(
+                TestHelper.COMPANY_NUMBER, 2, false, 5))
                 .thenReturn(testHelper.createStatementList());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -116,7 +116,8 @@ class PscStatementControllerTest {
 
     @Test
     void callPscStatementListGetRequestWithRegisterView() throws Exception {
-        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 2, true, 5))
+        when(pscStatementService.retrievePscStatementListFromDb(
+                TestHelper.COMPANY_NUMBER, 2, true, 5))
                 .thenReturn(testHelper.createStatementList());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -131,7 +132,8 @@ class PscStatementControllerTest {
 
     @Test
     void callPscStatementListGetRequestNoParams() throws Exception {
-        when(pscStatementService.retrievePscStatementListFromDb(TestHelper.COMPANY_NUMBER, 0, false, 25))
+        when(pscStatementService.retrievePscStatementListFromDb(
+                TestHelper.COMPANY_NUMBER, 0, false, 25))
                 .thenReturn(testHelper.createStatementList());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -145,7 +147,7 @@ class PscStatementControllerTest {
     @Test
     void callPscStatementDeleteRequest() throws Exception {
         doNothing()
-                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
+                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString());
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)
@@ -160,7 +162,7 @@ class PscStatementControllerTest {
     @Test
     void callPscStatementDeleteRequestServerError() throws Exception {
         doThrow(ServiceUnavailableException.class)
-                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
+                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString());
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)
@@ -175,7 +177,7 @@ class PscStatementControllerTest {
     @Test
     void callPscStatementDeleteRequestBadRequest() throws Exception {
         doThrow(BadRequestException.class)
-                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString(), anyString());
+                .when(pscStatementService).deletePscStatement(anyString(), anyString(), anyString());
 
         mockMvc.perform(delete(DELETE_URL)
                         .contentType(APPLICATION_JSON)

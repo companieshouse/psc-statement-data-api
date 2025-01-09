@@ -41,7 +41,7 @@ public class PscStatementController {
             throws JsonProcessingException, ResourceNotFoundException {
         DataMapHolder.get()
                 .companyNumber(companyNumber)
-                .statementId(statementId);
+                .pscStatementId(statementId);
         logger.info(String.format("Retrieving psc statement data for company number %s and statement_id %s",
                 companyNumber, statementId), DataMapHolder.getLogMap());
         Statement statement = pscStatementService.retrievePscStatementFromDb(companyNumber, statementId);
@@ -49,18 +49,15 @@ public class PscStatementController {
     }
 
     @PutMapping("/{statement_id}/internal")
-    public ResponseEntity<Void> processPcsStatement(@RequestHeader("x-request-id") String contextId,
-            @PathVariable("company_number") String companyNumber,
-            @PathVariable("statement_id") String statementId,
-            @RequestBody CompanyPscStatement companyPscStatement
+    public ResponseEntity<Void> processPcsStatement(@PathVariable("company_number") String companyNumber,
+            @PathVariable("statement_id") String statementId, @RequestBody CompanyPscStatement companyPscStatement
     ) throws JsonProcessingException {
         DataMapHolder.get()
                 .companyNumber(companyNumber)
-                .statementId(statementId);
-        logger.infoContext(contextId,
-                String.format("Processing psc statement data for company number %s and statement_id %s",
+                .pscStatementId(statementId);
+        logger.info(String.format("Processing psc statement data for company number %s and statement_id %s",
                         companyNumber, statementId), DataMapHolder.getLogMap());
-        pscStatementService.processPscStatement(contextId, companyNumber, statementId, companyPscStatement);
+        pscStatementService.processPscStatement(companyNumber, statementId, companyPscStatement);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -94,19 +91,16 @@ public class PscStatementController {
      */
     @DeleteMapping("/{statement_id}/internal")
     public ResponseEntity<Void> deletePscStatement(
-            @RequestHeader("x-request-id") String contextId,
             @RequestHeader("X-DELTA-AT") String deltaAt,
             @PathVariable("company_number") String companyNumber,
             @PathVariable("statement_id") String statementId) {
 
         DataMapHolder.get()
                 .companyNumber(companyNumber)
-                .contextId(contextId)
-                .statementId(statementId);
-        logger.infoContext(contextId, String.format(
-                        "Deleting Psc statement information for statement id %s", statementId),
+                .pscStatementId(statementId);
+        logger.info(String.format("Deleting Psc statement information for statement id %s", statementId),
                 DataMapHolder.getLogMap());
-        pscStatementService.deletePscStatement(contextId, companyNumber, statementId, deltaAt);
+        pscStatementService.deletePscStatement(companyNumber, statementId, deltaAt);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

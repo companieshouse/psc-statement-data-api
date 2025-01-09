@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
+import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 
 @Component
@@ -39,6 +40,6 @@ public class ResourceChangedRequestMapper {
                 .resourceUri(String.format(PSC_STATEMENTS_URI, request.companyNumber(), request.statementId()))
                 .resourceKind(RESOURCE_KIND)
                 .event(event)
-                .contextId(request.contextId());
+                .contextId(DataMapHolder.getRequestId());
     }
 }
