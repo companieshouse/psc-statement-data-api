@@ -4,7 +4,6 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDeltaStale;
 
-import com.github.dockerjava.api.exception.ConflictException;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
@@ -27,6 +26,7 @@ import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
@@ -161,6 +161,7 @@ public class PscStatementService {
         } else {
             LOGGER.info("Psc Statement not persisted as the record provided is not the latest record.",
                     DataMapHolder.getLogMap());
+            throw new ConflictException("Received stale delta");
         }
     }
 

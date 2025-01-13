@@ -30,7 +30,7 @@ Feature: Process Psc Statement Requests
     Given Psc statements data api service is running
     And a psc statement exists for company number "<companyNumber>" with statement id "<statementId>" and delta_at "<deltaAt>"
     When I send a PUT request with payload "<staleData>" file for company number "<companyNumber>" with statement id "<statementId>"
-    Then I should receive 200 status code
+    Then I should receive 409 status code
     And the CHS Kafka API is not invoked
     And a statement exists with id "<statementId>" and delta_at "<deltaAt>"
 
@@ -104,7 +104,7 @@ Feature: Process Psc Statement Requests
       | companyNumber | statementId                 | data                      | result                           |
       | OC421554      | DHTUrJoAuKdXw7zvkreyAm_SoH0 | company_psc_statement_put | company_psc_statement_put_result |
 
-  Scenario Outline: Update and existing Psc Statement with legacy psc_statement_id successfully
+  Scenario Outline: Update an existing Psc Statement with legacy psc_statement_id successfully
 
     Given Psc statements data api service is running
     And a psc statement exists with legacy data for company number "<companyNumber>" with statement id "<statementId>"
