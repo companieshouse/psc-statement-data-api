@@ -511,12 +511,9 @@ class PscStatementServiceTest {
         when(repository.findUpdatedPscStatement(COMPANY_NUMBER, STATEMENT_ID, DELTA_AT)).thenReturn(
                 Optional.ofNullable(document));
 
-<<<<<<< HEAD
-        pscStatementService.processPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
-=======
         // when
-        Executable actual = () -> pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
->>>>>>> main
+        Executable actual = () -> pscStatementService.processPscStatement(COMPANY_NUMBER, STATEMENT_ID,
+                companyPscStatement);
 
         // then
         assertThrows(ConflictException.class, actual);
@@ -699,7 +696,8 @@ class PscStatementServiceTest {
                 Optional.ofNullable(document));
 
         // when
-        Executable actual = () -> pscStatementService.processPscStatement("", COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
+        Executable actual = () -> pscStatementService.processPscStatement(COMPANY_NUMBER, STATEMENT_ID,
+                companyPscStatement);
 
         // then
         assertThrows(ConflictException.class, actual);
