@@ -19,6 +19,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 
 @ControllerAdvice
 public class ExceptionHandlerConfig {
@@ -27,38 +28,38 @@ public class ExceptionHandlerConfig {
 
     @ExceptionHandler(value = ResourceNotFoundException.class)
     public ResponseEntity<String> handleNotFoundException(ResourceNotFoundException exception) {
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), DataMapHolder.getLogMap());
         return ResponseEntity.notFound().build();
     }
 
     @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class, MongoException.class})
     public ResponseEntity<Object> handleServiceUnavailableException(Exception exception) {
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), DataMapHolder.getLogMap());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(value = {BadRequestException.class, DateTimeParseException.class,
             HttpMessageNotReadableException.class, JsonProcessingException.class, IllegalArgumentException.class})
     public ResponseEntity<Object> handleBadRequestException(Exception exception) {
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), DataMapHolder.getLogMap());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {MethodNotAllowedException.class, HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<Object> handleMethodNotAllowedException(Exception exception) {
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), DataMapHolder.getLogMap());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(value = {ConflictException.class})
     public ResponseEntity<Object> handleConflictException(Exception exception) {
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), DataMapHolder.getLogMap());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = {Exception.class})
     public ResponseEntity<String> handleException(Exception exception) {
-        LOGGER.error(exception.getMessage());
+        LOGGER.error(exception.getMessage(), DataMapHolder.getLogMap());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

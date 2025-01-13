@@ -396,6 +396,7 @@ public class PscStatementsSteps {
         headers.set("ERIC-Identity", "TEST-IDENTITY");
         headers.set("ERIC-Identity-Type", "key");
         headers.set("ERIC-Authorised-Key-Roles", "*");
+        headers.set("X-DELTA-AT", "");
 
         HttpEntity<String> request = new HttpEntity<String>(null, headers);
 
