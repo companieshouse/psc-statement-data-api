@@ -15,7 +15,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -107,7 +106,7 @@ class PscStatementServiceTest {
 
     @Test
     void statementReturnedByCompanyNumberAndStatementIdFromRepository()
-            throws JsonProcessingException, ResourceNotFoundException {
+            throws ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         Optional<PscStatementDocument> pscStatementOptional = Optional.of(document);
@@ -141,7 +140,7 @@ class PscStatementServiceTest {
 
     @Test
     void statementListReturnedByCompanyNumberFromRepositoryWithExemptions()
-            throws ResourceNotFoundException, IOException {
+            throws ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = testHelper.createStatementListWithExemptions();
         document.setData(expectedStatement);
@@ -160,17 +159,17 @@ class PscStatementServiceTest {
     }
 
     @Test
-    void whenNoStatementsExistGetStatementListShouldThrow() throws JsonProcessingException {
+    void whenNoStatementsExistGetStatementListShouldThrow() {
 
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(new ArrayList<PscStatementDocument>()));
+                Optional.of(new ArrayList<>()));
         assertThrows(ResourceNotFoundException.class,
                 () -> pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25));
     }
 
     @Test
     void statementListReturnedForCompanyNumberButNoMetricsFound_ShouldReturnList()
-            throws ResourceNotFoundException, IOException {
+            throws ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = testHelper.createStatementListNoMetrics();
         document.setData(expectedStatement);
@@ -189,13 +188,13 @@ class PscStatementServiceTest {
 
     @Test
     void statementListReturnedByCompanyNumberFromRepositoryRegisterView()
-            throws ResourceNotFoundException, IOException {
+            throws ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = testHelper.createStatementListRegisterView();
         document.setData(expectedStatement);
 
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
-                .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView()));
+                .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView("public-register")));
         when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
                 Optional.of(Collections.singletonList(document)));
 
@@ -208,8 +207,26 @@ class PscStatementServiceTest {
     }
 
     @Test
+    void statementListThrowsResourceNotFoundExceptionWhenNotPublicRegister()
+            throws ResourceNotFoundException {
+        // given
+        Statement expectedStatement = new Statement();
+        document.setData(expectedStatement);
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView("not-public")));
+
+        // when
+        Executable actual = () -> pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
+
+        // then
+        assertThrows(ResourceNotFoundException.class, actual);
+        verify(pscStatementService).retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
+        verifyNoInteractions(repository);
+    }
+
+    @Test
     void statementListIncWithdrawnCountOneReturnedByCompanyNumberFromRepositoryRegisterView()
-            throws ResourceNotFoundException, IOException {
+            throws ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         expectedStatement.setCeasedOn(LocalDate.parse("2022-12-20"));
         StatementList expectedStatementList = testHelper.createStatementList();
@@ -218,7 +235,7 @@ class PscStatementServiceTest {
         document.setData(expectedStatement);
 
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
-                .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView()));
+                .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView("public-register")));
         when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
                 Optional.of(Collections.singletonList(document)));
 
@@ -250,7 +267,7 @@ class PscStatementServiceTest {
     }
 
     @Test
-    void whenCompanyNotInPublicRegisterGetStatementListShouldThrow() throws ResourceNotFoundException, IOException {
+    void whenCompanyNotInPublicRegisterGetStatementListShouldThrow() throws ResourceNotFoundException {
         MetricsApi metricsApi = testHelper.createMetrics();
         RegistersApi registersApi = new RegistersApi();
         metricsApi.setRegisters(registersApi);
@@ -271,7 +288,7 @@ class PscStatementServiceTest {
 
     @Test
     void whenNoStatementsExistInPublicRegisterGetStatementListRegisterViewShouldThrow()
-            throws ResourceNotFoundException, IOException {
+            throws ResourceNotFoundException {
         MetricsApi metricsApi = testHelper.createMetrics();
         RegistersApi registersApi = new RegistersApi();
         RegisterApi api = new RegisterApi();
@@ -283,7 +300,7 @@ class PscStatementServiceTest {
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(metricsApi));
         when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
-                Optional.of(new ArrayList<PscStatementDocument>()));
+                Optional.of(new ArrayList<>()));
 
         Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
             pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
@@ -299,12 +316,12 @@ class PscStatementServiceTest {
 
     @Test
     void whenNoCountsDataInCompanyMetricsGetStatementListRegisterViewShouldReturnList()
-            throws ResourceNotFoundException, IOException {
+            throws ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = testHelper.createStatementListNoMetrics();
         expectedStatementList.setCeasedCount(0);
         document.setData(expectedStatement);
-        MetricsApi metricsApi = testHelper.createMetricsRegisterView();
+        MetricsApi metricsApi = testHelper.createMetricsRegisterView("public-register");
         metricsApi.setCounts(null);
 
         when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
@@ -537,7 +554,8 @@ class PscStatementServiceTest {
         Optional<CompanyExemptions> optionalExempt = Optional.of(companyExemptions);
         when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(optionalExempt);
 
-        StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
+        StatementList list = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0,
+                false, 25);
         StatementLinksType linksType = new StatementLinksType();
         linksType.setSelf("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements");
         linksType.setExemptions("/company/" + COMPANY_NUMBER + "/exemptions");
@@ -687,6 +705,40 @@ class PscStatementServiceTest {
         pscStatementService.processPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
         verify(repository).save(document);
         verify(repository).findUpdatedPscStatement(eq(COMPANY_NUMBER), eq(STATEMENT_ID), any());
+    }
+
+    @Test
+    void processPscStatementIfDocumentHasNoDeltaAt() {
+        // given
+        companyPscStatement.setDeltaAt(null);
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
+                document);
+
+        // when
+        pscStatementService.processPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
+
+        // then
+        verify(repository).save(document);
+        verify(repository).findById(STATEMENT_ID);
+        verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(
+                COMPANY_NUMBER, STATEMENT_ID, null, false));
+    }
+
+    @Test
+    void processPscStatementSaveToDbIllegalArgumentException() {
+        // given
+        when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement)).thenReturn(
+                document);
+        when(repository.save(any())).thenThrow(IllegalArgumentException.class);
+
+        // when
+        Executable actual = () -> pscStatementService.processPscStatement(COMPANY_NUMBER,
+                STATEMENT_ID, companyPscStatement);
+
+        // then
+        assertThrows(BadRequestException.class, actual);
+        verify(repository).save(document);
+        verifyNoInteractions(apiClientService);
     }
 
     @Test

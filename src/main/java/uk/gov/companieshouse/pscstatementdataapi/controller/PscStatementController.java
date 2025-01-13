@@ -2,7 +2,6 @@ package uk.gov.companieshouse.pscstatementdataapi.controller;
 
 import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,8 +39,7 @@ public class PscStatementController {
                 .companyNumber(companyNumber)
                 .pscStatementId(statementId);
         LOGGER.info("Processing GET single PSC statement", DataMapHolder.getLogMap());
-        Statement statement = pscStatementService.retrievePscStatementFromDb(companyNumber, statementId);
-        return new ResponseEntity<>(statement, HttpStatus.OK);
+        return ResponseEntity.ok(pscStatementService.retrievePscStatementFromDb(companyNumber, statementId));
     }
 
     @PutMapping("/{statement_id}/internal")
@@ -50,7 +48,7 @@ public class PscStatementController {
         DataMapHolder.get().companyNumber(companyNumber).pscStatementId(statementId);
         LOGGER.info("Processing PSC statement upsert", DataMapHolder.getLogMap());
         pscStatementService.processPscStatement(companyNumber, statementId, companyPscStatement);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("")
@@ -66,9 +64,8 @@ public class PscStatementController {
                 .startIndex(startIndex.toString())
                 .registerView(String.valueOf(registerView));
         LOGGER.info("Processing GET PSC statements list", DataMapHolder.getLogMap());
-        StatementList statementList = pscStatementService.retrievePscStatementListFromDb(companyNumber, startIndex,
-                registerView, itemsPerPage);
-        return new ResponseEntity<>(statementList, HttpStatus.OK);
+        return ResponseEntity.ok(pscStatementService.retrievePscStatementListFromDb(companyNumber, startIndex,
+                registerView, itemsPerPage));
     }
 
     /**
@@ -86,6 +83,6 @@ public class PscStatementController {
         DataMapHolder.get().companyNumber(companyNumber).pscStatementId(statementId);
         LOGGER.info("Processing PSC statement delete", DataMapHolder.getLogMap());
         pscStatementService.deletePscStatement(companyNumber, statementId, deltaAt);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
 }
