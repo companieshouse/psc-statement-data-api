@@ -54,11 +54,11 @@ class RepositoryITest extends AbstractMongoConfig {
         pscStatementRepository.save(createPscStatementDocument("4"));
         pscStatementRepository.save(createPscStatementDocument("5"));
 
-        assertEquals(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 5).size(), 5);
-        assertEquals(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 2).size(), 2);
-        assertEquals(pscStatementRepository.getStatementList(COMPANY_NUMBER, 4, 5).size(), 1);
-        assertEquals(pscStatementRepository.getStatementList(
-                "Bad Company Number", 0, 5).size(), 0);
+        assertEquals(5, pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 5).size());
+        assertEquals( 2, pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 2).size());
+        assertEquals( 1, pscStatementRepository.getStatementList(COMPANY_NUMBER, 4, 5).size());
+        assertEquals( 0, pscStatementRepository.getStatementList(
+                "Bad Company Number", 0, 5).size());
     }
 
     @Test
