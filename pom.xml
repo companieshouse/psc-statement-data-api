@@ -17,7 +17,7 @@
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
         <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-        <spring.boot.version>3.4.0</spring.boot.version>
+        <spring.boot.version>3.4.1</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
