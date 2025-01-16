@@ -71,14 +71,12 @@ public class PscStatementService {
         if (registerView) {
             return retrievePscStatementListFromDbRegisterView(companyNumber, companyMetrics, startIndex, itemsPerPage);
         }
-
-        Optional<List<PscStatementDocument>> statementListOptional = pscStatementRepository.getStatementList(
+        List<PscStatementDocument> pscStatementDocuments = pscStatementRepository.getStatementList(
                 companyNumber, startIndex, itemsPerPage);
-        List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs -> !docs.isEmpty())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
-                                "No PSC statements exists for company: %s", companyNumber)));
-
+        if (pscStatementDocuments.isEmpty()) {
+            throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
+                    "No PSC statements exists for company: %s", companyNumber));
+        }
         return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, companyNumber,
                 registerView);
     }
@@ -99,14 +97,13 @@ public class PscStatementService {
                         String.format("Company %s is not on the public register", companyNumber)));
 
         if (registerMovedTo.equals("public-register")) {
-            Optional<List<PscStatementDocument>> statementListOptional = pscStatementRepository.getStatementListRegisterView(
+            List<PscStatementDocument> pscStatementDocuments = pscStatementRepository.getStatementListRegisterView(
                     companyNumber, startIndex,
                     metricsData.getRegisters().getPersonsWithSignificantControl().getMovedOn(), itemsPerPage);
-            List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs -> !docs.isEmpty())
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
-                                    "No PSC statements exists for company: %s", companyNumber)));
-
+            if (pscStatementDocuments.isEmpty()) {
+                throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
+                        "No PSC statements exists for company: %s", companyNumber));
+            }
             return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, companyNumber,
                     true);
         } else {

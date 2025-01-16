@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -53,10 +54,14 @@ class RepositoryITest extends AbstractMongoConfig {
         pscStatementRepository.save(createPscStatementDocument("4"));
         pscStatementRepository.save(createPscStatementDocument("5"));
 
-        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 5).get()).hasSize(5);
-        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 0, 2).get()).hasSize(2);
-        assertThat(pscStatementRepository.getStatementList(COMPANY_NUMBER, 4, 5).get()).hasSize(1);
-        assertThat(pscStatementRepository.getStatementList("Bad Company Number", 0, 5).get()).isEmpty();
+        assertEquals(5, pscStatementRepository.getStatementList(
+                COMPANY_NUMBER, 0, 5).size());
+        assertEquals(2, pscStatementRepository.getStatementList(
+                COMPANY_NUMBER, 0, 2).size());
+        assertEquals(1, pscStatementRepository.getStatementList(
+                COMPANY_NUMBER, 4, 5).size());
+        assertEquals(0, pscStatementRepository.getStatementList(
+                "Bad Company Number", 0, 5).size());
     }
 
     @Test

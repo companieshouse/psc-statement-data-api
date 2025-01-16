@@ -129,7 +129,7 @@ class PscStatementServiceTest {
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25);
 
@@ -148,7 +148,7 @@ class PscStatementServiceTest {
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetrics()));
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
         when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(
                 Optional.ofNullable(testHelper.createExemptions()));
 
@@ -161,8 +161,7 @@ class PscStatementServiceTest {
     @Test
     void whenNoStatementsExistGetStatementListShouldThrow() {
 
-        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(new ArrayList<>()));
+        when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(new ArrayList<>());
         assertThrows(ResourceNotFoundException.class,
                 () -> pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, false, 25));
     }
@@ -175,7 +174,7 @@ class PscStatementServiceTest {
         document.setData(expectedStatement);
 
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
 
@@ -196,7 +195,7 @@ class PscStatementServiceTest {
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView("public-register")));
         when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
 
@@ -230,14 +229,14 @@ class PscStatementServiceTest {
         Statement expectedStatement = new Statement();
         expectedStatement.setCeasedOn(LocalDate.parse("2022-12-20"));
         StatementList expectedStatementList = testHelper.createStatementList();
-        List<Statement> statement = (List<Statement>) expectedStatementList.getItems();
+        List<Statement> statement = expectedStatementList.getItems();
         statement.get(0).setCeasedOn(LocalDate.parse("2022-12-20"));
         document.setData(expectedStatement);
 
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(testHelper.createMetricsRegisterView("public-register")));
         when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         StatementList statementList = pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
 
@@ -250,8 +249,7 @@ class PscStatementServiceTest {
     @Test
     void whenNoMetricsDataFoundForCompanyInRegisterViewShouldThrow() throws ResourceNotFoundException, IOException {
         // given
-        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
-                .thenReturn(Optional.empty());
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER)).thenReturn(Optional.empty());
 
         // when
         Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
@@ -299,8 +297,8 @@ class PscStatementServiceTest {
 
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(metricsApi));
-        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
-                Optional.of(new ArrayList<>()));
+        when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt()))
+                .thenReturn(new ArrayList<>());
 
         Exception ex = assertThrows(ResourceNotFoundException.class, () -> {
             pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25);
@@ -325,7 +323,7 @@ class PscStatementServiceTest {
         metricsApi.setCounts(null);
 
         when(repository.getStatementListRegisterView(anyString(), anyInt(), any(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
                 .thenReturn(Optional.ofNullable(metricsApi));
 
@@ -545,7 +543,7 @@ class PscStatementServiceTest {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -568,7 +566,7 @@ class PscStatementServiceTest {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -590,7 +588,7 @@ class PscStatementServiceTest {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -612,7 +610,7 @@ class PscStatementServiceTest {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -635,7 +633,7 @@ class PscStatementServiceTest {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -655,7 +653,7 @@ class PscStatementServiceTest {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();
@@ -677,7 +675,7 @@ class PscStatementServiceTest {
         Statement expectedStatement = new Statement();
         document.setData(expectedStatement);
         when(repository.getStatementList(anyString(), anyInt(), anyInt())).thenReturn(
-                Optional.of(Collections.singletonList(document)));
+                Collections.singletonList(document));
 
         CompanyExemptions companyExemptions = new CompanyExemptions();
         Exemptions exemptions = new Exemptions();

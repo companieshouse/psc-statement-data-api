@@ -26,7 +26,7 @@ public interface PscStatementRepository extends MongoRepository<PscStatementDocu
             "{'$skip': ?1}",
             "{'$limit': ?2}",
     })
-    Optional<List<PscStatementDocument>> getStatementList(String companyNumber, int startIndex, int itemsPerPage);
+    List<PscStatementDocument> getStatementList(String companyNumber, int startIndex, int itemsPerPage);
 
     @Aggregation(pipeline = {
             "{'$match': { 'company_number' : ?0, $or:[ { 'data.ceased_on': { $gte : { \"$date\" : \"?2\" }} },{ 'data.ceased_on': {$exists: false }} ]} }",
@@ -34,6 +34,6 @@ public interface PscStatementRepository extends MongoRepository<PscStatementDocu
             "{'$skip': ?1}",
             "{'$limit': ?3}",
     })
-    Optional<List<PscStatementDocument>> getStatementListRegisterView(String companyNumber, int startIndex,
+    List<PscStatementDocument> getStatementListRegisterView(String companyNumber, int startIndex,
             OffsetDateTime movedOn, int itemsPerPage);
 }
