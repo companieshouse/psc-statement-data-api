@@ -164,7 +164,7 @@ public class TestHelper {
         return metrics;
     }
 
-    public MetricsApi createMetricsRegisterView() {
+    public MetricsApi createMetricsRegisterView(String registerMovedTo) {
         MetricsApi metrics = new MetricsApi();
         CountsApi counts = new CountsApi();
         PscApi pscs = new PscApi();
@@ -176,7 +176,7 @@ public class TestHelper {
 
         RegistersApi registers = new RegistersApi();
         RegisterApi pscStatements = new RegisterApi();
-        pscStatements.setRegisterMovedTo("public-register");
+        pscStatements.setRegisterMovedTo(registerMovedTo);
         String date = "2020-12-20T06:00:00Z";
         OffsetDateTime dt = OffsetDateTime.parse(date);
         pscStatements.setMovedOn(dt);
@@ -190,7 +190,6 @@ public class TestHelper {
         exemptions.setExemptions(getExemptions());
         return exemptions;
     }
-
 
     private Exemptions getExemptions() {
         ExemptionItem exemptionItem = new ExemptionItem();

@@ -17,8 +17,7 @@
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
         <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-        <spring-boot-dependencies.version>3.3.7</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.3.7</spring-boot-maven-plugin.version>
+        <spring.boot.version>3.4.0</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
@@ -34,7 +33,7 @@
         <docker-java-api.version>3.3.6</docker-java-api.version>
 
         <!-- Internal -->
-        <structured-logging.version>3.0.9</structured-logging.version>
+        <structured-logging.version>3.0.23</structured-logging.version>
         <private-api-sdk-java.version>4.0.257</private-api-sdk-java.version>
         <data-sync-api-sdk-java.version>1.0.9</data-sync-api-sdk-java.version>
         <api-security-java.version>2.0.5</api-security-java.version>
@@ -65,7 +64,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot-dependencies.version}</version>
+                <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -83,17 +82,6 @@
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-core</artifactId>
             <version>2.10.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.5.13</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.13</version>
             <scope>test</scope>
         </dependency>
         <!--		Transitive deps end here-->
@@ -116,7 +104,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring-boot-dependencies.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -240,7 +227,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot-maven-plugin.version}</version>
+                <version>${spring.boot.version}</version>
                 <configuration>
 
                     <mainClass>${start-class}</mainClass>

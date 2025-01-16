@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
@@ -18,15 +18,15 @@ import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 @ActiveProfiles({"test"})
 public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
 
-    @MockBean
+    @MockitoBean
     public PscStatementApiService pscStatementApiService;
 
-    @MockBean
+    @MockitoBean
     public CompanyMetricsApiService companyMetricsApiService;
 
-    @MockBean
+    @MockitoBean
     public CompanyExemptionsApiService companyExemptionsApiService;
 
-    @MockBean
+    @MockitoBean
     public InternalApiClient internalApiClient;
 }

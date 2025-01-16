@@ -37,7 +37,7 @@ import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransform
 @Service
 public class PscStatementService {
 
-    private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private final PscStatementRepository pscStatementRepository;
     private final PscStatementTransformer pscStatementTransformer;
@@ -59,8 +59,7 @@ public class PscStatementService {
             throws ResourceNotFoundException {
         PscStatementDocument pscStatementDocument = getPscStatementDocument(companyNumber, statementId)
                 .orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
-                        String.format("Resource not found for statement ID: %s and company number: %s",
-                                statementId, companyNumber)));
+                        "Record not found in MongoDB"));
         return pscStatementDocument.getData();
     }
 
@@ -78,7 +77,7 @@ public class PscStatementService {
         List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs -> !docs.isEmpty())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
-                                "Resource not found for company number: %s", companyNumber)));
+                                "No PSC statements exists for company: %s", companyNumber)));
 
         return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, companyNumber,
                 registerView);
@@ -87,18 +86,17 @@ public class PscStatementService {
     public StatementList retrievePscStatementListFromDbRegisterView(String companyNumber,
             Optional<MetricsApi> companyMetrics, int startIndex, int itemsPerPage) {
 
-        logger.info(String.format("In register view for company number: %s", companyNumber), DataMapHolder.getLogMap());
         MetricsApi metricsData;
         metricsData = companyMetrics.orElseThrow(
                 () -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
-                        String.format("No company metrics data found for company number: %s", companyNumber)));
+                        String.format("Metrics does not exist for company number: %s", companyNumber)));
 
         String registerMovedTo = Optional.ofNullable(metricsData)
                 .map(MetricsApi::getRegisters)
                 .map(RegistersApi::getPersonsWithSignificantControl)
                 .map(RegisterApi::getRegisterMovedTo)
                 .orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
-                        String.format("company %s not on public register", companyNumber)));
+                        String.format("Company %s is not on the public register", companyNumber)));
 
         if (registerMovedTo.equals("public-register")) {
             Optional<List<PscStatementDocument>> statementListOptional = pscStatementRepository.getStatementListRegisterView(
@@ -107,17 +105,17 @@ public class PscStatementService {
             List<PscStatementDocument> pscStatementDocuments = statementListOptional.filter(docs -> !docs.isEmpty())
                     .orElseThrow(() ->
                             new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
-                                    "Resource not found for company number: %s", companyNumber)));
+                                    "No PSC statements exists for company: %s", companyNumber)));
 
             return createStatementList(pscStatementDocuments, startIndex, itemsPerPage, companyMetrics, companyNumber,
                     true);
         } else {
             throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
-                    String.format("company %s not on public register", companyNumber));
+                    String.format("Company %s is not on the public register", companyNumber));
         }
     }
 
-    public void deletePscStatement(String contextId, String companyNumber, String statementId, String requestDeltaAt) {
+    public void deletePscStatement(String companyNumber, String statementId, String requestDeltaAt) {
         if (StringUtils.isBlank(requestDeltaAt)) {
             throw new BadRequestException("deltaAt missing from delete request");
         }
@@ -127,28 +125,20 @@ public class PscStatementService {
             pscStatementDocument.ifPresentOrElse(doc -> {
                 String existingDeltaAt = doc.getDeltaAt();
                 if (isDeltaStale(requestDeltaAt, existingDeltaAt)) {
-                    throw new ConflictException(
-                            String.format(
-                                    "Stale delta received; request delta_at: [%s] is not after existing delta_at: [%s]",
-                                    requestDeltaAt, existingDeltaAt));
+                    throw new ConflictException(String.format("Stale delta received; request delta_at: [%s] "
+                                    + "is not after existing delta_at: [%s]", requestDeltaAt, existingDeltaAt));
                 }
 
                 pscStatementRepository.delete(doc);
-                logger.infoContext(contextId,
-                        String.format("Psc Statement is deleted in MongoDb with companyNumber %s and statementId %s",
-                                companyNumber, statementId), DataMapHolder.getLogMap());
                 apiClientService.invokeChsKafkaApiDelete(
-                        new ResourceChangedRequest(contextId, companyNumber, statementId, doc, true));
+                        new ResourceChangedRequest(companyNumber, statementId, doc, true));
             }, () -> {
-                logger.infoContext(contextId,
-                        String.format("PSC Statement does not exist for companyNumber %s and statementId %s",
-                                companyNumber, statementId), DataMapHolder.getLogMap());
+                LOGGER.info("Delete for non-existent document", DataMapHolder.getLogMap());
                 apiClientService.invokeChsKafkaApiDelete(
-                        new ResourceChangedRequest(contextId, companyNumber, statementId, new PscStatementDocument(),
-                                true));
+                        new ResourceChangedRequest(companyNumber, statementId, new PscStatementDocument(), true));
             });
         } catch (DataAccessException ex) {
-            logger.error("Error connecting to MongoDB", ex, DataMapHolder.getLogMap());
+            LOGGER.error("Error connecting to MongoDB", ex, DataMapHolder.getLogMap());
             throw new ServiceUnavailableException("Error connecting to MongoDB");
         }
     }
@@ -157,7 +147,7 @@ public class PscStatementService {
         return pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
     }
 
-    public void processPscStatement(String contextId, String companyNumber, String statementId,
+    public void processPscStatement(String companyNumber, String statementId,
             CompanyPscStatement companyPscStatement) throws BadRequestException {
         boolean isLatestRecord = isLatestRecord(companyNumber, statementId, companyPscStatement.getDeltaAt());
 
@@ -165,11 +155,11 @@ public class PscStatementService {
             PscStatementDocument document = pscStatementTransformer.transformPscStatement(companyNumber, statementId,
                     companyPscStatement);
 
-            saveToDb(contextId, companyNumber, statementId, document);
+            saveToDb(companyNumber, statementId, document);
             apiClientService.invokeChsKafkaApi(
-                    new ResourceChangedRequest(contextId, companyNumber, statementId, null, false));
+                    new ResourceChangedRequest(companyNumber, statementId, null, false));
         } else {
-            logger.error("Psc Statement not persisted as the record provided is not the latest record.",
+            LOGGER.info("Psc Statement not persisted as the record provided is not the latest record.",
                     DataMapHolder.getLogMap());
             throw new ConflictException("Received stale delta");
         }
@@ -186,7 +176,7 @@ public class PscStatementService {
         return statement.isEmpty();
     }
 
-    private void saveToDb(String contextId, String companyNumber, String statementId, PscStatementDocument document) {
+    private void saveToDb(String companyNumber, String statementId, PscStatementDocument document) {
 
         Created created = getCreatedFromCurrentRecord(companyNumber, statementId);
         if (created == null) {
@@ -197,11 +187,9 @@ public class PscStatementService {
 
         try {
             pscStatementRepository.save(document);
-            logger.infoContext(contextId, String.format(
-                    "Psc statement is updated in MongoDb for context id: %s, company number: %s, and statement id: %s",
-                    contextId, companyNumber, statementId), DataMapHolder.getLogMap());
-        } catch (IllegalArgumentException illegalArgumentEx) {
-            throw new BadRequestException("Saving to MongoDb failed", illegalArgumentEx);
+        } catch (IllegalArgumentException ex) {
+            LOGGER.error("MongoDB error when inserting document", ex, DataMapHolder.getLogMap());
+            throw new BadRequestException("Saving to MongoDb failed", ex);
         }
 
     }
@@ -246,11 +234,11 @@ public class PscStatementService {
                             metricsApi.getCounts().getPersonsWithSignificantControl().getStatementsCount());
                 }
             } catch (NullPointerException exp) {
-                logger.error(String.format("No PSC data in metrics for company number %s",
+                LOGGER.error(String.format("No PSC data in metrics for company number %s",
                         companyNumber), DataMapHolder.getLogMap());
             }
         }, () -> {
-            logger.info(String.format("No company metrics counts data found for company number: %s",
+            LOGGER.info(String.format("Metrics does not exist for company number: %s",
                     companyNumber), DataMapHolder.getLogMap());
         });
 

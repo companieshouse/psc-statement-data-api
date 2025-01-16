@@ -10,6 +10,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,6 +22,7 @@ import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 
@@ -44,12 +46,16 @@ class ResourceChangedRequestMapperTest {
     @Mock
     private Supplier<Instant> instantSupplier;
 
+    @BeforeEach
+    void setUp() {
+        DataMapHolder.initialise(CONTEXT_ID);
+    }
+
     @Test
     void shouldMapChangedEvent() {
         // given
         ResourceChangedTestArgument argument = ResourceChangedTestArgument.builder()
-                .withRequest(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID,
-                        null, false))
+                .withRequest(new ResourceChangedRequest(COMPANY_NUMBER, STATEMENT_ID, null, false))
                 .withContextId(CONTEXT_ID)
                 .withResourceUri(RESOURCE_URI)
                 .withResourceKind(RESOURCE_KIND)
@@ -81,7 +87,7 @@ class ResourceChangedRequestMapperTest {
     static Stream<ResourceChangedTestArgument> resourceChangedScenarios() {
         return Stream.of(
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID,
+                        .withRequest(new ResourceChangedRequest(COMPANY_NUMBER, STATEMENT_ID,
                                 new PscStatementDocument(), true))
                         .withContextId(CONTEXT_ID)
                         .withResourceUri(RESOURCE_URI)
@@ -90,7 +96,7 @@ class ResourceChangedRequestMapperTest {
                         .withEventPublishedAt(PUBLISHED_AT)
                         .build(),
                 ResourceChangedTestArgument.builder()
-                        .withRequest(new ResourceChangedRequest(CONTEXT_ID, COMPANY_NUMBER, STATEMENT_ID,
+                        .withRequest(new ResourceChangedRequest(COMPANY_NUMBER, STATEMENT_ID,
                                 getPscStatementDocument(), true))
                         .withContextId(CONTEXT_ID)
                         .withResourceUri(RESOURCE_URI)
