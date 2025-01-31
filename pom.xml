@@ -17,20 +17,20 @@
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
         <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-        <spring.boot.version>3.4.1</spring.boot.version>
+        <spring.boot.version>3.4.2</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- tests -->
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
         <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
-        <io-cucumber.version>7.15.0</io-cucumber.version>
-        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
-        <assertj-core.version>3.25.3</assertj-core.version>
+        <io-cucumber.version>7.20.1</io-cucumber.version>
+        <assertj-core.version>3.27.3</assertj-core.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <docker-java-api.version>3.3.6</docker-java-api.version>
+        <docker-java-api.version>3.4.1</docker-java-api.version>
 
         <!-- Internal -->
         <structured-logging.version>3.0.23</structured-logging.version>
@@ -251,13 +251,6 @@
                         <exclude>**/*ITest.java</exclude>
                     </excludes>
                     <skipTests>${skip.unit.tests}</skipTests>
-                    <environmentVariables>
-                        <CHS_API_KEY>key</CHS_API_KEY>
-                        <API_URL>key</API_URL>
-                        <DOCUMENT_API_LOCAL_URL>key</DOCUMENT_API_LOCAL_URL>
-                        <PAYMENTS_API_URL>key</PAYMENTS_API_URL>
-                        <COMPANY_METRICS_API_URL>key</COMPANY_METRICS_API_URL>
-                    </environmentVariables>
                 </configuration>
             </plugin>
             <plugin>

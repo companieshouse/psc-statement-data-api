@@ -9,22 +9,36 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.function.Supplier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import uk.gov.companieshouse.api.InternalApiClient;
-import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.converter.EnumWriteConverter;
+import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.serialization.LocalDateDeserializer;
 import uk.gov.companieshouse.api.serialization.LocalDateSerializer;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementWriteConverter;
-import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
+import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 
 @Configuration
 public class ApplicationConfig {
+    private final String apiKey;
+    private final String kafkaApiUrl;
+    private final String metricsApiUrl;
+    private final String exemptionsApiUrl;
+
+    public ApplicationConfig(@Value("${api.key}") String apiKey,
+            @Value("${kafka.api.url}") String kafkaApiUrl,
+            @Value("${metrics.api.url}") String metricsApiUrl,
+            @Value("${exemptions.api.url}") String exemptionsApiUrl) {
+        this.apiKey = apiKey;
+        this.kafkaApiUrl = kafkaApiUrl;
+        this.metricsApiUrl = metricsApiUrl;
+        this.exemptionsApiUrl = exemptionsApiUrl;
+    }
 
     @Bean
     public MongoCustomConversions mongoCustomConversions() {
@@ -36,23 +50,33 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public InternalApiClient internalApiClient() {
-        return ApiSdkManager.getPrivateSDK();
+    public Supplier<InternalApiClient> kafkaApiClientSupplier() {
+        return () -> buildClient(kafkaApiUrl);
+    }
+
+    @Bean
+    public Supplier<InternalApiClient> metricsApiClientSupplier() {
+        return () -> buildClient(metricsApiUrl);
+    }
+
+    @Bean
+    public Supplier<InternalApiClient> exemptionsApiClientSupplier() {
+        return () -> buildClient(exemptionsApiUrl);
+    }
+
+    private InternalApiClient buildClient(final String url) {
+        ApiKeyHttpClient apiKeyHttpClient = new ApiKeyHttpClient(apiKey);
+        apiKeyHttpClient.setRequestId(DataMapHolder.getRequestId());
+
+        InternalApiClient internalApiClient = new InternalApiClient(apiKeyHttpClient);
+        internalApiClient.setBasePath(url);
+
+        return internalApiClient;
     }
 
     @Bean
     public Supplier<Instant> instantSupplier() {
         return Instant::now;
-    }
-
-    @Bean
-    public CompanyExemptionsApiService companyExemptionsApiService() {
-        return new CompanyExemptionsApiService();
-    }
-
-    @Bean
-    public CompanyMetricsApiService companyMetricsApiService() {
-        return new CompanyMetricsApiService();
     }
 
     private ObjectMapper mongoDbObjectMapper() {

@@ -10,8 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
@@ -25,7 +23,9 @@ import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.ChsKafkaApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
@@ -43,16 +43,16 @@ public class PscStatementService {
     private final PscStatementTransformer pscStatementTransformer;
     private final CompanyMetricsApiService companyMetricsApiService;
     private final CompanyExemptionsApiService companyExemptionsApiService;
-    private final PscStatementApiService apiClientService;
+    private final ChsKafkaApiService chsKafkaApiService;
 
     public PscStatementService(PscStatementRepository pscStatementRepository,
             PscStatementTransformer pscStatementTransformer, CompanyMetricsApiService companyMetricsApiService,
-            CompanyExemptionsApiService companyExemptionsApiService, PscStatementApiService apiClientService) {
+            CompanyExemptionsApiService companyExemptionsApiService, ChsKafkaApiService chsKafkaApiService) {
         this.pscStatementRepository = pscStatementRepository;
         this.pscStatementTransformer = pscStatementTransformer;
         this.companyMetricsApiService = companyMetricsApiService;
         this.companyExemptionsApiService = companyExemptionsApiService;
-        this.apiClientService = apiClientService;
+        this.chsKafkaApiService = chsKafkaApiService;
     }
 
     public Statement retrievePscStatementFromDb(String companyNumber, String statementId)
@@ -127,11 +127,11 @@ public class PscStatementService {
                 }
 
                 pscStatementRepository.delete(doc);
-                apiClientService.invokeChsKafkaApiDelete(
+                chsKafkaApiService.invokeChsKafkaApiDelete(
                         new ResourceChangedRequest(companyNumber, statementId, doc, true));
             }, () -> {
                 LOGGER.info("Delete for non-existent document", DataMapHolder.getLogMap());
-                apiClientService.invokeChsKafkaApiDelete(
+                chsKafkaApiService.invokeChsKafkaApiDelete(
                         new ResourceChangedRequest(companyNumber, statementId, new PscStatementDocument(), true));
             });
         } catch (DataAccessException ex) {
@@ -153,7 +153,7 @@ public class PscStatementService {
                     companyPscStatement);
 
             saveToDb(companyNumber, statementId, document);
-            apiClientService.invokeChsKafkaApi(
+            chsKafkaApiService.invokeChsKafkaApi(
                     new ResourceChangedRequest(companyNumber, statementId, null, false));
         } else {
             LOGGER.info("Psc Statement not persisted as the record provided is not the latest record.",
@@ -213,10 +213,10 @@ public class PscStatementService {
         companyMetrics.ifPresentOrElse(metricsApi -> {
             try {
                 if (registerView) {
-                    Long withdrawnCount = statements.stream()
+                    long withdrawnCount = statements.stream()
                             .filter(statement -> statement.getCeasedOn() != null).count();
 
-                    statementList.setCeasedCount(withdrawnCount.intValue());
+                    statementList.setCeasedCount((int) withdrawnCount);
                     statementList.setTotalResults(
                             metricsApi.getCounts().getPersonsWithSignificantControl().getActiveStatementsCount()
                                     + statementList.getCeasedCount());

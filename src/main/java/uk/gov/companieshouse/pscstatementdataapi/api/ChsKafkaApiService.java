@@ -2,7 +2,8 @@ package uk.gov.companieshouse.pscstatementdataapi.api;
 
 import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 
-import org.springframework.beans.factory.annotation.Value;
+import java.util.function.Supplier;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -16,35 +17,27 @@ import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.util.ResourceChangedRequestMapper;
 
 @Service
-public class PscStatementApiService {
+public class ChsKafkaApiService {
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-
+    private static final String RESOURCE_CHANGED_URI = "/private/resource-changed";
     private final ResourceChangedRequestMapper mapper;
-    private final InternalApiClient internalApiClient;
-    private final String chsKafkaApiUrl;
-    private final String resourceChangedUri;
+    private final Supplier<InternalApiClient> internalApiClientSupplier;
 
-    public PscStatementApiService(ResourceChangedRequestMapper mapper, InternalApiClient internalApiClient,
-            @Value("${chs.api.kafka.url}") String chsKafkaApiUrl,
-            @Value("${chs.api.kafka.uri}") String resourceChangedUri) {
+    public ChsKafkaApiService(ResourceChangedRequestMapper mapper,
+            @Qualifier("kafkaApiClientSupplier") Supplier<InternalApiClient> internalApiClientSupplier) {
         this.mapper = mapper;
-        this.internalApiClient = internalApiClient;
-        this.chsKafkaApiUrl = chsKafkaApiUrl;
-        this.resourceChangedUri = resourceChangedUri;
+        this.internalApiClientSupplier = internalApiClientSupplier;
     }
 
-
     public ApiResponse<Void> invokeChsKafkaApi(ResourceChangedRequest resourceChangedRequest) {
-        internalApiClient.setBasePath(chsKafkaApiUrl);
-        PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
-                .postChangedResource(resourceChangedUri, mapper.mapChangedEvent(resourceChangedRequest));
+        PrivateChangedResourcePost changedResourcePost = internalApiClientSupplier.get().privateChangedResourceHandler()
+                .postChangedResource(RESOURCE_CHANGED_URI, mapper.mapChangedEvent(resourceChangedRequest));
         return handleApiCall(changedResourcePost);
     }
 
     public ApiResponse<Void> invokeChsKafkaApiDelete(ResourceChangedRequest resourceChangedRequest) {
-        internalApiClient.setBasePath(chsKafkaApiUrl);
-        PrivateChangedResourcePost changedResourcePost = internalApiClient.privateChangedResourceHandler()
-                .postChangedResource(resourceChangedUri, mapper.mapDeletedEvent(resourceChangedRequest));
+        PrivateChangedResourcePost changedResourcePost = internalApiClientSupplier.get().privateChangedResourceHandler()
+                .postChangedResource(RESOURCE_CHANGED_URI, mapper.mapDeletedEvent(resourceChangedRequest));
         return handleApiCall(changedResourcePost);
     }
 

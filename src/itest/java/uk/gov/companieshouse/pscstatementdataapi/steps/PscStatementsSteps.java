@@ -37,8 +37,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
-import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.exemptions.ExemptionItem;
@@ -47,7 +45,9 @@ import uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketIte
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementList;
-import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.ChsKafkaApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.config.CucumberContext;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
@@ -64,19 +64,19 @@ public class PscStatementsSteps {
     private final PscStatementRepository pscStatementRepository;
     private final MongoTemplate mongoTemplate;
     private final CompanyMetricsApiService companyMetricsApiService;
-    private final PscStatementApiService pscStatementApiService;
+    private final ChsKafkaApiService pscStatementApiService;
     private final CompanyExemptionsApiService companyExemptionsApiService;
 
     public PscStatementsSteps(ObjectMapper objectMapper, TestRestTemplate restTemplate,
             PscStatementRepository pscStatementRepository, MongoTemplate mongoTemplate,
-            CompanyMetricsApiService companyMetricsApiService, PscStatementApiService pscStatementApiService,
+            CompanyMetricsApiService companyMetricsApiService, ChsKafkaApiService chsKafkaApiService,
             CompanyExemptionsApiService companyExemptionsApiService) {
         this.objectMapper = objectMapper;
         this.restTemplate = restTemplate;
         this.pscStatementRepository = pscStatementRepository;
         this.mongoTemplate = mongoTemplate;
         this.companyMetricsApiService = companyMetricsApiService;
-        this.pscStatementApiService = pscStatementApiService;
+        this.pscStatementApiService = chsKafkaApiService;
         this.companyExemptionsApiService = companyExemptionsApiService;
     }
 
