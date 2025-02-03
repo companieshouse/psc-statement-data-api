@@ -32,8 +32,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.TransientDataAccessResourceException;
-import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
@@ -52,7 +50,9 @@ import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
-import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.ChsKafkaApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
@@ -77,7 +77,7 @@ class PscStatementServiceTest {
     @Mock
     private CompanyMetricsApiService companyMetricsApiService;
     @Mock
-    private PscStatementApiService apiClientService;
+    private ChsKafkaApiService apiClientService;
     @Mock
     private CompanyExemptionsApiService companyExemptionsApiService;
 

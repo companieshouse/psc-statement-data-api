@@ -5,9 +5,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.api.InternalApiClient;
-import uk.gov.companieshouse.api.api.CompanyExemptionsApiService;
-import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
-import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
+
+import uk.gov.companieshouse.pscstatementdataapi.api.ChsKafkaApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
+import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 
 /**
  * Loads the application context.
@@ -19,7 +20,7 @@ import uk.gov.companieshouse.pscstatementdataapi.api.PscStatementApiService;
 public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
 
     @MockitoBean
-    public PscStatementApiService pscStatementApiService;
+    public ChsKafkaApiService chsKafkaApiService;
 
     @MockitoBean
     public CompanyMetricsApiService companyMetricsApiService;
