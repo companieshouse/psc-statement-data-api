@@ -145,6 +145,12 @@
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>data-sync-api-sdk-java</artifactId>
             <version>${data-sync-api-sdk-java.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
