@@ -1,8 +1,15 @@
 package uk.gov.companieshouse.pscstatementdataapi.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +20,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
@@ -22,6 +30,7 @@ import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.pscstatementdataapi.exception.SerDesException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
@@ -45,6 +54,9 @@ class ResourceChangedRequestMapperTest {
 
     @Mock
     private Supplier<Instant> instantSupplier;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -73,15 +85,49 @@ class ResourceChangedRequestMapperTest {
 
     @ParameterizedTest
     @MethodSource("resourceChangedScenarios")
-    void shouldMapDeletedEvent(ResourceChangedTestArgument argument) {
+    void shouldMapDeletedEvent(ResourceChangedTestArgument argument) throws Exception {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        String serialisedData = "serialisedData";
+        when(objectMapper.writeValueAsString(any())).thenReturn(serialisedData);
+        when(objectMapper.readValue(anyString(), eq(Object.class))).thenReturn(argument.changedResource().getDeletedData());
 
         // when
         ChangedResource actual = mapper.mapDeletedEvent(argument.request());
 
         // then
         assertEquals(argument.changedResource(), actual);
+        verify(objectMapper).writeValueAsString(argument.request().document().getData());
+        verify(objectMapper).readValue(serialisedData, Object.class);
+    }
+
+    @Test
+    void testMapperThrowsSerDesExceptionIfObjectMapperWriteFails() throws Exception {
+        // given
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+
+        // when
+        Executable actual = () -> mapper.mapDeletedEvent(
+                new ResourceChangedRequest(CONTEXT_ID, STATEMENT_ID, new PscStatementDocument(), true));
+
+        // then
+        assertThrows(SerDesException.class, actual);
+    }
+
+    @Test
+    void testMapperThrowsSerDesExceptionIfObjectMapperReadFails() throws Exception {
+        // given
+        when(instantSupplier.get()).thenReturn(UPDATED_AT);
+        when(objectMapper.writeValueAsString(any())).thenReturn("deletedDataAsString");
+        when(objectMapper.readValue(anyString(), eq(Object.class))).thenThrow(JsonProcessingException.class);
+
+        // when
+        Executable actual = () -> mapper.mapDeletedEvent(
+                new ResourceChangedRequest(CONTEXT_ID, STATEMENT_ID, new PscStatementDocument(), true));
+
+        // then
+        assertThrows(SerDesException.class, actual);
     }
 
     static Stream<ResourceChangedTestArgument> resourceChangedScenarios() {
