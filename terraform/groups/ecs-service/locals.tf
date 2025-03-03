@@ -8,7 +8,7 @@ locals {
   eric_port                  = "10000"
   docker_repo                = "psc-statement-data-api"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
-  lb_listener_rule_priority  = 85
+  lb_listener_rule_priority  = 7
   lb_listener_paths          = ["/company/*/persons-with-significant-control-statements","/company/*/persons-with-significant-control-statements/*"]
   healthcheck_path           = "/healthcheck" # healthcheck path for psc statement data api
   healthcheck_matcher        = "200"
