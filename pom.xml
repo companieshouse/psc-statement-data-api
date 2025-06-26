@@ -40,7 +40,7 @@
         <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
 
         <!--sonar configuration-->
-        <sonar-maven-plugin.version>3.11.0.3922</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.projectKey>uk.gov.companieshouse:psc-statement-data-api</sonar.projectKey>
         <sonar.sources>src/main</sonar.sources>
