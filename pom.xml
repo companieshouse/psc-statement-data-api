@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.11</version>
+        <version>2.1.12</version>
     </parent>
     <artifactId>psc-statement-data-api</artifactId>
     <version>unversioned</version>
@@ -17,30 +17,30 @@
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
         <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-        <spring.boot.version>3.4.2</spring.boot.version>
+        <spring.boot.version>3.5.3</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- tests -->
-        <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
-        <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
-        <io-cucumber.version>7.20.1</io-cucumber.version>
+        <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
+        <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
+        <io-cucumber.version>7.23.0</io-cucumber.version>
         <assertj-core.version>3.27.3</assertj-core.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <docker-java-api.version>3.4.1</docker-java-api.version>
+        <docker-java-api.version>3.5.1</docker-java-api.version>
 
         <!-- Internal -->
-        <structured-logging.version>3.0.23</structured-logging.version>
-        <private-api-sdk-java.version>4.0.257</private-api-sdk-java.version>
+        <structured-logging.version>3.0.32</structured-logging.version>
+        <private-api-sdk-java.version>4.0.312</private-api-sdk-java.version>
         <data-sync-api-sdk-java.version>1.0.9</data-sync-api-sdk-java.version>
-        <api-security-java.version>2.0.5</api-security-java.version>
+        <api-security-java.version>2.0.8</api-security-java.version>
         <api-helper-java-library.version>3.0.1</api-helper-java-library.version>
 
         <!--sonar configuration-->
-        <sonar-maven-plugin.version>3.11.0.3922</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.projectKey>uk.gov.companieshouse:psc-statement-data-api</sonar.projectKey>
         <sonar.sources>src/main</sonar.sources>
@@ -51,7 +51,7 @@
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
 
         <argLine>
             --add-opens java.base/java.util=ALL-UNNAMED
@@ -91,6 +91,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
