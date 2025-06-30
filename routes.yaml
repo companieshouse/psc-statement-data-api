@@ -1,8 +1,0 @@
-app_name: psc-statement-data-api
-group: api
-weight: 904
-routes:
-   1: ^/psc-statement-data-api/healthcheck
-   2: ^/company/(.){0,10}/persons-with-significant-control-statements
-   3: ^/company/(.){0,10}/persons-with-significant-control-statements/(.*)
-   
