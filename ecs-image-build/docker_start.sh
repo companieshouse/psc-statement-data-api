@@ -4,4 +4,4 @@
 
 
 PORT=8080
-exec java -jar -Dserver.port="${PORT}" "psc-statement-data-api.jar"
+exec java -jar -Dserver.port="${PORT}" -XX:MaxRAMPercentage=80 "psc-statement-data-api.jar"
