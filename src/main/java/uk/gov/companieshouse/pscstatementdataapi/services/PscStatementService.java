@@ -33,6 +33,7 @@ import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
+import uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil;
 
 @Service
 public class PscStatementService {
@@ -143,6 +144,37 @@ public class PscStatementService {
     private Optional<PscStatementDocument> getPscStatementDocument(String companyNumber, String statementId) {
         return pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
     }
+
+    private void processPscStatementNew(String companyNumber, String statementId, CompanyPscStatement companyPscStatement) {
+        String requestDeltaAt = companyPscStatement.getDeltaAt();
+        pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)
+                .ifPresentOrElse(
+                        existingDoc -> {
+                            String existingDeltaAt = existingDoc.getDeltaAt();
+                            if (!DateTimeUtil.isDeltaStale(requestDeltaAt, existingDeltaAt)) {
+                                LOGGER.info("Updating existing document", DataMapHolder.getLogMap());
+                                PscStatementDocument updatedDoc = pscStatementTransformer
+                                        .transformPscStatement(companyNumber, statementId, companyPscStatement);
+                                saveToDb(companyNumber, statementId, updatedDoc);
+                                chsKafkaApiService.invokeChsKafkaApi(
+                                        new ResourceChangedRequest(companyNumber, statementId, null, false));
+                            } else {
+                                LOGGER.info("Psc Statement not persisted as the record provided is not the latest record.",
+                                        DataMapHolder.getLogMap());
+                                throw new ConflictException("Received stale delta");
+                            }
+                        },
+                        () -> {
+                            PscStatementDocument pscStatementDocument = pscStatementTransformer
+                                    .transformPscStatement(companyNumber, statementId, companyPscStatement);
+                            LOGGER.info("Inserting new document", DataMapHolder.getLogMap());
+                            saveToDb(companyNumber, statementId, pscStatementDocument);
+                            chsKafkaApiService.invokeChsKafkaApi(
+                                    new ResourceChangedRequest(companyNumber, statementId, null, false));
+                        });
+    }
+
+
 
     public void processPscStatement(String companyNumber, String statementId,
             CompanyPscStatement companyPscStatement) throws BadRequestException {
