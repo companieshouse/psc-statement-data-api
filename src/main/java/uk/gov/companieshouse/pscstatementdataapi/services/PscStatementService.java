@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.exception.BadRequestException;
 import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
@@ -26,6 +25,8 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.api.ChsKafkaApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
+import uk.gov.companieshouse.pscstatementdataapi.exception.BadGatewayException;
+import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
@@ -33,7 +34,6 @@ import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
 import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransformer;
-import uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil;
 
 @Service
 public class PscStatementService {
@@ -145,19 +145,23 @@ public class PscStatementService {
         return pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
     }
 
-    private void processPscStatementNew(String companyNumber, String statementId, CompanyPscStatement companyPscStatement) {
+    public void processPscStatement(String companyNumber, String statementId, CompanyPscStatement companyPscStatement) {
         String requestDeltaAt = companyPscStatement.getDeltaAt();
+        if (StringUtils.isBlank(requestDeltaAt)) {
+            LOGGER.error("deltaAt missing from request", DataMapHolder.getLogMap());
+            // Decouple from data-sync-api-sdk-java
+            throw new BadRequestException("deltaAt missing from request");
+        }
         pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)
                 .ifPresentOrElse(
                         existingDoc -> {
                             String existingDeltaAt = existingDoc.getDeltaAt();
-                            if (!DateTimeUtil.isDeltaStale(requestDeltaAt, existingDeltaAt)) {
+                            if (!isDeltaStale(requestDeltaAt, existingDeltaAt)) {
                                 LOGGER.info("Updating existing document", DataMapHolder.getLogMap());
-                                PscStatementDocument updatedDoc = pscStatementTransformer
-                                        .transformPscStatement(companyNumber, statementId, companyPscStatement);
-                                saveToDb(companyNumber, statementId, updatedDoc);
-                                chsKafkaApiService.invokeChsKafkaApi(
-                                        new ResourceChangedRequest(companyNumber, statementId, null, false));
+                                Created existingCreated = existingDoc.getCreated();
+                                PscStatementDocument updatedDoc = pscStatementTransformer.transformPscStatement(
+                                        companyNumber, statementId, companyPscStatement, existingCreated);
+                                dbSaveUpsertApiCall(companyNumber, statementId, updatedDoc);
                             } else {
                                 LOGGER.info("Psc Statement not persisted as the record provided is not the latest record.",
                                         DataMapHolder.getLogMap());
@@ -166,67 +170,22 @@ public class PscStatementService {
                         },
                         () -> {
                             PscStatementDocument pscStatementDocument = pscStatementTransformer
-                                    .transformPscStatement(companyNumber, statementId, companyPscStatement);
+                                    .transformPscStatement(companyNumber, statementId, companyPscStatement, null);
                             LOGGER.info("Inserting new document", DataMapHolder.getLogMap());
-                            saveToDb(companyNumber, statementId, pscStatementDocument);
-                            chsKafkaApiService.invokeChsKafkaApi(
-                                    new ResourceChangedRequest(companyNumber, statementId, null, false));
+                            dbSaveUpsertApiCall(companyNumber, statementId, pscStatementDocument);
                         });
     }
 
-
-
-    public void processPscStatement(String companyNumber, String statementId,
-            CompanyPscStatement companyPscStatement) throws BadRequestException {
-        boolean isLatestRecord = isLatestRecord(companyNumber, statementId, companyPscStatement.getDeltaAt());
-
-        if (isLatestRecord) {
-            PscStatementDocument document = pscStatementTransformer.transformPscStatement(companyNumber, statementId,
-                    companyPscStatement);
-
-            saveToDb(companyNumber, statementId, document);
-            chsKafkaApiService.invokeChsKafkaApi(
-                    new ResourceChangedRequest(companyNumber, statementId, null, false));
-        } else {
-            LOGGER.info("Psc Statement not persisted as the record provided is not the latest record.",
-                    DataMapHolder.getLogMap());
-            throw new ConflictException("Received stale delta");
-        }
-    }
-
-    private boolean isLatestRecord(String companyNumber, String statementId, String deltaAt) {
-        Optional<PscStatementDocument> statement;
-        if (StringUtils.isBlank(deltaAt)) {
-            statement = pscStatementRepository.findById(statementId)
-                    .filter(doc -> !StringUtils.isBlank(doc.getDeltaAt()));
-        } else {
-            statement = pscStatementRepository.findUpdatedPscStatement(companyNumber, statementId, deltaAt);
-        }
-        return statement.isEmpty();
-    }
-
-    private void saveToDb(String companyNumber, String statementId, PscStatementDocument document) {
-
-        Created created = getCreatedFromCurrentRecord(companyNumber, statementId);
-        if (created == null) {
-            document.setCreated(new Created().setAt(document.getUpdated().getAt()));
-        } else {
-            document.setCreated(created);
-        }
-
+    private void dbSaveUpsertApiCall(String companyNumber, String statementId, PscStatementDocument document) {
         try {
             pscStatementRepository.save(document);
         } catch (IllegalArgumentException ex) {
             LOGGER.error("MongoDB error when inserting document", ex, DataMapHolder.getLogMap());
-            throw new BadRequestException("Saving to MongoDb failed", ex);
+            // Decouple from data-sync-api-sdk-java / use diff error
+            throw new BadGatewayException("Saving to MongoDb failed", ex);
         }
-
-    }
-
-    private Created getCreatedFromCurrentRecord(String companyNumber, String statementId) {
-        Optional<PscStatementDocument> document = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(
-                companyNumber, statementId);
-        return document.map(PscStatementDocument::getCreated).orElse(null);
+        chsKafkaApiService.invokeChsKafkaApi(new ResourceChangedRequest(
+                companyNumber, statementId, null, false));
     }
 
     private StatementList createStatementList(List<PscStatementDocument> statementDocuments,
