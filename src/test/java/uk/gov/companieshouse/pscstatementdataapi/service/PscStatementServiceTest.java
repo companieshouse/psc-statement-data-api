@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -613,6 +614,24 @@ class PscStatementServiceTest {
         verify(repository).getPscStatementByCompanyNumberAndStatementId(eq(COMPANY_NUMBER), eq(STATEMENT_ID));
         verify(apiClientService).invokeChsKafkaApi(
                 new ResourceChangedRequest(COMPANY_NUMBER, STATEMENT_ID, null, false));
+    }
+
+    @Test
+    void processPscStatementDateTimeParseExceptionForIncorrectDeltaAtFormat() {
+        // given
+        document.setDeltaAt("abcd123");
+        when(repository.getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID)).thenReturn(
+                Optional.ofNullable(document));
+
+        // when
+        Executable actual = () -> pscStatementService.processPscStatement(COMPANY_NUMBER, STATEMENT_ID,
+                companyPscStatement);
+
+        // then
+        assertThrows(DateTimeParseException.class, actual);
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(eq(COMPANY_NUMBER), eq(STATEMENT_ID));
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(apiClientService);
     }
 
     @Test
