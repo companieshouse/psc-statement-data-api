@@ -16,22 +16,22 @@
         <java.version>21</java.version>
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
-        <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
-        <spring.boot.version>3.5.3</spring.boot.version>
+        <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
+        <spring.boot.version>3.5.4</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <opentelemetry.version>2.14.0</opentelemetry.version>
+        <opentelemetry.version>2.18.1</opentelemetry.version>
 
         <!-- tests -->
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
         <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
-        <io-cucumber.version>7.23.0</io-cucumber.version>
-        <assertj-core.version>3.27.3</assertj-core.version>
+        <io-cucumber.version>7.7.0</io-cucumber.version>
+        <assertj-core.version>3.27.4</assertj-core.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <docker-java-api.version>3.5.1</docker-java-api.version>
+        <docker-java-api.version>3.5.3</docker-java-api.version>
 
         <!-- Internal -->
         <structured-logging.version>3.0.32</structured-logging.version>
@@ -226,7 +226,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java-api</artifactId>
+                <artifactId>docker-java-api</artifactId>
             <version>${docker-java-api.version}</version>
         </dependency>
       <!-- Overrides -->
