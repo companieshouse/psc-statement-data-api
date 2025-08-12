@@ -32,7 +32,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.TransientDataAccessResourceException;
-import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.exemptions.Exemptions;
 import uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem;
@@ -51,10 +50,10 @@ import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.api.ChsKafkaApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
-import uk.gov.companieshouse.pscstatementdataapi.exception.BadGatewayException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
 import uk.gov.companieshouse.pscstatementdataapi.repository.PscStatementRepository;
@@ -487,14 +486,14 @@ class PscStatementServiceTest {
         // given
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement, null))
                 .thenReturn(document);
-        when(repository.save(any())).thenThrow(IllegalArgumentException.class);
+        when(repository.save(any())).thenThrow(TransientDataAccessResourceException.class);
 
         // when
         Executable actual = () -> pscStatementService.processPscStatement(COMPANY_NUMBER,
                 STATEMENT_ID, companyPscStatement);
 
         // then
-        assertThrows(BadGatewayException.class, actual);
+        assertThrows(ServiceUnavailableException.class, actual);
         verify(repository).save(document);
         verifyNoInteractions(apiClientService);
     }
@@ -577,14 +576,14 @@ class PscStatementServiceTest {
                 Optional.ofNullable(document));
         when(statementTransformer.transformPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement, created))
                 .thenReturn(document);
-        when(repository.save(any())).thenThrow(IllegalArgumentException.class);
+        when(repository.save(any())).thenThrow(TransientDataAccessResourceException.class);
 
         // when
         Executable actual = () -> pscStatementService.processPscStatement(COMPANY_NUMBER,
                 STATEMENT_ID, companyPscStatement);
 
         // then
-        assertThrows(BadGatewayException.class, actual);
+        assertThrows(ServiceUnavailableException.class, actual);
         verify(repository).save(document);
         verifyNoInteractions(apiClientService);
     }

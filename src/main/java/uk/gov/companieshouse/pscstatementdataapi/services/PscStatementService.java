@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
@@ -25,10 +24,10 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.api.ChsKafkaApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
-import uk.gov.companieshouse.pscstatementdataapi.exception.BadGatewayException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
@@ -179,10 +178,9 @@ public class PscStatementService {
     private void dbSaveUpsertApiCall(String companyNumber, String statementId, PscStatementDocument document) {
         try {
             pscStatementRepository.save(document);
-        } catch (IllegalArgumentException ex) {
-            LOGGER.error("MongoDB error when inserting document", ex, DataMapHolder.getLogMap());
-            // Decouple from data-sync-api-sdk-java / use diff error
-            throw new BadGatewayException("Saving to MongoDb failed", ex);
+        } catch (DataAccessException ex) {
+            LOGGER.error("Error connecting to MongoDB", ex, DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException("Error connecting to MongoDB");
         }
         chsKafkaApiService.invokeChsKafkaApi(new ResourceChangedRequest(
                 companyNumber, statementId, null, false));
