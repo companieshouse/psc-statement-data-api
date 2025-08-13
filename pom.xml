@@ -167,8 +167,8 @@
             <version>${data-sync-api-sdk-java.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>commons-beanutils</groupId>
-                    <artifactId>commons-beanutils</artifactId>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
