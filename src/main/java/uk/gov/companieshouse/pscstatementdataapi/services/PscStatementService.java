@@ -6,7 +6,7 @@ import static uk.gov.companieshouse.pscstatementdataapi.util.DateTimeUtil.isDelt
 
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
