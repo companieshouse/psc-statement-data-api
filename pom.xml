@@ -167,17 +167,6 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
-            <artifactId>data-sync-api-sdk-java</artifactId>
-            <version>${data-sync-api-sdk-java.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.sonarsource.scanner.maven</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.companieshouse</groupId>
             <artifactId>api-security-java</artifactId>
             <version>${api-security-java.version}</version>
         </dependency>

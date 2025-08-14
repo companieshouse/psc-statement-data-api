@@ -28,12 +28,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
-import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.pscstatementdataapi.exception.SerDesException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.model.ResourceChangedRequest;
+import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceChangedRequestMapperTest {

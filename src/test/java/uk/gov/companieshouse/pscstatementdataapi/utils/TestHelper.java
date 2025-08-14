@@ -26,12 +26,12 @@ import uk.gov.companieshouse.api.metrics.MetricsApi;
 import uk.gov.companieshouse.api.metrics.PscApi;
 import uk.gov.companieshouse.api.metrics.RegisterApi;
 import uk.gov.companieshouse.api.metrics.RegistersApi;
-import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.StatementLinksType;
 import uk.gov.companieshouse.api.psc.StatementList;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
+import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
 
 public class TestHelper {
 

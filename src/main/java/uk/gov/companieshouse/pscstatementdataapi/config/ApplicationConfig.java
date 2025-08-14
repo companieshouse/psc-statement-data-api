@@ -17,14 +17,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import uk.gov.companieshouse.api.InternalApiClient;
-import uk.gov.companieshouse.api.converter.EnumWriteConverter;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.api.psc.Statement;
-import uk.gov.companieshouse.api.serialization.LocalDateDeserializer;
-import uk.gov.companieshouse.api.serialization.LocalDateSerializer;
+import uk.gov.companieshouse.pscstatementdataapi.converter.EnumWriteConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementReadConverter;
 import uk.gov.companieshouse.pscstatementdataapi.converter.PscStatementWriteConverter;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
+import uk.gov.companieshouse.pscstatementdataapi.serdes.LocalDateDeserializer;
+import uk.gov.companieshouse.pscstatementdataapi.serdes.LocalDateSerializer;
 
 @Configuration
 public class ApplicationConfig {

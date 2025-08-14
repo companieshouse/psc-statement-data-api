@@ -2,11 +2,11 @@ package uk.gov.companieshouse.pscstatementdataapi.transform;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.model.Created;
-import uk.gov.companieshouse.api.model.Updated;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
+import uk.gov.companieshouse.pscstatementdataapi.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
+import uk.gov.companieshouse.pscstatementdataapi.model.Updated;
 
 @Component
 public class PscStatementTransformer {
@@ -24,7 +24,9 @@ public class PscStatementTransformer {
         document.setPscStatementIdRaw(companyPscStatement.getPscStatementIdRaw());
         document.setData(companyPscStatement.getStatement());
         document.setDeltaAt(companyPscStatement.getDeltaAt());
-        document.setCreated(created != null ? created : new Created().setAt(timeNow));
+        document.setCreated(created != null ? created : new Created()
+                .setAt(timeNow)
+                .setBy(DataMapHolder.getRequestId()));
 
         return document;
     }
