@@ -148,7 +148,6 @@ public class PscStatementService {
         String requestDeltaAt = companyPscStatement.getDeltaAt();
         if (StringUtils.isBlank(requestDeltaAt)) {
             LOGGER.error("deltaAt missing from request", DataMapHolder.getLogMap());
-            // Decouple from data-sync-api-sdk-java
             throw new BadRequestException("deltaAt missing from request");
         }
         pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId)
