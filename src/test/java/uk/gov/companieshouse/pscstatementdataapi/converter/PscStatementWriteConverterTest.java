@@ -10,15 +10,15 @@ import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.Statement.KindEnum;
 
-class WriteConverterTest {
+class PscStatementWriteConverterTest {
 
     private static final KindEnum KIND = Statement.KindEnum.PERSONS_WITH_SIGNIFICANT_CONTROL_STATEMENT;
 
-    private WriteConverter<Statement> converter;
+    private PscStatementWriteConverter converter;
 
     @BeforeEach
     void setUp() {
-        converter = new WriteConverter<>(new ObjectMapper());
+        converter = new PscStatementWriteConverter(new ObjectMapper());
     }
 
     @Test

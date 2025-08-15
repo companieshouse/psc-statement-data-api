@@ -7,13 +7,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.psc.Statement;
 
-class ReadConverterTest {
+class PscStatementReadConverterTest {
 
-    private ReadConverter<Statement> readConverter;
+    private PscStatementReadConverter readConverter;
 
     @BeforeEach
     void setUp(){
-        readConverter = new ReadConverter<>(new ObjectMapper(), Statement.class);
+        readConverter = new PscStatementReadConverter(new ObjectMapper());
     }
 
     @Test
