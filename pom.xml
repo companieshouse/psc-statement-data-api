@@ -44,6 +44,7 @@
         <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.projectKey>uk.gov.companieshouse:psc-statement-data-api</sonar.projectKey>
+        <sonar.projectName>psc-statement-data-api</sonar.projectName>
         <sonar.sources>src/main</sonar.sources>
         <sonar.tests>src/test</sonar.tests>
         <sonar.verbose>true</sonar.verbose>
@@ -52,6 +53,9 @@
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
+        <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
+        <sonar.login/>
+        <sonar.password/>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
 
         <argLine>
