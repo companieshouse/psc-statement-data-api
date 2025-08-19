@@ -6,8 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.companieshouse.api.model.Created;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
+import uk.gov.companieshouse.pscstatementdataapi.model.Created;
 import uk.gov.companieshouse.pscstatementdataapi.model.PscStatementDocument;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
