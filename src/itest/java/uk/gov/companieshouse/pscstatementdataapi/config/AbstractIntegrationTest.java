@@ -5,7 +5,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.api.InternalApiClient;
-
 import uk.gov.companieshouse.pscstatementdataapi.api.ChsKafkaApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyExemptionsApiService;
 import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;

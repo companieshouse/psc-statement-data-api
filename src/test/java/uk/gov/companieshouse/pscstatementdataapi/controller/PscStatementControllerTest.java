@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.format.DateTimeParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.companieshouse.api.api.CompanyMetricsApiService;
-import uk.gov.companieshouse.api.exception.BadRequestException;
-import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.api.psc.CompanyPscStatement;
+import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.services.PscStatementService;
 import uk.gov.companieshouse.pscstatementdataapi.utils.TestHelper;
 
@@ -151,6 +152,20 @@ class PscStatementControllerTest {
                         .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES)
                         .content(testHelper.createJsonCompanyPscStatementPayload()))
                 .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void putPscStatementReturns400ForDateTimeParseException() throws Exception {
+        doThrow(DateTimeParseException.class).when(pscStatementService).processPscStatement(anyString(), anyString(), any());
+
+        mockMvc.perform(put(PUT_URL)
+                        .contentType(APPLICATION_JSON)
+                        .header("x-request-id", X_REQUEST_ID)
+                        .header("ERIC-Identity", ERIC_IDENTITY)
+                        .header("ERIC-Identity-Type", ERIC_IDENTITY_TYPE)
+                        .header("ERIC-Authorised-Key-Roles", ERIC_PRIVILEGES)
+                        .content(testHelper.createJsonCompanyPscStatementPayload()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

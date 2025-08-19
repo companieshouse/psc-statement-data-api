@@ -13,13 +13,14 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.MethodNotAllowedException;
-import uk.gov.companieshouse.api.exception.BadRequestException;
-import uk.gov.companieshouse.api.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.pscstatementdataapi.exception.BadGatewayException;
+import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.SerDesException;
+import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
 import uk.gov.companieshouse.pscstatementdataapi.logging.DataMapHolder;
 
 @ControllerAdvice
@@ -33,7 +34,8 @@ public class ExceptionHandlerConfig {
         return ResponseEntity.notFound().build();
     }
 
-    @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class, MongoException.class})
+    @ExceptionHandler(value = {ServiceUnavailableException.class, DataAccessException.class, MongoException.class,
+            BadGatewayException.class})
     public ResponseEntity<Object> handleServiceUnavailableException(Exception exception) {
         LOGGER.error(exception.getMessage(), DataMapHolder.getLogMap());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
