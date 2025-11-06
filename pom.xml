@@ -34,11 +34,11 @@
         <docker-java-api.version>3.5.3</docker-java-api.version>
 
         <!-- Internal -->
-        <structured-logging.version>3.0.37</structured-logging.version>
-        <private-api-sdk-java.version>4.0.339</private-api-sdk-java.version>
+        <structured-logging.version>3.0.43</structured-logging.version>
+        <private-api-sdk-java.version>4.0.407</private-api-sdk-java.version>
         <data-sync-api-sdk-java.version>1.0.9</data-sync-api-sdk-java.version>
         <api-security-java.version>2.0.11</api-security-java.version>
-        <api-helper-java-library.version>3.0.2</api-helper-java-library.version>
+        <api-helper-java-library.version>3.0.3</api-helper-java-library.version>
 
         <!--sonar configuration-->
         <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
