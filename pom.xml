@@ -17,7 +17,7 @@
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
         <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
-        <spring.boot.version>3.5.4</spring.boot.version>
+        <spring.boot.version>3.5.7</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <opentelemetry.version>2.18.1</opentelemetry.version>
@@ -37,7 +37,7 @@
         <structured-logging.version>3.0.43</structured-logging.version>
         <private-api-sdk-java.version>4.0.407</private-api-sdk-java.version>
         <data-sync-api-sdk-java.version>1.0.9</data-sync-api-sdk-java.version>
-        <api-security-java.version>2.0.11</api-security-java.version>
+        <api-security-java.version>2.0.16</api-security-java.version>
         <api-helper-java-library.version>3.0.3</api-helper-java-library.version>
 
         <!--sonar configuration-->
@@ -92,32 +92,12 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.18.0</version>
+            <version>3.19.0</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-context</artifactId>
             <version>1.74.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>6.2.10</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>10.1.44</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-websocket</artifactId>
-            <version>10.1.44</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-el</artifactId>
-            <version>10.1.44</version>
         </dependency>
         <!--		Transitive deps end here-->
         <dependency>
