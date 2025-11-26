@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.pscstatementdataapi.exception.PscStatementConversionException;
 
 class PscStatementReadConverterTest {
 
@@ -26,10 +27,10 @@ class PscStatementReadConverterTest {
     }
 
     @Test
-    void throwsRuntimeExceptionWhenJsonProcessingFails() {
+    void throwsPscStatementConversionExceptionWhenJsonProcessingFails() {
         Document invalidSource = Document.parse("{\"invalid\" : \"invalid\"}");
 
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
+        RuntimeException exception = Assertions.assertThrows(PscStatementConversionException.class, () -> {
             readConverter.convert(invalidSource);
         });
 
