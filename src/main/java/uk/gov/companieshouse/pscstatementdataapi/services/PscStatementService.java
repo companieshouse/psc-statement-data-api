@@ -97,7 +97,6 @@ public class PscStatementService {
                 .orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
                         String.format("Company %s is not on the public register", companyNumber)));
 
-
         if (registerMovedTo.equals("public-register")) {
             List<PscStatementDocument> pscStatementDocuments = pscStatementRepository.getStatementListRegisterView(
                     companyNumber, startIndex,
