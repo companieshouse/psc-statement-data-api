@@ -38,6 +38,7 @@ import uk.gov.companieshouse.pscstatementdataapi.transform.PscStatementTransform
 public class PscStatementService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final String ERROR_CONNECTING_MONGODB = "Error connecting to MongoDB";
 
     private final PscStatementRepository pscStatementRepository;
     private final PscStatementTransformer pscStatementTransformer;
@@ -135,8 +136,8 @@ public class PscStatementService {
                         new ResourceChangedRequest(companyNumber, statementId, new PscStatementDocument(), true));
             });
         } catch (DataAccessException ex) {
-            LOGGER.error("Error connecting to MongoDB", ex, DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("Error connecting to MongoDB");
+            LOGGER.error(ERROR_CONNECTING_MONGODB, ex, DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException(ERROR_CONNECTING_MONGODB);
         }
     }
 
@@ -178,8 +179,8 @@ public class PscStatementService {
         try {
             pscStatementRepository.save(document);
         } catch (DataAccessException ex) {
-            LOGGER.error("Error connecting to MongoDB", ex, DataMapHolder.getLogMap());
-            throw new ServiceUnavailableException("Error connecting to MongoDB");
+            LOGGER.error(ERROR_CONNECTING_MONGODB, ex, DataMapHolder.getLogMap());
+            throw new ServiceUnavailableException(ERROR_CONNECTING_MONGODB);
         }
         chsKafkaApiService.invokeChsKafkaApi(new ResourceChangedRequest(
                 companyNumber, statementId, null, false));
@@ -222,10 +223,9 @@ public class PscStatementService {
                 LOGGER.error(String.format("No PSC data in metrics for company number %s",
                         companyNumber), DataMapHolder.getLogMap());
             }
-        }, () -> {
-            LOGGER.info(String.format("Metrics does not exist for company number: %s",
-                    companyNumber), DataMapHolder.getLogMap());
-        });
+        }, () -> LOGGER.info(String.format("Metrics does not exist for company number: %s",
+                        companyNumber), DataMapHolder.getLogMap())
+        );
 
         statementList.setItemsPerPage(itemsPerPage);
         statementList.setLinks(links);

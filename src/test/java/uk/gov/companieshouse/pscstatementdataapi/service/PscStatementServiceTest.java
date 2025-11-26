@@ -120,7 +120,7 @@ class PscStatementServiceTest {
     }
 
     @Test
-    void statementListReturnedByCompanyNumberFromRepository() throws ResourceNotFoundException, IOException {
+    void statementListReturnedByCompanyNumberFromRepository() throws ResourceNotFoundException {
         Statement expectedStatement = new Statement();
         StatementList expectedStatementList = testHelper.createStatementList();
         document.setData(expectedStatement);
@@ -246,7 +246,7 @@ class PscStatementServiceTest {
     }
 
     @Test
-    void whenNoMetricsDataFoundForCompanyInRegisterViewShouldThrow() throws ResourceNotFoundException, IOException {
+    void whenNoMetricsDataFoundForCompanyInRegisterViewShouldThrow() throws ResourceNotFoundException {
         // given
         when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER)).thenReturn(Optional.empty());
 
@@ -462,7 +462,7 @@ class PscStatementServiceTest {
         pscStatementService.processPscStatement(COMPANY_NUMBER, STATEMENT_ID, companyPscStatement);
 
         verify(repository).save(document);
-        verify(repository).getPscStatementByCompanyNumberAndStatementId(eq(COMPANY_NUMBER), eq(STATEMENT_ID));
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verify(apiClientService).invokeChsKafkaApi(
                 new ResourceChangedRequest(COMPANY_NUMBER, STATEMENT_ID, null, false));
     }
@@ -515,7 +515,7 @@ class PscStatementServiceTest {
         // then
         assertThrows(ServiceUnavailableException.class, executable);
         verify(repository).save(document);
-        verify(repository).getPscStatementByCompanyNumberAndStatementId(eq(COMPANY_NUMBER), eq(STATEMENT_ID));
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verify(apiClientService).invokeChsKafkaApi(
                 new ResourceChangedRequest(COMPANY_NUMBER, STATEMENT_ID, null, false));
     }
@@ -540,7 +540,7 @@ class PscStatementServiceTest {
 
         // then
         verify(repository).save(document);
-        verify(repository).getPscStatementByCompanyNumberAndStatementId(eq(COMPANY_NUMBER), eq(STATEMENT_ID));
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verify(apiClientService).invokeChsKafkaApi(new ResourceChangedRequest(COMPANY_NUMBER, STATEMENT_ID,
                 null, false));
         assertEquals(document.getCreated().getAt(), dateTime);
@@ -559,7 +559,7 @@ class PscStatementServiceTest {
 
         // then
         assertThrows(ConflictException.class, actual);
-        verify(repository).getPscStatementByCompanyNumberAndStatementId(eq(COMPANY_NUMBER), eq(STATEMENT_ID));
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(apiClientService);
     }
@@ -610,7 +610,7 @@ class PscStatementServiceTest {
         // then
         assertThrows(ServiceUnavailableException.class, executable);
         verify(repository).save(document);
-        verify(repository).getPscStatementByCompanyNumberAndStatementId(eq(COMPANY_NUMBER), eq(STATEMENT_ID));
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verify(apiClientService).invokeChsKafkaApi(
                 new ResourceChangedRequest(COMPANY_NUMBER, STATEMENT_ID, null, false));
     }
@@ -628,7 +628,7 @@ class PscStatementServiceTest {
 
         // then
         assertThrows(DateTimeParseException.class, actual);
-        verify(repository).getPscStatementByCompanyNumberAndStatementId(eq(COMPANY_NUMBER), eq(STATEMENT_ID));
+        verify(repository).getPscStatementByCompanyNumberAndStatementId(COMPANY_NUMBER, STATEMENT_ID);
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(apiClientService);
     }

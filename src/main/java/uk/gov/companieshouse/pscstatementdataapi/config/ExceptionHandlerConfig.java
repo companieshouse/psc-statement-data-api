@@ -18,6 +18,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadGatewayException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadRequestException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ConflictException;
+import uk.gov.companieshouse.pscstatementdataapi.exception.PscStatementConversionException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ResourceNotFoundException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.SerDesException;
 import uk.gov.companieshouse.pscstatementdataapi.exception.ServiceUnavailableException;
@@ -60,7 +61,7 @@ public class ExceptionHandlerConfig {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(value = {Exception.class, SerDesException.class})
+    @ExceptionHandler(value = {Exception.class, SerDesException.class, PscStatementConversionException.class})
     public ResponseEntity<String> handleException(Exception exception) {
         LOGGER.error(exception.getMessage(), DataMapHolder.getLogMap());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

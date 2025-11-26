@@ -56,7 +56,7 @@ public class PscStatementController {
             @PathVariable("company_number") String companyNumber,
             @RequestParam(value = "items_per_page", required = false, defaultValue = "25") Integer itemsPerPage,
             @RequestParam(value = "start_index", required = false, defaultValue = "0") final Integer startIndex,
-            @RequestParam(value = "register_view", required = false) boolean registerView) {
+            @RequestParam(value = "register_view", defaultValue = "false", required = false) Boolean registerView) {
         itemsPerPage = Math.min(itemsPerPage, 100);
         DataMapHolder.get()
                 .companyNumber(companyNumber)
