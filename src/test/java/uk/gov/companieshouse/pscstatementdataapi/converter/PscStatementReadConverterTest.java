@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.pscstatementdataapi.converter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
 import org.junit.jupiter.api.Assertions;
@@ -21,6 +22,18 @@ class PscStatementReadConverterTest {
         Document source = Document.parse("{\"etag\" : \"etag\"}");
         Statement actualStatement = readConverter.convert(source);
         Assertions.assertNotNull(actualStatement);
-        Assertions.assertEquals(actualStatement.getEtag(), "etag");
+        Assertions.assertEquals("etag", actualStatement.getEtag());
+    }
+
+    @Test
+    void throwsRuntimeExceptionWhenJsonProcessingFails() {
+        Document invalidSource = Document.parse("{\"invalid\" : \"invalid\"}");
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            readConverter.convert(invalidSource);
+        });
+
+        Assertions.assertNotNull(exception.getCause());
+        Assertions.assertInstanceOf(JsonProcessingException.class, exception.getCause());
     }
 }

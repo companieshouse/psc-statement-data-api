@@ -2,11 +2,13 @@ package uk.gov.companieshouse.pscstatementdataapi.converter;
 
 import static org.junit.Assert.assertThrows;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.Statement.KindEnum;
 
@@ -36,5 +38,17 @@ class PscStatementWriteConverterTest {
     @Test
     void assertThrowsJsonException() {
         assertThrows(RuntimeException.class, () -> converter.convert(null));
+    }
+
+    @Test
+    void throwsRuntimeExceptionWhenJsonProcessingFails() throws JsonProcessingException {
+        Statement statement = new Statement();
+
+        ObjectMapper mockObjectMapper = Mockito.mock(ObjectMapper.class);
+        Mockito.when(mockObjectMapper.writeValueAsString(statement))
+                .thenThrow(new JsonProcessingException("Test exception") {});
+
+        PscStatementWriteConverter converter = new PscStatementWriteConverter(mockObjectMapper);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> converter.convert(statement));
     }
 }

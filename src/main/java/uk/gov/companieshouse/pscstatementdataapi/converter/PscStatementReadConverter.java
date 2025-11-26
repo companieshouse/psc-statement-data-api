@@ -6,6 +6,7 @@ import org.bson.Document;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import uk.gov.companieshouse.api.psc.Statement;
+import uk.gov.companieshouse.pscstatementdataapi.exception.PscStatementConversionException;
 
 @ReadingConverter
 public class PscStatementReadConverter implements Converter<Document, Statement> {
@@ -20,7 +21,7 @@ public class PscStatementReadConverter implements Converter<Document, Statement>
         try {
             return this.objectMapper.readValue(source.toJson(), Statement.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new PscStatementConversionException("Failed to convert Json into a statement", e);
         }
     }
 }
