@@ -48,7 +48,7 @@ class PscStatementWriteConverterTest {
         Mockito.when(mockObjectMapper.writeValueAsString(statement))
                 .thenThrow(new JsonProcessingException("Test exception") {});
 
-        PscStatementWriteConverter converter = new PscStatementWriteConverter(mockObjectMapper);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> converter.convert(statement));
+        PscStatementWriteConverter converterWithMock = new PscStatementWriteConverter(mockObjectMapper);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> converterWithMock.convert(statement));
     }
 }
