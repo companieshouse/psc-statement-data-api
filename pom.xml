@@ -20,7 +20,7 @@
         <spring.boot.version>3.5.11</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <opentelemetry.version>2.18.1</opentelemetry.version>
+        <opentelemetry.version>2.25.0</opentelemetry.version>
 
         <!-- tests -->
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
@@ -107,6 +107,13 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-to-slf4j</artifactId>
             <version>2.25.3</version>
+        </dependency>
+        <!-- Pinning version to address CVE-2020-29582(5.3) in kotlin-stdlib:jar:1.9.25
+     pulled transitively by opentelemetry-spring-boot-starter:jar:2.25.0 -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>2.2.21</version>
         </dependency>
         <!--		Transitive deps end here-->
         <dependency>
