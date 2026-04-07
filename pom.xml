@@ -17,10 +17,10 @@
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
         <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
-        <spring.boot.version>3.5.11</spring.boot.version>
+        <spring.boot.version>3.5.12</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <opentelemetry.version>2.25.0</opentelemetry.version>
+        <opentelemetry.version>2.26.0</opentelemetry.version>
 
         <!-- tests -->
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
