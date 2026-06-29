@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -66,10 +65,10 @@ public class ApplicationConfig {
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
                 .registerModule(new JavaTimeModule())
-                .setDateFormat(new SimpleDateFormat("yyyy-MM-dd"))
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 
     @Bean
