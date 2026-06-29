@@ -26,9 +26,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import org.apache.commons.io.IOUtils;
 import org.bson.Document;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +38,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.exemptions.ExemptionItem;
 import uk.gov.companieshouse.api.exemptions.Exemptions;
@@ -87,7 +88,6 @@ public class PscStatementsSteps {
             mongoDBContainer.start();
         }
         pscStatementRepository.deleteAll();
-        MockitoAnnotations.openMocks(this);
     }
 
     @Given("Psc statements data api service is running")
@@ -129,10 +129,8 @@ public class PscStatementsSteps {
     }
 
     @And("a psc statement exists with legacy data for company number {string} with statement id {string}")
-    public void aPscStatementExistsWithLegacyDataForCompanyNumberWithStatementId(String companyNumber, String statementId)
-            throws IOException {
-        String jsonToInsert = IOUtils.resourceToString("/json/input/psc_statement_legacy.json",
-                        StandardCharsets.UTF_8)
+    public void aPscStatementExistsWithLegacyDataForCompanyNumberWithStatementId(String companyNumber, String statementId) {
+        String jsonToInsert = FileReaderUtil.readFile("src/itest/resources/json/input/psc_statement_legacy.json")
                 .replaceAll("<id>", statementId)
                 .replaceAll("<company_number>", companyNumber);
         Document document = Document.parse(jsonToInsert);
@@ -168,8 +166,7 @@ public class PscStatementsSteps {
 
 
     @When("I send an GET request for company number {string} with statement id {string}")
-    public void i_send_psc_statement_get_request_with_statement_id(String companyNumber, String statementId)
-            throws IOException {
+    public void i_send_psc_statement_get_request_with_statement_id(String companyNumber, String statementId) {
         String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}";
 
         HttpHeaders headers = new HttpHeaders();
@@ -186,7 +183,7 @@ public class PscStatementsSteps {
     }
 
     @When("I send a GET request for company number {string} to company metrics api")
-    public void i_send_get_request_to_company_metrics_api(String companyNumber) throws IOException {
+    public void i_send_get_request_to_company_metrics_api(String companyNumber) {
         String uri = "/company/{company_number}/metrics";
 
         HttpHeaders headers = new HttpHeaders();
@@ -203,7 +200,7 @@ public class PscStatementsSteps {
     }
 
     @When("I send a GET statement list request for company number {string}")
-    public void get_statement_list_for_company_number(String companyNumber) throws IOException {
+    public void get_statement_list_for_company_number(String companyNumber) {
 
         String uri = "/company/{company_number}/persons-with-significant-control-statements";
 
@@ -221,7 +218,7 @@ public class PscStatementsSteps {
     }
 
     @When("I send a GET statement list request for company number in register view {string}")
-    public void get_statement_list_for_company_number_register_view(String companyNumber) throws IOException {
+    public void get_statement_list_for_company_number_register_view(String companyNumber) {
 
         String uri = "/company/{company_number}/persons-with-significant-control-statements?register_view=true";
 
@@ -253,7 +250,7 @@ public class PscStatementsSteps {
     }
 
     @When("Company Metrics API is unavailable")
-    public void company_metrics_api_service_unavailable() throws IOException {
+    public void company_metrics_api_service_unavailable() {
         when(companyMetricsApiService.getCompanyMetrics(any())).thenReturn(Optional.empty());
     }
 
@@ -282,7 +279,7 @@ public class PscStatementsSteps {
 
         companyExemptions.setExemptions(exemptions);
 
-        Optional<CompanyExemptions> exemptionsApi = Optional.ofNullable(companyExemptions);
+        Optional<CompanyExemptions> exemptionsApi = Optional.of(companyExemptions);
 
         when(companyExemptionsApiService.getCompanyExemptions(any())).thenReturn(exemptionsApi);
     }
@@ -324,8 +321,7 @@ public class PscStatementsSteps {
 
 
     @When("I send a PUT request with payload {string} file for company number {string} with statement id {string}")
-    public void i_send_psc_statement_put_request_with_payload(String dataFile, String companyNumber, String statementId)
-            throws IOException {
+    public void i_send_psc_statement_put_request_with_payload(String dataFile, String companyNumber, String statementId) {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/" + dataFile + ".json");
 
         HttpHeaders headers = new HttpHeaders();
@@ -347,7 +343,7 @@ public class PscStatementsSteps {
     }
 
     @When("I send a PUT request with no ERIC headers")
-    public void i_send_psc_statement_put_request_no_eric_headers() throws IOException {
+    public void i_send_psc_statement_put_request_no_eric_headers() {
         String data = FileReaderUtil.readFile("src/itest/resources/json/input/company_psc_statement_put.json");
 
         HttpHeaders headers = new HttpHeaders();
@@ -366,7 +362,7 @@ public class PscStatementsSteps {
     }
 
     @When("I send DELETE request for company number {string} with statement id {string}")
-    public void send_delete_request_for_statement(String companyNumber, String statementId) throws IOException {
+    public void send_delete_request_for_statement(String companyNumber, String statementId) {
         String uri = "/company/{company_number}/persons-with-significant-control-statements/{statement_id}/internal";
 
         HttpHeaders headers = new HttpHeaders();
@@ -413,7 +409,7 @@ public class PscStatementsSteps {
     }
 
     @When("CHS kafka API service is unavailable")
-    public void chs_kafka_service_unavailable() throws IOException {
+    public void chs_kafka_service_unavailable() {
         doThrow(ServiceUnavailableException.class)
                 .when(pscStatementApiService).invokeChsKafkaApi(any());
     }
@@ -425,12 +421,12 @@ public class PscStatementsSteps {
     }
 
     @Then("the CHS Kafka API is not invoked")
-    public void chs_kafka_api_not_invoked() throws IOException {
+    public void chs_kafka_api_not_invoked() {
         verifyNoInteractions(pscStatementApiService);
     }
 
     @Then("the CHS Kafka API delete is invoked for company number {string} with statement id {string} and the correct statement data")
-    public void chs_kafka_api_invoked_delete(String companyNumber, String statementId) throws IOException {
+    public void chs_kafka_api_invoked_delete(String companyNumber, String statementId) {
         PscStatementDocument document = CucumberContext.CONTEXT.get("pscStatementDocument");
         ResourceChangedRequest resourceChangedRequest = new ResourceChangedRequest(
                 companyNumber, statementId, document, true);

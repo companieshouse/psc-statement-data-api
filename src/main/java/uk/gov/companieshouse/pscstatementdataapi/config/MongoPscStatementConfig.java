@@ -4,6 +4,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +21,7 @@ public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
     private final MongoCustomConversions mongoCustomConversions;
 
     public MongoPscStatementConfig(@Value("${spring.data.mongodb.name}") String databaseName,
-            @Value("${spring.data.mongodb.uri}") String databaseUri,
+            @Value("${spring.mongodb.uri}") String databaseUri,
             MongoCustomConversions mongoCustomConversions) {
         this.databaseName = databaseName;
         this.databaseUri = databaseUri;
@@ -28,7 +29,7 @@ public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
     }
 
     @Override
-    protected String getDatabaseName() {
+    protected @NonNull String getDatabaseName() {
         return this.databaseName;
     }
 
@@ -37,12 +38,12 @@ public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
     }
 
     @Override
-    public MongoCustomConversions customConversions() {
+    public @NonNull MongoCustomConversions customConversions() {
         return this.mongoCustomConversions;
     }
 
     @Override
-    public MongoClient mongoClient() {
+    public @NonNull MongoClient mongoClient() {
         final ConnectionString connectionString =
                 new ConnectionString(getDatabaseUri());
         final MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
@@ -50,4 +51,5 @@ public class MongoPscStatementConfig extends AbstractMongoClientConfiguration {
                 .build();
         return MongoClients.create(mongoClientSettings);
     }
+
 }

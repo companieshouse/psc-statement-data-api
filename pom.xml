@@ -19,27 +19,30 @@
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
-        <spring-boot.version>3.5.16</spring-boot.version>
+        <spring-boot.version>4.1.0</spring-boot.version>
         <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-instrumentation-bom -->
         <opentelemetry.version>2.29.0</opentelemetry.version>
         <!-- Source: https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-bom -->
         <kotlin.version>2.3.21</kotlin.version>
-        <!-- Source: https://mvnrepository.com/artifact/io.grpc/grpc-bom -->
-        <io-grpc.version>1.81.0</io-grpc.version>
 
         <!-- tests -->
         <!-- Source: https://mvnrepository.com/artifact/io.cucumber/cucumber-bom -->
-        <io-cucumber.version>7.34.3</io-cucumber.version>
+        <io-cucumber.version>7.34.4</io-cucumber.version>
         <!-- Source: https://mvnrepository.com/artifact/com.github.docker-java/docker-java-api -->
         <docker-java-api.version>3.7.1</docker-java-api.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
 
         <!-- CH Internal Dependencies       -->
+        <!-- Source: https://github.com/companieshouse/structured-logging/releases -->
         <structured-logging.version>3.0.57</structured-logging.version>
-        <private-api-sdk-java.version>6.0.33</private-api-sdk-java.version>
+        <!-- Source: https://github.com/companieshouse/private-api-sdk-java/releases -->
+        <private-api-sdk-java.version>7.0.2</private-api-sdk-java.version>
+        <!-- Source: https://github.com/companieshouse/data-sync-api-sdk-java/releases -->
         <data-sync-api-sdk-java.version>1.0.16</data-sync-api-sdk-java.version>
+        <!-- Source: https://github.com/companieshouse/api-security-java/releases -->
         <api-security-java.version>2.0.27</api-security-java.version>
+        <!-- Source: https://github.com/companieshouse/api-helper-java/releases -->
         <api-helper-java-library.version>3.0.4</api-helper-java-library.version>
 
         <!-- Plugin Configuration -->
@@ -59,7 +62,8 @@
         <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
 
         <!--sonar configuration-->
-        <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
+        <!-- Source: https://mvnrepository.com/artifact/org.sonarsource.scanner.maven/sonar-maven-plugin -->
+        <sonar-maven-plugin.version>5.7.0.6970</sonar-maven-plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.projectKey>uk.gov.companieshouse:psc-statement-data-api</sonar.projectKey>
         <sonar.projectName>psc-statement-data-api</sonar.projectName>
@@ -73,7 +77,6 @@
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
-        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
 
         <argLine>
             --add-opens java.base/java.util=ALL-UNNAMED
@@ -92,12 +95,16 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- Source: https://mvnrepository.com/artifact/io.grpc/grpc-bom -->
             <dependency>
                 <groupId>io.grpc</groupId>
-                <artifactId>grpc-context</artifactId>
-                <version>${io-grpc.version}</version>
+                <artifactId>grpc-bom</artifactId>
+                <version>1.82.1</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
+            <!-- Source: https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
@@ -109,6 +116,24 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>33.6.0-jre</version>
+            </dependency>
+
+            <!-- Source: https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-bom -->
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Source: https://mvnrepository.com/artifact/org.junit/junit-bom -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>6.1.1</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>
@@ -125,8 +150,16 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-opentelemetry</artifactId>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-logback-appender-1.0 -->
+        <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
-            <artifactId>opentelemetry-spring-boot-starter</artifactId>
+            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+            <version>${opentelemetry.version}-alpha</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -151,7 +184,7 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
         </dependency>
 
         <dependency>
@@ -218,6 +251,32 @@
             </exclusions>
         </dependency>
 
+        <!-- Test Dependencies       -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-restclient</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+            <version>2.22.0</version>
+        </dependency>
+
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-core</artifactId>
@@ -243,11 +302,26 @@
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-spring</artifactId>
             <version>${io-cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/io.cucumber/cucumber-junit-platform-engine -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit-platform-engine</artifactId>
+            <version>${io-cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>mongodb</artifactId>
+            <artifactId>testcontainers-mongodb</artifactId>
             <exclusions>
                 <!--excluded to remove vulnerability-->
                 <exclusion>
@@ -260,14 +334,13 @@
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -309,6 +382,11 @@
                         <exclude>**/*ITest.java</exclude>
                     </excludes>
                     <skipTests>${skip.unit.tests}</skipTests>
+                    <properties>
+                        <configurationParameters>
+                            cucumber.junit-platform.naming-strategy=long
+                        </configurationParameters>
+                    </properties>
                 </configuration>
             </plugin>
 
@@ -410,6 +488,11 @@
                     <includes>
                         <include>**/*ITest.java</include>
                     </includes>
+                    <properties>
+                        <configurationParameters>
+                            cucumber.junit-platform.naming-strategy=long
+                        </configurationParameters>
+                    </properties>
                 </configuration>
             </plugin>
 
