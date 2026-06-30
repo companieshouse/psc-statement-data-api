@@ -33,7 +33,7 @@ class PscStatementReadConverterTest {
 
     @Test
     void throwsPscStatementConversionExceptionWhenJsonProcessingFails() {
-        Document invalidSource = Document.parse("{\"invalid\" : \"invalid\" \"missing-comma\": \"true\"}");
+        Document invalidSource = Document.parse("{\"invalid\" : \"invalid\"}");
 
         RuntimeException exception = Assertions.assertThrows(PscStatementConversionException.class, () -> readConverter.convert(invalidSource));
 
