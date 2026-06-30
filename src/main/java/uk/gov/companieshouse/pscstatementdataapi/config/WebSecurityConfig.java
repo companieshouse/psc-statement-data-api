@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
-import java.util.Arrays;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +20,7 @@ import uk.gov.companieshouse.api.interceptor.UserAuthenticationInterceptor;
 public class WebSecurityConfig implements WebMvcConfigurer {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new CustomCorsFilter(externalMethods()), CsrfFilter.class);
@@ -31,11 +30,11 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
     @Bean
     public List<String> externalMethods() {
-        return Arrays.asList(HttpMethod.GET.name());
+        return List.of(HttpMethod.GET.name());
     }
 
     //Key type is automatically checked by the authenticator add other allowed auth types here
-    List<String> otherAllowedAuthMethods = Arrays.asList("oauth2");
+    List<String> otherAllowedAuthMethods = List.of("oauth2");
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
