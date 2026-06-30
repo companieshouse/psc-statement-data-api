@@ -2,7 +2,6 @@ package uk.gov.companieshouse.pscstatementdataapi.config;
 
 import static uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication.NAMESPACE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.MongoException;
 import java.time.format.DateTimeParseException;
 import org.springframework.dao.DataAccessException;
@@ -13,6 +12,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.MethodNotAllowedException;
+import tools.jackson.core.JacksonException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.pscstatementdataapi.exception.BadGatewayException;
@@ -43,7 +43,7 @@ public class ExceptionHandlerConfig {
     }
 
     @ExceptionHandler(value = {BadRequestException.class, DateTimeParseException.class,
-            HttpMessageNotReadableException.class, JsonProcessingException.class, IllegalArgumentException.class})
+            HttpMessageNotReadableException.class, JacksonException.class, IllegalArgumentException.class})
     public ResponseEntity<Object> handleBadRequestException(Exception exception) {
         LOGGER.error(exception.getMessage(), DataMapHolder.getLogMap());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);

@@ -2,13 +2,13 @@ package uk.gov.companieshouse.pscstatementdataapi.converter;
 
 import static org.junit.Assert.assertThrows;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.api.psc.Statement.KindEnum;
 
@@ -20,7 +20,7 @@ class PscStatementWriteConverterTest {
 
     @BeforeEach
     void setUp() {
-        converter = new PscStatementWriteConverter(new ObjectMapper());
+        converter = new PscStatementWriteConverter(JsonMapper.builder().build());
     }
 
     @Test
@@ -41,14 +41,14 @@ class PscStatementWriteConverterTest {
     }
 
     @Test
-    void throwsRuntimeExceptionWhenJsonProcessingFails() throws JsonProcessingException {
+    void throwsRuntimeExceptionWhenJsonProcessingFails() {
         Statement statement = new Statement();
 
-        ObjectMapper mockObjectMapper = Mockito.mock(ObjectMapper.class);
-        Mockito.when(mockObjectMapper.writeValueAsString(statement))
-                .thenThrow(new JsonProcessingException("Test exception") {});
+        JsonMapper mockJsonMapper = Mockito.mock(JsonMapper.class);
+        Mockito.when(mockJsonMapper.writeValueAsString(statement))
+                .thenThrow(new JacksonException("Test exception") {});
 
-        PscStatementWriteConverter converterWithMock = new PscStatementWriteConverter(mockObjectMapper);
+        PscStatementWriteConverter converterWithMock = new PscStatementWriteConverter(mockJsonMapper);
         Assertions.assertThrows(IllegalArgumentException.class, () -> converterWithMock.convert(statement));
     }
 }

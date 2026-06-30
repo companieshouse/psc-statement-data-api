@@ -2,7 +2,6 @@ package uk.gov.companieshouse.pscstatementdataapi.serdes;
 
 import static org.mockito.Mockito.verify;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JsonGenerator;
 
 @ExtendWith(MockitoExtension.class)
 class LocalDateSerializerTest {

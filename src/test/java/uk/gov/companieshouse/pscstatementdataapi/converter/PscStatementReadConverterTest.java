@@ -1,11 +1,12 @@
 package uk.gov.companieshouse.pscstatementdataapi.converter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.psc.Statement;
 import uk.gov.companieshouse.pscstatementdataapi.exception.PscStatementConversionException;
 
@@ -15,7 +16,11 @@ class PscStatementReadConverterTest {
 
     @BeforeEach
     void setUp(){
-        readConverter = new PscStatementReadConverter(new ObjectMapper());
+        readConverter = new PscStatementReadConverter(
+                JsonMapper.builder()
+                        .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                        .build()
+        );
     }
 
     @Test
@@ -28,13 +33,13 @@ class PscStatementReadConverterTest {
 
     @Test
     void throwsPscStatementConversionExceptionWhenJsonProcessingFails() {
-        Document invalidSource = Document.parse("{\"invalid\" : \"invalid\"}");
+        Document invalidSource = Document.parse("{\"invalid\" : \"invalid\" \"missing-comma\": \"true\"}");
 
         RuntimeException exception = Assertions.assertThrows(PscStatementConversionException.class, () -> {
             readConverter.convert(invalidSource);
         });
 
         Assertions.assertNotNull(exception.getCause());
-        Assertions.assertInstanceOf(JsonProcessingException.class, exception.getCause());
+        Assertions.assertInstanceOf(JacksonException.class, exception.getCause());
     }
 }

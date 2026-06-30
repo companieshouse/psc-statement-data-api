@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.pscstatementdataapi.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.pscstatementdataapi.exception.SerDesException;
@@ -20,9 +20,9 @@ public class ResourceChangedRequestMapper {
     private static final String RESOURCE_KIND = "persons-with-significant-control-statement";
 
     private final Supplier<Instant> instantSupplier;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
 
-    public ResourceChangedRequestMapper(Supplier<Instant> instantSupplier, ObjectMapper objectMapper) {
+    public ResourceChangedRequestMapper(Supplier<Instant> instantSupplier, JsonMapper objectMapper) {
         this.instantSupplier = instantSupplier;
         this.objectMapper = objectMapper;
     }
@@ -38,7 +38,7 @@ public class ResourceChangedRequestMapper {
                     objectMapper.writeValueAsString(request.document().getData()), Object.class
             );
             changedResource.setDeletedData(dataAsObject);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             throw new SerDesException("Failed to serialise/deserialise data", ex);
         }
         return changedResource;

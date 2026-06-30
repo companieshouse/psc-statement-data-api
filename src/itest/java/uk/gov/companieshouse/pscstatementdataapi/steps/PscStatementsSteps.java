@@ -11,25 +11,19 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static uk.gov.companieshouse.api.exemptions.PscExemptAsSharesAdmittedOnMarketItem.ExemptionTypeEnum.PSC_EXEMPT_AS_SHARES_ADMITTED_ON_MARKET;
 import static uk.gov.companieshouse.pscstatementdataapi.config.AbstractMongoConfig.mongoDBContainer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.apache.commons.io.IOUtils;
 import org.bson.Document;
-import org.mockito.MockitoAnnotations;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
@@ -38,6 +32,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.exemptions.CompanyExemptions;
 import uk.gov.companieshouse.api.exemptions.ExemptionItem;
 import uk.gov.companieshouse.api.exemptions.Exemptions;
@@ -60,7 +55,7 @@ public class PscStatementsSteps {
     private static final LocalDate EXEMPTION_DATE = LocalDate.of(2022, 11, 3);
     private static final String PSC_STATEMENT_COLLECTION = "company_psc_statements";
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final TestRestTemplate restTemplate;
     private final PscStatementRepository pscStatementRepository;
     private final MongoTemplate mongoTemplate;
@@ -68,11 +63,11 @@ public class PscStatementsSteps {
     private final ChsKafkaApiService pscStatementApiService;
     private final CompanyExemptionsApiService companyExemptionsApiService;
 
-    public PscStatementsSteps(ObjectMapper objectMapper, TestRestTemplate restTemplate,
+    public PscStatementsSteps(JsonMapper jsonMapper, TestRestTemplate restTemplate,
             PscStatementRepository pscStatementRepository, MongoTemplate mongoTemplate,
             CompanyMetricsApiService companyMetricsApiService, ChsKafkaApiService chsKafkaApiService,
             CompanyExemptionsApiService companyExemptionsApiService) {
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.restTemplate = restTemplate;
         this.pscStatementRepository = pscStatementRepository;
         this.mongoTemplate = mongoTemplate;
@@ -96,10 +91,10 @@ public class PscStatementsSteps {
     }
 
     @Given("a psc statement exists for company number {string} with statement id {string}")
-    public void psc_statement_exists_for_company_and_id(String companyNumber, String statementId) throws IOException {
+    public void psc_statement_exists_for_company_and_id(String companyNumber, String statementId) {
         String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/psc_statement.json");
 
-        Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
+        Statement pscStatement = jsonMapper.readValue(statementFile, Statement.class);
 
         PscStatementDocument document = new PscStatementDocument();
         document.setId(statementId);
@@ -114,9 +109,9 @@ public class PscStatementsSteps {
 
     @Given("a psc statement exists for company number {string} with statement id {string} and delta_at {string}")
     public void psc_statement_exists_for_company_and_id_with_delta_at(String companyNumber, String statementId,
-            String deltaAt) throws IOException {
+            String deltaAt) {
         String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/psc_statement.json");
-        Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
+        Statement pscStatement = jsonMapper.readValue(statementFile, Statement.class);
 
         PscStatementDocument document = new PscStatementDocument();
         document.setId(statementId);
@@ -143,10 +138,10 @@ public class PscStatementsSteps {
     }
 
     @Given("Psc statements exist for company number {string}")
-    public void psc_statements_exist_for_company(String companyNumber) throws IOException {
+    public void psc_statements_exist_for_company(String companyNumber) {
         String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/psc_statement.json");
 
-        Statement pscStatement = objectMapper.readValue(statementFile, Statement.class);
+        Statement pscStatement = jsonMapper.readValue(statementFile, Statement.class);
         PscStatementDocument document = new PscStatementDocument();
         document.setId("1");
         document.setCompanyNumber(companyNumber);
@@ -239,11 +234,11 @@ public class PscStatementsSteps {
     }
 
     @When("Company Metrics API is available for company number {string}")
-    public void company_metrics_api_service_available(String companyNumber) throws IOException {
+    public void company_metrics_api_service_available(String companyNumber) {
         String metricsFile = FileReaderUtil.readFile(
                 "src/itest/resources/json/input/company_metrics_" + companyNumber + ".json");
 
-        MetricsApi metrics = objectMapper.readValue(metricsFile, MetricsApi.class);
+        MetricsApi metrics = jsonMapper.readValue(metricsFile, MetricsApi.class);
         Optional<MetricsApi> metricsApi = Optional.ofNullable(metrics);
 
         when(companyMetricsApiService.getCompanyMetrics(any())).thenReturn(metricsApi);
@@ -255,11 +250,11 @@ public class PscStatementsSteps {
     }
 
     @When("Company Exemptions API is available for company number {string}")
-    public void company_exemptions_api_service_available(String companyNumber) throws IOException {
+    public void company_exemptions_api_service_available(String companyNumber) {
         String exemptionsFile = FileReaderUtil.readFile(
                 "src/itest/resources/json/input/company_exemptions_" + companyNumber + ".json");
 
-        CompanyExemptions companyExemptions = objectMapper.readValue(exemptionsFile, CompanyExemptions.class);
+        CompanyExemptions companyExemptions = jsonMapper.readValue(exemptionsFile, CompanyExemptions.class);
         ExemptionItem exemptionItem = new ExemptionItem();
         exemptionItem.exemptFrom(EXEMPTION_DATE);
         exemptionItem.exemptTo(null);
@@ -291,10 +286,10 @@ public class PscStatementsSteps {
     }
 
     @Then("the psc statement Get call response body should match {string} file")
-    public void the_psc_statement_get_call_response_body_should_match(String dataFile) throws IOException {
+    public void the_psc_statement_get_call_response_body_should_match(String dataFile) {
         String statementFile = FileReaderUtil.readFile("src/itest/resources/json/output/" + dataFile + ".json");
 
-        Statement expected = objectMapper.readValue(statementFile, Statement.class);
+        Statement expected = jsonMapper.readValue(statementFile, Statement.class);
 
         Statement actual = CucumberContext.CONTEXT.get("getResponseBody");
 
@@ -304,11 +299,11 @@ public class PscStatementsSteps {
     }
 
     @Then("the psc statement list Get call response body should match {string} file")
-    public void the_psc_statement_list_get_call_response_body_should_match(String dataFile) throws IOException {
+    public void the_psc_statement_list_get_call_response_body_should_match(String dataFile) {
 
         String file = FileReaderUtil.readFile("src/itest/resources/json/output/" + dataFile + ".json");
 
-        StatementList expected = objectMapper.readValue(file, StatementList.class);
+        StatementList expected = jsonMapper.readValue(file, StatementList.class);
 
         StatementList actual = CucumberContext.CONTEXT.get("getResponseBody");
 
@@ -462,15 +457,14 @@ public class PscStatementsSteps {
     }
 
     @And("the data matches {string} for company number {string} and statement id {string}")
-    public void theDataMatchesForCompanyNumberAndStatementId(String resultFile, String companyNumber, String statementId)
-            throws JsonProcessingException {
+    public void theDataMatchesForCompanyNumberAndStatementId(String resultFile, String companyNumber, String statementId) {
         Optional<PscStatementDocument> pscDoc = pscStatementRepository.getPscStatementByCompanyNumberAndStatementId(companyNumber, statementId);
         assertThat(pscDoc).isPresent();
 
         String file = FileReaderUtil.readFile("src/itest/resources/json/output/" + resultFile + ".json")
                 .replaceAll("<id>", statementId)
                 .replaceAll("<company_number>", companyNumber);
-        PscStatementDocument expected = objectMapper.readValue(file, PscStatementDocument.class);
+        PscStatementDocument expected = jsonMapper.readValue(file, PscStatementDocument.class);
 
         assertEquals(expected.getData(), pscDoc.get().getData());
         assertEquals(expected.getCompanyNumber(), pscDoc.get().getCompanyNumber());

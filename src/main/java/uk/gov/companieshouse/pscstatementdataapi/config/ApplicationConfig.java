@@ -1,20 +1,21 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.function.Supplier;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.pscstatementdataapi.converter.EnumWriteConverter;
@@ -43,7 +44,7 @@ public class ApplicationConfig {
 
     @Bean
     public MongoCustomConversions mongoCustomConversions() {
-        ObjectMapper objectMapper = mongoDbObjectMapper();
+        JsonMapper objectMapper = mongoDbObjectMapper();
         return new MongoCustomConversions(Arrays.asList(
                 new PscStatementReadConverter(objectMapper),
                 new PscStatementWriteConverter(objectMapper),
@@ -62,13 +63,14 @@ public class ApplicationConfig {
 
     @Bean
     @Primary
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    public JsonMapper objectMapper() {
+        return JsonMapper.builder()
+                // No module registration needed; java.time support is native in Jackson 3!
+                .changeDefaultPropertyInclusion(inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .build();
     }
 
     @Bean
@@ -91,15 +93,17 @@ public class ApplicationConfig {
         return Instant::now;
     }
 
-    private ObjectMapper mongoDbObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    private JsonMapper mongoDbObjectMapper() {
         SimpleModule module = new SimpleModule();
         module.addDeserializer(LocalDate.class, new LocalDateDeserializer());
         module.addSerializer(LocalDate.class, new LocalDateSerializer());
-        objectMapper.registerModule(module);
-        return objectMapper;
+
+        return JsonMapper.builder()
+                .enable(DateTimeFeature.WRITE_DATES_WITH_ZONE_ID)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .changeDefaultPropertyInclusion(inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .addModule(module)
+                .build();
     }
 }
