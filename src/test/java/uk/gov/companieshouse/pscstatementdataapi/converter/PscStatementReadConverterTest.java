@@ -35,9 +35,7 @@ class PscStatementReadConverterTest {
     void throwsPscStatementConversionExceptionWhenJsonProcessingFails() {
         Document invalidSource = Document.parse("{\"invalid\" : \"invalid\" \"missing-comma\": \"true\"}");
 
-        RuntimeException exception = Assertions.assertThrows(PscStatementConversionException.class, () -> {
-            readConverter.convert(invalidSource);
-        });
+        RuntimeException exception = Assertions.assertThrows(PscStatementConversionException.class, () -> readConverter.convert(invalidSource));
 
         Assertions.assertNotNull(exception.getCause());
         Assertions.assertInstanceOf(JacksonException.class, exception.getCause());

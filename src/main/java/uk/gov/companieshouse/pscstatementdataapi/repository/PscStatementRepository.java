@@ -21,7 +21,7 @@ public interface PscStatementRepository extends MongoRepository<PscStatementDocu
     Optional<PscStatementDocument> findUpdatedPscStatement(String companyNumber, String statementId, String deltaAt);
 
     @Aggregation(pipeline = {
-            "{'$match': { 'company_number': ?0} } }",
+            "{'$match': { 'company_number': ?0} }",
             "{'$sort': {'data.notified_on': -1, 'data.ceased_on': -1 } }",
             "{'$skip': ?1}",
             "{'$limit': ?2}",

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.pscstatementdataapi.converter;
 
 import com.mongodb.BasicDBObject;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.WritingConverter;
 import tools.jackson.core.JacksonException;
@@ -16,7 +17,7 @@ public class PscStatementWriteConverter implements Converter<Statement, BasicDBO
         this.objectMapper = objectMapper;
     }
 
-    public BasicDBObject convert(Statement source) {
+    public BasicDBObject convert(@NonNull Statement source) {
         try {
             return BasicDBObject.parse(objectMapper.writeValueAsString(source));
         } catch (JacksonException e) {

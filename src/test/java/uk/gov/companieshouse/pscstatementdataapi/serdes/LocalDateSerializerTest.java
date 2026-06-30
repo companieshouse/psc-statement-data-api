@@ -30,7 +30,7 @@ class LocalDateSerializerTest {
     }
 
     @Test
-    void dateShouldSerialize() throws Exception {
+    void dateShouldSerialize() {
         LocalDate date = LocalDate.of(2020, 1, 1);
 
         serializer.serialize(date, generator, null);
@@ -40,7 +40,7 @@ class LocalDateSerializerTest {
     }
 
     @Test
-    void assertNullDateReturnsNull() throws Exception {
+    void assertNullDateReturnsNull() {
 
         serializer.serialize(null, generator, null);
 

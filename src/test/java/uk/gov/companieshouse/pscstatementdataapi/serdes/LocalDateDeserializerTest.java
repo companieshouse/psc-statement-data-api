@@ -43,21 +43,19 @@ class LocalDateDeserializerTest {
 
     }
 
-//    @Test
-//    void nullStringReturnsError() {
-//        assertThrows(NullPointerException.class, ()->{
-//            deserialize(null);
-//        });
-//    }
+    @Test
+    void nullStringReturnsError() {
+        assertThrows(IllegalArgumentException.class, ()->{
+            deserialize(null);
+        });
+    }
 
     @Test
     void invalidStringReturnsError() {
 
         String jsonTestString = "{\"date\":{\"$date\": \"NotADate\"}}}";
 
-        assertThrows(BadRequestException.class, ()->{
-            deserialize(jsonTestString);
-        });
+        assertThrows(BadRequestException.class, ()-> deserialize(jsonTestString));
     }
 
     private LocalDate deserialize(String jsonString) {
