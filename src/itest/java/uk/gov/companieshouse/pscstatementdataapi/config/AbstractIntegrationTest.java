@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.pscstatementdataapi.config;
 
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,6 +17,7 @@ import uk.gov.companieshouse.pscstatementdataapi.api.CompanyMetricsApiService;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @ActiveProfiles({"test"})
+@AutoConfigureTestRestTemplate
 public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
 
     @MockitoBean
@@ -29,4 +31,5 @@ public abstract class AbstractIntegrationTest extends AbstractMongoConfig {
 
     @MockitoBean
     public InternalApiClient internalApiClient;
+
 }

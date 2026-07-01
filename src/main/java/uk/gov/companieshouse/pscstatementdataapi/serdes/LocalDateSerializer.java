@@ -1,22 +1,22 @@
 package uk.gov.companieshouse.pscstatementdataapi.serdes;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateSerializer extends JsonSerializer<LocalDate> {
+public class LocalDateSerializer extends ValueSerializer<LocalDate> {
 
     @Override
-    public void serialize(LocalDate localDate, JsonGenerator jsonGenerator,
-                          SerializerProvider serializerProvider) throws IOException {
-        if (localDate == null) {
+    public void serialize(LocalDate value, JsonGenerator jsonGenerator, SerializationContext serializationContext) throws JacksonException {
+        if (value == null) {
             jsonGenerator.writeNull();
         } else {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            String format = localDate.atStartOfDay().format(dtf);
+            String format = value.atStartOfDay().format(dtf);
             jsonGenerator.writeRawValue("ISODate(\"" + format + "\")");
         }
     }

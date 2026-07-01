@@ -8,8 +8,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +24,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.chskafka.ChangedResource;
 import uk.gov.companieshouse.api.chskafka.ChangedResourceEvent;
 import uk.gov.companieshouse.api.psc.Statement;
@@ -56,7 +56,7 @@ class ResourceChangedRequestMapperTest {
     private Supplier<Instant> instantSupplier;
 
     @Mock
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @BeforeEach
     void setUp() {
@@ -85,27 +85,27 @@ class ResourceChangedRequestMapperTest {
 
     @ParameterizedTest
     @MethodSource("resourceChangedScenarios")
-    void shouldMapDeletedEvent(ResourceChangedTestArgument argument) throws Exception {
+    void shouldMapDeletedEvent(ResourceChangedTestArgument argument) {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
         String serialisedData = "serialisedData";
-        when(objectMapper.writeValueAsString(any())).thenReturn(serialisedData);
-        when(objectMapper.readValue(anyString(), eq(Object.class))).thenReturn(argument.changedResource().getDeletedData());
+        when(jsonMapper.writeValueAsString(any())).thenReturn(serialisedData);
+        when(jsonMapper.readValue(anyString(), eq(Object.class))).thenReturn(argument.changedResource().getDeletedData());
 
         // when
         ChangedResource actual = mapper.mapDeletedEvent(argument.request());
 
         // then
         assertEquals(argument.changedResource(), actual);
-        verify(objectMapper).writeValueAsString(argument.request().document().getData());
-        verify(objectMapper).readValue(serialisedData, Object.class);
+        verify(jsonMapper).writeValueAsString(argument.request().document().getData());
+        verify(jsonMapper).readValue(serialisedData, Object.class);
     }
 
     @Test
-    void testMapperThrowsSerDesExceptionIfObjectMapperWriteFails() throws Exception {
+    void testMapperThrowsSerDesExceptionIfObjectMapperWriteFails() {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+        when(jsonMapper.writeValueAsString(any())).thenThrow(JacksonException.class);
 
         // when
         Executable actual = () -> mapper.mapDeletedEvent(
@@ -116,11 +116,11 @@ class ResourceChangedRequestMapperTest {
     }
 
     @Test
-    void testMapperThrowsSerDesExceptionIfObjectMapperReadFails() throws Exception {
+    void testMapperThrowsSerDesExceptionIfObjectMapperReadFails() {
         // given
         when(instantSupplier.get()).thenReturn(UPDATED_AT);
-        when(objectMapper.writeValueAsString(any())).thenReturn("deletedDataAsString");
-        when(objectMapper.readValue(anyString(), eq(Object.class))).thenThrow(JsonProcessingException.class);
+        when(jsonMapper.writeValueAsString(any())).thenReturn("deletedDataAsString");
+        when(jsonMapper.readValue(anyString(), eq(Object.class))).thenThrow(JacksonException.class);
 
         // when
         Executable actual = () -> mapper.mapDeletedEvent(
