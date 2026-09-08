@@ -35,7 +35,7 @@
 
         <!-- CH Internal Dependencies       -->
         <!-- Source: https://github.com/companieshouse/structured-logging/releases -->
-        <structured-logging.version>3.0.57</structured-logging.version>
+        <structured-logging.version>4.0.4</structured-logging.version>
         <!-- Source: https://github.com/companieshouse/private-api-sdk-java/releases -->
         <private-api-sdk-java.version>7.0.2</private-api-sdk-java.version>
         <!-- Source: https://github.com/companieshouse/data-sync-api-sdk-java/releases -->
