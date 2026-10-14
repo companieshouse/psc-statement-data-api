@@ -39,6 +39,7 @@ public class PscStatementService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final String ERROR_CONNECTING_MONGODB = "Error connecting to MongoDB";
+    private static final String COMPANY_NOT_ON_PUBLIC_REGISTER = "Company %s is not on the public register";
 
     private final PscStatementRepository pscStatementRepository;
     private final PscStatementTransformer pscStatementTransformer;
@@ -90,17 +91,19 @@ public class PscStatementService {
                 () -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
                         String.format("Metrics does not exist for company number: %s", companyNumber)));
 
-        String registerMovedTo = Optional.ofNullable(metricsData)
-                .map(MetricsApi::getRegisters)
+        RegisterApi pscRegister = Optional.ofNullable(metricsData.getRegisters())
                 .map(RegistersApi::getPersonsWithSignificantControl)
-                .map(RegisterApi::getRegisterMovedTo)
                 .orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
-                        String.format("Company %s is not on the public register", companyNumber)));
+                        String.format(COMPANY_NOT_ON_PUBLIC_REGISTER, companyNumber)));
+
+        String registerMovedTo = Optional.ofNullable(pscRegister.getRegisterMovedTo())
+                .orElseThrow(() -> new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
+                        String.format(COMPANY_NOT_ON_PUBLIC_REGISTER, companyNumber)));
 
         if (registerMovedTo.equals("public-register")) {
             List<PscStatementDocument> pscStatementDocuments = pscStatementRepository.getStatementListRegisterView(
                     companyNumber, startIndex,
-                    metricsData.getRegisters().getPersonsWithSignificantControl().getMovedOn(), itemsPerPage);
+                    pscRegister.getMovedOn(), itemsPerPage);
             if (pscStatementDocuments.isEmpty()) {
                 throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()), String.format(
                         "No PSC statements exists for company: %s", companyNumber));
@@ -109,7 +112,7 @@ public class PscStatementService {
                     true);
         } else {
             throw new ResourceNotFoundException(HttpStatusCode.valueOf(NOT_FOUND.value()),
-                    String.format("Company %s is not on the public register", companyNumber));
+                    String.format(COMPANY_NOT_ON_PUBLIC_REGISTER, companyNumber));
         }
     }
 
