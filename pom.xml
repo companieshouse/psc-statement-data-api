@@ -19,7 +19,7 @@
         <start-class>uk.gov.companieshouse.pscstatementdataapi.PSCStatementDataApiApplication</start-class>
 
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
-        <spring-boot.version>4.1.0</spring-boot.version>
+        <spring-boot-dependencies.version>4.1.1</spring-boot-dependencies.version>
         <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-instrumentation-bom -->
         <opentelemetry.version>2.29.0</opentelemetry.version>
         <!-- Source: https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-bom -->
@@ -34,16 +34,9 @@
         <skip.unit.tests>false</skip.unit.tests>
 
         <!-- CH Internal Dependencies       -->
-        <!-- Source: https://github.com/companieshouse/structured-logging/releases -->
-        <structured-logging.version>4.0.4</structured-logging.version>
+        <ch-bom.version>0.1.30</ch-bom.version>
         <!-- Source: https://github.com/companieshouse/private-api-sdk-java/releases -->
         <private-api-sdk-java.version>7.0.2</private-api-sdk-java.version>
-        <!-- Source: https://github.com/companieshouse/data-sync-api-sdk-java/releases -->
-        <data-sync-api-sdk-java.version>1.0.16</data-sync-api-sdk-java.version>
-        <!-- Source: https://github.com/companieshouse/api-security-java/releases -->
-        <api-security-java.version>2.0.27</api-security-java.version>
-        <!-- Source: https://github.com/companieshouse/api-helper-java/releases -->
-        <api-helper-java-library.version>3.0.4</api-helper-java-library.version>
 
         <!-- Plugin Configuration -->
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -87,6 +80,30 @@
     <dependencyManagement>
         <dependencies>
 
+            <!-- ch-boms -->
+            <dependency>
+                <groupId>uk.gov.companieshouse</groupId>
+                <artifactId>ch-dependency-bom</artifactId>
+                <version>${ch-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.companieshouse</groupId>
+                <artifactId>ch-test-bom</artifactId>
+                <version>${ch-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-bom</artifactId>
@@ -123,23 +140,6 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-bom</artifactId>
                 <version>${kotlin.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <!-- Source: https://mvnrepository.com/artifact/org.junit/junit-bom -->
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>6.1.1</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -229,7 +229,6 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>structured-logging</artifactId>
-            <version>${structured-logging.version}</version>
         </dependency>
 
         <dependency>
@@ -241,13 +240,11 @@
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>api-security-java</artifactId>
-            <version>${api-security-java.version}</version>
         </dependency>
 
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>api-helper-java</artifactId>
-            <version>${api-helper-java-library.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-lang</groupId>
@@ -363,7 +360,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
+                <version>${spring-boot-dependencies.version}</version>
                 <configuration>
                     <mainClass>${start-class}</mainClass>
                 </configuration>

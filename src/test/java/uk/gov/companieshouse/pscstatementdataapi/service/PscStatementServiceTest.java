@@ -282,6 +282,22 @@ class PscStatementServiceTest {
     }
 
     @Test
+    void whenRegistersAreMissingGetStatementListShouldThrow() throws ResourceNotFoundException {
+        MetricsApi metricsApi = testHelper.createMetrics();
+        metricsApi.setRegisters(null);
+
+        when(companyMetricsApiService.getCompanyMetrics(COMPANY_NUMBER))
+                .thenReturn(Optional.of(metricsApi));
+
+        Exception ex = assertThrows(ResourceNotFoundException.class, () ->
+                pscStatementService.retrievePscStatementListFromDb(COMPANY_NUMBER, 0, true, 25));
+
+        String expectedMessage = "Company companyNumber is not on the public register";
+        assertTrue(ex.getMessage().contains(expectedMessage));
+        verifyNoInteractions(repository);
+    }
+
+    @Test
     void whenNoStatementsExistInPublicRegisterGetStatementListRegisterViewShouldThrow()
             throws ResourceNotFoundException {
         MetricsApi metricsApi = testHelper.createMetrics();
