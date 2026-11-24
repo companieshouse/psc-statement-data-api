@@ -34,7 +34,7 @@
         <skip.unit.tests>false</skip.unit.tests>
 
         <!-- CH Internal Dependencies       -->
-        <ch-bom.version>0.1.30</ch-bom.version>
+        <ch-bom.version>0.1.42</ch-bom.version>
         <!-- Source: https://github.com/companieshouse/private-api-sdk-java/releases -->
         <private-api-sdk-java.version>7.0.2</private-api-sdk-java.version>
 
